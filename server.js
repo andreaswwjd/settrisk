@@ -26,6 +26,7 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+var port = process.env.PORT || 3000;
 
 // rethinkdb
 var connection = null;
@@ -1848,4 +1849,4 @@ var constructNation = function(input, index, callback){
 
 
 //Listen!
-server.listen(3000);
+server.listen(port);
