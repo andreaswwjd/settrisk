@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
   <title><%= player %> </title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="icon" type="image/png" href="icon.png">
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
@@ -11,6 +12,8 @@
   <script src="bootstrap/dist/js/bootstrap.min.js"></script>
   <!-- Bootbox -->
   <script src="bootbox/dist/pusher.min.js"></script>
+  <!-- Bootbox -->
+  <script src="bootbox/bootbox.js"></script>
   <!-- Angular.js -->
   <script src="angular/angular.min.js"></script>
   <!-- Pusher -->
@@ -28,8 +31,8 @@
     var pusher = new Pusher('49150bc81042dacfac7d', {
       encrypted: true
     });
-    var privateChannel = pusher.subscribe('private-channel_<%= player %>');
-    var gameChannel = pusher.subscribe('game_channel');
+    var privateChannel = pusher.subscribe('private-game_<%= game %>-<%= player %>');
+    var gameChannel = pusher.subscribe('channel_game_<%= game %>');
 
     /*channel.bind('update_event', function(data) {
       if (data.alert!=undefined){alert(data.alert);}
@@ -45,7 +48,6 @@
   <script>
     var player = '<%= player %>' ;
     var game = <%= game %> ;
-    var id = '<%= id %>' ;
     
 
     var app = angular.module('myApp', []);
@@ -53,40 +55,144 @@
       d=Date.now();
       $scope.game='Game '+game;
       $scope.slider=0;
-//Player settings
-      $scope.player = JSON.parse(document.getElementById('playerSettings').value);
-//Korg
-      $scope.player.korg = JSON.parse(document.getElementById('playerKorg').value);
-//Priser
-      $scope.priser = JSON.parse(document.getElementById('priser').value);
-//Players
-      $scope.players = JSON.parse(document.getElementById('players').value);
-//byggnads_info
-      //$scope.players = JSON.parse(document.getElementById('players').value);
-//din tur
-      $scope.player.player.dintur = <%= dintur %> ;
 
-//Pusher 
+      ///LOAD AND UPDATE
+      //Player settings
+      //Load
+
+      $http.get('db/game_<%= game %>/<%= player %>').success(function (data) {
+        if(data[0].player){
+          $scope.player = data[0];
+          $scope.player.korg = {resurser: {}, infanteri: {}, byggnader: {}};
+              var keyarr = Object.keys($scope.player.resurser);
+              for(i in keyarr){$scope.player.korg.resurser[keyarr[i]]=[];}
+              var keyarr = Object.keys($scope.player.infanteri);
+              for(i in keyarr){$scope.player.korg.infanteri[keyarr[i]]=[];}
+              var keyarr = Object.keys($scope.player.byggnader);
+              for(i in keyarr){$scope.player.korg.byggnader[keyarr[i]]=[];} 
+          if($scope.player.din_tur){
+            $scope.dinTur();
+          }
+        }else{
+          console.log('Error loading player settings:'); 
+          console.log(data);
+          alert('Error loading player settings. Please reload page!'); 
+        }
+      });
+      //Update
+      privateChannel.bind('update_byggnader', function(data) {
+        $scope.player.byggnader = data.byggnader;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_byggnads_info', function(data) {
+        $scope.player.byggnads_info = data.byggnads_info;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_din_tur', function(data) {
+        $scope.player.din_tur = data.din_tur;
+        console.log($scope);
+        $scope.$apply();
+        if($scope.player.din_tur){
+          $scope.dinTur();
+        }
+      }); 
+
+      privateChannel.bind('update_infanteri', function(data) {
+        $scope.player.infanteri = data.infanteri;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_nationer', function(data) {
+        $scope.player.nationer = data.nationer;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_player', function(data) {
+        $scope.player.player = data.player;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_resurser', function(data) {
+        $scope.clearKorg('infanteri');
+        $scope.clearKorg('byggnader');
+        $scope.player.resurser = data.resurser;
+        $scope.checkPrice();
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      privateChannel.bind('update_typer', function(data) {
+        $scope.player.typer = data.typer;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+
+      //Game settings
+      //Load
+      $http.get('db/game_<%= game %>/settings').success(function (data) {
+        if(data[0].players){
+          $scope.game = data[0];
+          $scope.checkPrice();
+        }else{
+          console.log('Error loading game settings:'); 
+          console.log(data);
+          alert('Error loading game settings. Please reload page!'); 
+        }
+      });
+
+      //Update
+      gameChannel.bind('update_aktiemarknad', function(data) { 
+        console.log('Aktiemarknaden uppdaterades.');
+        console.log(data);
+        $scope.game.aktiemarknad = data;
+        console.log($scope);
+        $scope.$apply();
+      }); 
+      gameChannel.bind('update_d', function(data) { 
+        console.log('Dices rolled! Result: '+data);
+        $scope.game.d = data;
+        console.log($scope);
+        $scope.$apply();
+      });
+      gameChannel.bind('update_handelsekort', function(data) { 
+        console.log('Händelsekort uppdaterades');
+        console.log(data);
+        $scope.game.handelsekort = data;
+        console.log($scope);
+        $scope.$apply();
+      });
+      gameChannel.bind('update_players', function(data) { 
+        console.log('Players updated');
+        console.log(data);
+        $scope.game.players = data;
+        console.log($scope);
+        $scope.$apply();
+      });
+      gameChannel.bind('update_priser', function(data) { 
+        $scope.game.priser = data;
+        console.log('Priser uppdaterade:');
+        console.log($scope);
+        $scope.checkPrice();
+        $scope.$apply();
+      });
+
+      //Pusher 
       privateChannel.bind('pusher:subscription_succeeded', function() {
         $scope.$apply(function() {
             var triggered = privateChannel.trigger('client-log_event', { "note": player+" has logged in.", "color": "success"});
             console.log($scope);
-          
-          //alert(triggered+' '+window.location.href.split('/')[5]);
         });
       });
       console.log("Log $scope:");
       console.log($scope);   
 
-      gameChannel.bind('update_prices_event', function (data) {
-        $scope.$apply(function() {
-          console.log('Priser uppdaterade: '+data);
-          console.log(data);
-          $scope.priser = data;
-          //eval('$scope.'+data.var_name+'=data.data;');
-          //console.log('Updated '+data.var_name);
-        });
-      });
       gameChannel.bind('note_all_event', function (data) {
           $scope.note=data;
           $(".alert").addClass("active");
@@ -94,7 +200,7 @@
           setTimeout(function() {
             $(".alert").removeClass("active");
           }, 5000);
-      })
+      });
       privateChannel.bind('client-log_event', function (data) {
           $scope.note=data;
           $(".alert").addClass("active");
@@ -102,19 +208,6 @@
           setTimeout(function() {
             $(".alert").removeClass("active");
           }, 5000);
-
-      });
-      privateChannel.bind('update_player_event', function (data) {
-          console.log(data);
-          $scope.clearKorg('infanteri');
-          $scope.clearKorg('byggnader');
-          $scope.player.infanteri = data.infanteri;
-          $scope.player.byggnader = data.byggnader;
-          $scope.player.resurser = data.resurser;
-          $scope.player.nationer = data.nationer;
-          $scope.player.player.dintur = data.player.dintur;
-          $scope.checkPrice();
-          $scope.$apply();
       });
       privateChannel.bind('update_player_byggnader_event', function (data) {
           console.log(data);
@@ -123,15 +216,15 @@
       });
       privateChannel.bind('client-ping', function (data) {
           console.log(data);
-          $http.post('/pong', {player: player, id: id})
+          $http.post('/pong', {player: player, id: id}).success(function(pong){console.log(pong);})
       });
 
-//Functions
+      //Functions
       //Kan jag köpa?
       $scope.noPurchase = {};
       $scope.checkPrice = function (){
         var d=Date.now();
-        angular.forEach( $scope.priser, function(reObj, type){
+        angular.forEach( $scope.game.priser, function(reObj, type){
           if(type!='id' && type!='infanteri' && type!='byggnader'){
             var i=0, x=0;
             angular.forEach( reObj, function(value, key){
@@ -145,12 +238,11 @@
         console.log($scope.noPurchase);
         console.log('Loading $scope.noPurchase: '+(Date.now()-d)+'ms');
       }
-      $scope.checkPrice();
       //
       $scope.addItemToKorg = function (item, type){
         var typeItem = $scope.player.korg[type];
         typeItem[item].push(typeItem[item].length+1);
-          angular.forEach( $scope.priser[item], function(prisarr, res){
+          angular.forEach( $scope.game.priser[item], function(prisarr, res){
             var i=0;
             while(i<prisarr.length){
               var x = $scope.player.resurser[res].shift();
@@ -166,7 +258,7 @@
         var typeItem = $scope.player.korg[type];
         angular.forEach( typeItem, function(antal, unit){
           while(0<antal.length){
-            angular.forEach( $scope.priser[unit], function(arr, res){
+            angular.forEach( $scope.game.priser[unit], function(arr, res){
               for(j in arr){
                 var x = $scope.player.korg.resurser[res].pop();
                 $scope.player.resurser[res].unshift(x);
@@ -261,10 +353,30 @@
       $scope.placera = function (nation){
         $scope.select_mark = 'mark1';
         $scope.byggmodalunit['nation']=nation;
-        $http.post('/byggnads_info',{game: 'game_'+game, player: player, byggnads_info: $scope.byggmodalunit}).success(function(data) {
+        $http.post('/byggnads_info',{game: 'game_'+game, player: player, byggnads_info: $scope.byggmodalunit}).success( function (data) {
               console.log(data);
               //$scope.clearKorg('byggnader');
             });
+      }
+
+      $scope.dinTur = function () {
+        bootbox.dialog({
+          message: 'Din tur!',
+          title: 'Hej...',
+          buttons: {
+            success: {
+              label: "Slå tärningar...",
+              className: "btn-success",
+              callback: function() {
+                $http.post('/dices', {player: $scope.player.player.name, game: 'game_'+game}).success( function (data) {
+                  if(!data){ alert('Ok, nåt gick fel... Vad gör vi nu?');}else{
+                    console.log("Tärningar: "+data);
+                  }
+                });
+              }
+            }
+          }
+        });
       }
 
       $(".container").on("swipeleft",function(){
@@ -291,201 +403,197 @@
 
       console.log('Loading myApp: '+(Date.now()-d)+'ms');
     });//Controller
-  var logout = function (player, id) {
-    $.post( "/logout", {playername: player, id: id});
-  }
 
-window.onbeforeunload=before;
-function before(evt){
-   var message="Du loggas nu ut!";
-   if(typeof evt=="undefined"){
-      evt=window.event;
-   }
-   if(evt){
-      $.post( "/logout", {playername: player, id: id});
-      evt.returnValue=message;
-   }
-}
+    var logout = function (playername, game_index) {
+      $.post( "/logout", {playername: playername, game_index: game_index});
+    }
+
+    window.onbeforeunload=before;
+    function before(evt){
+       var message="Du loggas nu ut!";
+       if(typeof evt=="undefined"){
+          evt=window.event;
+       }
+       if(evt){
+          $.post( "/logout", {playername: player, game_index: game});
+          evt.returnValue=message;
+       }
+    }
 
   </script>
   <style>
-@import url(http://fonts.googleapis.com/css?family=Graduate);
-*{font-family: 'Graduate', sans serif;}
+    @import url(http://fonts.googleapis.com/css?family=Graduate);
+    *{font-family: 'Graduate', sans serif;}
 
-@media only screen and (min-width: 1000px) {
-  #nav{display:none;}
-  .slider{width:100% !important;}
-  .unit{padding-top:89.25%;width: 100%;}
-  .resurs>div{height:23px !important;
-  width:23px !important;}
-  h1{font-size: 35px !important;}
-  p{font-size: 11px !important;color:black !important;}
-  .unitdiv>p{font-size: 11px !important;}
-  .tag>p{margin-top: -25px !important;
-  margin-left: 1px !important;
-  font-size: 19px !important;}
-  .tag{
-  font-size: 31px !important;
-  margin-top: 0px !important;
-  margin-left: 19px !important;}
-  .trash span{
-  font-size: 20px !important;
-  margin: 0px !important;}
-  .trash>button{margin:0 2px !important;}
-  .alert{font-size: 250% !important; }
-  .alert.active{height:55px !important;}
-  .market-div{height:100px !important;width:100px !important;}
-  h3{font-size: 17px !important;}
-  .Xactive {
-  height:110px;
-  width:110px;
-  margin-left: -55px;}
-  .X {margin-left:-50px !important;}
-  .n{margin-left:-10px !important;}
-  .n1{left:-16% !important;}
-  .n2{margin-top: -7% !important;left: 9% !important;}
-  .n3{margin-top: 5% !important;}
-  .n4{margin-top: -7% !important;left: 91% !important;}
-  .n5{left: 116% !important;}
-  .nation img{max-height:50px !important;max-width:60px !important;}
-  .form-bygg{transform: scale(1,1) !important;
-  margin: 0 !important;}
-  .true{border-width: 5px !important;}
-  #sendRes{height: 150px !important;}
-}
-div, button{ padding:0;}
+    @media only screen and (min-width: 1000px) {
+      #nav{display:none;}
+      .slider{width:100% !important;}
+      .unit{padding-top:89.25%;width: 100%;}
+      .resurs>div{height:23px !important;
+      width:23px !important;}
+      h1{font-size: 35px !important;}
+      p{font-size: 11px !important;color:black !important;}
+      .unitdiv>p{font-size: 11px !important;}
+      .tag>p{margin-top: -25px !important;
+      margin-left: 1px !important;
+      font-size: 19px !important;}
+      .tag{
+      font-size: 31px !important;
+      margin-top: 0px !important;
+      margin-left: 19px !important;}
+      .trash span{
+      font-size: 20px !important;
+      margin: 0px !important;}
+      .trash>button{margin:0 2px !important;}
+      .alert{font-size: 250% !important; }
+      .alert.active{height:55px !important;}
+      .market-div{height:100px !important;width:100px !important;}
+      h3{font-size: 17px !important;}
+      .Xactive {
+      height:110px;
+      width:110px;
+      margin-left: -55px;}
+      .X {margin-left:-50px !important;}
+      .n{margin-left:-10px !important;}
+      .n1{left:-16% !important;}
+      .n2{margin-top: -7% !important;left: 9% !important;}
+      .n3{margin-top: 5% !important;}
+      .n4{margin-top: -7% !important;left: 91% !important;}
+      .n5{left: 116% !important;}
+      .nation img{max-height:50px !important;max-width:60px !important;}
+      .form-bygg{transform: scale(1,1) !important;
+      margin: 0 !important;}
+      .true{border-width: 5px !important;}
+      #sendRes{height: 150px !important;}
+    }
+    div, button{ padding:0;}
 
-.slider{
-    transition: .5s;
-    height:100%;
-    width:300%;}
-.unit{padding-top:89.25%;width: 100%%;
-  box-shadow: 2px 2px 1px 1px black}
-.container {
-  width: 100%;
-  padding:0;
-    background-color: rgba(255, 239, 209, 1);
-    box-shadow: 0px 0px 500px rgba(219, 175, 117, 1) inset;
-}
-h1{font-size: 60px;}
-p{font-size: 27px;}
-.unitdiv>p{margin: 0;position: absolute;}
-.unit>img{
-  max-width: 52%;
-  max-height: 55%;
-  margin-top: -56%;
-  margin-left: -25%;
-  position:absolute;}
-.resurs{padding:0 5px;display:inline-block}
-.resurs>div{height:45px;
-  width:45px;
-  border-radius:100%;
-  display:inline-block;
-  box-shadow: -0.5px -2px 8px -2px black inset;}
-.olja{background-color: rgb(119, 67, 67)}
-.sten{background-color: darkgray}
-.trä{background-color: rgb(120, 147, 53)}
-.djur{background-color: rgb(124, 202, 86)}
-.säd{background-color: #f0cd4e}
-.true{border-color:white;border-style:solid;border-width: 11px;}
-.false{}
+    .slider{
+        transition: .5s;
+        height:100%;
+        width:300%;}
+    .unit{padding-top:89.25%;width: 100%%;
+      box-shadow: 2px 2px 1px 1px black}
+    .container {
+      width: 100%;
+      padding:0;
+        background-color: rgba(255, 239, 209, 1);
+        box-shadow: 0px 0px 500px rgba(219, 175, 117, 1) inset;
+    }
+    h1{font-size: 60px;}
+    p{font-size: 27px;}
+    .unitdiv>p{margin: 0;position: absolute;}
+    .unit>img{
+      max-width: 52%;
+      max-height: 55%;
+      margin-top: -56%;
+      margin-left: -25%;
+      position:absolute;}
+    .resurs{padding:0 5px;display:inline-block}
+    .resurs>div{height:45px;
+      width:45px;
+      border-radius:100%;
+      display:inline-block;
+      box-shadow: -0.5px -2px 8px -2px black inset;}
+    .olja{background-color: rgb(119, 67, 67)}
+    .sten{background-color: darkgray}
+    .trä{background-color: rgb(120, 147, 53)}
+    .djur{background-color: rgb(124, 202, 86)}
+    .säd{background-color: #f0cd4e}
+    .true{border-color:white;border-style:solid;border-width: 11px;}
+    .false{}
 
-.tag>p{color: black;
-  margin-top: -44px;
-  font-size: 32px;
-  margin-left: 0px;}
-.tag{  position: absolute;
-  font-size: 55px;
-  color: rgb(227, 6, 19);
-  text-shadow: 0px 0px 1px black;
-  margin-top: 9px;
-  margin-left: 25px;}
-.trash{
-  bottom: 3%;
-  right: 3%;
-  position: absolute;
-}
-.trash>button{
-  right: 0;
-  bottom: 0;
-  display: inline-block;
-  margin: 0 5px;
-}
-.trash span{
-  font-size: 40px;
-  margin: 15px;}
-.alert{font-size: 350%;height: 0; width: 100%; overflow: hidden; position: fixed;z-index: 1;padding: 0; transition: .7s;}
-.alert.active{height:80px;}
-.market-div{padding:0;
-margin:0;
-display:inline-block;
-border-radius:100%;
-position:absolute;
-height:180px;
-width:180px;
-transition: 0.5s;
-top:0;
-z-index: 1;}
-.market-div>h3{margin-top:40%;font-size: 30px;transition: 0.5s;}
-.X {
-left:50% !important;
-margin-left:-90px;
-}
-.Xactive {
-  height:220px;
-  width:220px;
-  margin-left: -110px;
-  z-index: 2;
-}
-.Xactive h3{font-size: 39px;}
-.m {
-top:50%;
-opacity:0;
-margin-top:-10px;
-left:0;
-z-index: 0;
-}
-.n{
-top:100%;
-opacity:1;
-margin-left:-40px;
-height:80px !important;
-width:80px !important;
-}
-.n p, .m p{margin-top:20px;color:white;}
-.n1{transition-delay: 0.10s;margin-top:-42px;left:-34%;}
-.n2{transition-delay: 0.13s;margin-top: 30px;left: 0%;}
-.n3{transition-delay: 0.16s;margin-top: 55px;left: 50%;}
-.n4{transition-delay: 0.19s;margin-top: 30px;left: 100%;}
-.n5{transition-delay: 0.22s;margin-top:-42px;left: 134%;}
-.nation img{max-height:150px;max-width:160px;}
-.markres{display:inline-block;margin-top:-41px;}
-.marknr{display:inline-block;margin: 5px;}
-.markicon{display:inline-block;margin: -5px;}
-.byggnad{position:absolute;width: 160px;text-align: center;}
-.byggnad img{max-width: 57px; margin-top: 28px;}
-.mark1{width: 160px;text-align:center;margin-top:-16px;padding:0;}
-.mark3{margin-bottom:-16px;}
-.modal-dialog{  width: 90%; max-width: 1000px;}
-.form-bygg{  width: 500px;
-  transform: scale(1.7,1.7);
-  margin: 160px 0 100px 130px;
-  text-align:center;}
-  .modal-header{min-height: 100.694px;}
-  .hidem{opacity: 0;}
-  .showm{opacity: 1;}
-</style>
+    .tag>p{color: black;
+      margin-top: -44px;
+      font-size: 32px;
+      margin-left: 0px;}
+    .tag{  position: absolute;
+      font-size: 55px;
+      color: rgb(227, 6, 19);
+      text-shadow: 0px 0px 1px black;
+      margin-top: 9px;
+      margin-left: 25px;}
+    .trash{
+      bottom: 3%;
+      right: 3%;
+      position: absolute;
+    }
+    .trash>button{
+      right: 0;
+      bottom: 0;
+      display: inline-block;
+      margin: 0 5px;
+    }
+    .trash span{
+      font-size: 40px;
+      margin: 15px;}
+    .alert{font-size: 350%;height: 0; width: 100%; overflow: hidden; position: fixed;z-index: 1;padding: 0; transition: .7s;}
+    .alert.active{height:80px;}
+    .market-div{padding:0;
+    margin:0;
+    display:inline-block;
+    border-radius:100%;
+    position:absolute;
+    height:180px;
+    width:180px;
+    transition: 0.5s;
+    top:0;
+    z-index: 1;}
+    .market-div>h3{margin-top:40%;font-size: 30px;transition: 0.5s;}
+    .X {
+    left:50% !important;
+    margin-left:-90px;
+    }
+    .Xactive {
+      height:220px;
+      width:220px;
+      margin-left: -110px;
+      z-index: 2;
+    }
+    .Xactive h3{font-size: 39px;}
+    .m {
+    top:50%;
+    opacity:0;
+    margin-top:-10px;
+    left:0;
+    z-index: 0;
+    }
+    .n{
+    top:100%;
+    opacity:1;
+    margin-left:-40px;
+    height:80px !important;
+    width:80px !important;
+    }
+    .n p, .m p{margin-top:20px;color:white;}
+    .n1{transition-delay: 0.10s;margin-top:-42px;left:-34%;}
+    .n2{transition-delay: 0.13s;margin-top: 30px;left: 0%;}
+    .n3{transition-delay: 0.16s;margin-top: 55px;left: 50%;}
+    .n4{transition-delay: 0.19s;margin-top: 30px;left: 100%;}
+    .n5{transition-delay: 0.22s;margin-top:-42px;left: 134%;}
+    .nation img{max-height:150px;max-width:160px;}
+    .markres{display:inline-block;margin-top:-41px;}
+    .marknr{display:inline-block;margin: 5px;}
+    .markicon{display:inline-block;margin: -5px;}
+    .byggnad{position:absolute;width: 160px;text-align: center;}
+    .byggnad img{max-width: 57px; margin-top: 28px;}
+    .mark1{width: 160px;text-align:center;margin-top:-16px;padding:0;}
+    .mark3{margin-bottom:-16px;}
+    .modal-dialog{  width: 90%; max-width: 1000px;}
+    .form-bygg{  width: 500px;
+      transform: scale(1.7,1.7);
+      margin: 160px 0 100px 130px;
+      text-align:center;}
+      .modal-header{min-height: 100.694px;}
+      .hidem{opacity: 0;}
+      .showm{opacity: 1;}
+      .bootbox-close-button.close{display:none;}
+  </style>
 </head>
 
 
 
 <body ng-app='myApp' >
-  <div style="display:none;">
-    <input id="playerSettings" value="<%= JSON.stringify(playerSettings) %>">
-    <input id="playerKorg" value="<%= JSON.stringify(playerKorg) %>">
-    <input id="priser" value="<%= JSON.stringify(priser) %>">
-    <input id="players" value="<%= JSON.stringify(players) %>">
-  </div>
 
 
 
@@ -508,15 +616,15 @@ width:80px !important;
                     <img src="infanteri/{{inf}}.png">
                   </button>
                 </div>
-                <div class="col-sm-8 unitdiv" style="padding:0%;">
+                <div class="col-sm-8 unitdiv" style="padding:3%;">
                   <p>{{inf}}</p>
-                  <div class="col-sm-12 unitdiv" style="padding:0%;position:relative;">
-                    <div  style=" ">
-                      <div class="resurs" ng-repeat="(key, arr) in priser[inf]" style="padding: 0; margin-top:50px;position:relative:width:{{arr.length*10}}px;">
-                        <div ng-repeat="x in arr" class="{{key}} {{x>player.resurser[key].length}}" ></div>
-                      </div>
+
+                  <div  style="position: absolute; width: 100%;">
+                    <div class="resurs" ng-repeat="(key, arr) in game.priser[inf]" style="padding:0; margin-top:36px;position:relative;width:{{arr.length*10}}px;">
+                      <div ng-repeat="x in arr" class="{{key}} {{x>player.resurser[key].length}}" ></div>
                     </div>
                   </div>
+                  
                 </div>
               </div>
             </div>
@@ -551,7 +659,7 @@ width:80px !important;
                 <div class="col-sm-8 unitdiv" style="padding:3%;">
                   <p>{{bygg}}</p>
                   <div style=" position: absolute; width: 100%;">
-                    <div class="resurs" ng-repeat="(key, arr) in priser[bygg]" style="padding: 0; margin-top:36px;position:relative:width:{{arr.length*10}}px;">
+                    <div class="resurs" ng-repeat="(key, arr) in game.priser[bygg]" style="padding: 0; margin-top:36px;position:relative:width:{{arr.length*10}}px;">
                       <div ng-repeat="x in arr" class="{{key}} {{x>player.resurser[key].length}}"></div>
                     </div>
                   </div>
@@ -674,7 +782,7 @@ width:80px !important;
       <div class="slider" style="margin-left: {{slider}}%;">
         <div id="nations" class="col-sm-4" style="padding:0 1%;">
           <div ></div>
-          <h1>Nationer</h1>
+          <h1 ng-hide="player.din_tur">Nationer</h1>
           <table class="table">
             <tr class="nation {{success(ockuperad)}}" ng-repeat="(nation, ockuperad) in player.nationer" ng-click="ockupera(nation)">
               <td><p>{{nation}} </p>
@@ -683,20 +791,20 @@ width:80px !important;
                   <div class="mark1">
                     <div class="markicon" ><svg width="82.333px" height="83.833px">
                       <polygon fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark1[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark1[0]}}</text>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark1}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.nr1}}</text>
                     </svg></div>
                     <div class="markicon" ><svg width="82.333px" height="83.833px">
                       <polygon  fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark2[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark2[0]}}</text>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark2}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.nr2}}</text>
                     </svg></div>
                   </div>
                   <div class="mark1">
                     <div class="markicon" ><svg width="82.333px" height="83.833px">
                       <polygon fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark3[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark3[0]}}</text>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark3}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.nr3}}</text>
                     </svg></div>
                   </div>
                 </div>
@@ -720,7 +828,7 @@ width:80px !important;
               <button class="btn btn-warning unit" ng-click="addItemToKorg(inf, 'infanteri')" ng-disabled="noPurchase[inf]">
                 <img src="infanteri/{{inf}}.png">
                 <div ng-repeat="antal in player.korg.infanteri[inf]" style=" position: absolute; width: 100%;">
-                  <div class="resurs" ng-repeat="(key, arr) in priser[inf]" style=" position: absolute; width: 100%;">
+                  <div class="resurs" ng-repeat="(key, arr) in game.priser[inf]" style=" position: absolute; width: 100%;">
                     <div ng-repeat="x in arr" class="{{key}}" style="margin-top: -{{randomTop[key][x+antal]}}%; position: absolute; margin-left: -{{randomLeft[key][x+antal]}}%;"></div>
                   </div>
                 </div>
@@ -742,7 +850,7 @@ width:80px !important;
               <button class="btn btn-warning unit" ng-click="addItemToKorg(bygg, 'byggnader')" ng-disabled="noPurchase[bygg]">
                 <img src="byggnader/{{bygg}}.png">
                 <div ng-repeat="antal in player.korg.byggnader[bygg]" style=" position: absolute; width: 100%;">
-                  <div class="resurs" ng-repeat="(key, arr) in priser[bygg]" style=" position: absolute; width: 100%;">
+                  <div class="resurs" ng-repeat="(key, arr) in game.priser[bygg]" style=" position: absolute; width: 100%;">
                     <div ng-repeat="x in arr" class="{{key}}" style="margin-top: -{{randomTop[key][x+antal]}}%; position: absolute; margin-left: -{{randomLeft[key][x+antal]}}%;"></div>
                   </div>
                 </div>
@@ -767,9 +875,9 @@ width:80px !important;
           <h1>Marknad</h1>
           <div id="sendRes" class="col-sm-12" style="text-align:center;height:330px;">
             <div class="resurs X market-div">
-              <div ng-repeat="res in [0,1,2,3,4]" id="m{{res+1}}" class="market-div m {{player.typer.resurser[res]}}" ng-click="sendResurs(player.typer.resurser[res], mplayer);"><p>{{player.typer.resurser[res]}}</p></div>
+              <div ng-repeat="res in [0,1,2,3,4]" id="m{{res+1}}" class="market-div m {{player.typer.resurser[res]}}" ng-click="sendResurs(player.typer.resurser[res], mplayer);" ng-hide="player.resurser[player.typer.resurser[res]].length==0"><p>{{player.typer.resurser[res]}}</p></div>
             </div>
-            <div ng-repeat="player in players" id="x{{player.name}}"class="market-div pm btn-{{player.color}}" style="left:{{(player.index-1)*33}}%;top:0%;" ng-click="marketActivatePlayer(player.name)"><h3>{{player.name}}</h3></div>
+            <div ng-repeat="mplayer in game.players" ng-hide="mplayer.name==player.player.name" id="x{{mplayer.name}}" class="market-div pm btn-{{mplayer.color}}" style="left:{{(mplayer.index-1)*33}}%;top:0%;" ng-click="marketActivatePlayer(mplayer.name)"><h3>{{mplayer.name}}</h3></div>
           </div>
           <h3 id="marknad_forklaring" class="hidem" style="text-align:center;transition: 0.5s;">Skicka en resurs.</h3>
         </div>
@@ -791,22 +899,22 @@ width:80px !important;
                 <div style="margin: -69px 0 -81px 600px;">
                   <div class="byggnad" ng-show="select_mark=='nation'"><img style="max-width: 57px; margin-top: 36px;" src="/byggnader/{{byggmodalunit.type}}.png"></div>
                   <div class="mark1">
-                    <div class="markicon" ng-show="byggmodalunit.mark1[1]!=''" ng-click="select_mark=='mark1'"><svg width="82.333px" height="83.833px">
-                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark1[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark1[0]!=0">{{byggmodalunit.mark1[0]}}</text>
+                    <div class="markicon" ng-show="byggmodalunit.mark1!=''" ng-click="select_mark=='mark1'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark1!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark1}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.nr1!=0">{{byggmodalunit.nr1}}</text>
                     </svg></div>
-                    <div class="markicon" ng-show="byggmodalunit.mark2[1]!=''" ng-click="select_mark=='mark2'"><svg width="82.333px" height="83.833px">
-                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark2[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark2[0]!=0">{{byggmodalunit.mark2[0]}}</text>
+                    <div class="markicon" ng-show="byggmodalunit.mark2!=''" ng-click="select_mark=='mark2'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark2!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark2}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.nr2!=0">{{byggmodalunit.nr2}}</text>
                     </svg></div>
                   </div>
                   <div class="mark1 mark3">
-                    <div class="markicon" ng-show="byggmodalunit.mark3[1]!=''" ng-click="select_mark=='mark3'"><svg width="82.333px" height="83.833px">
-                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
-                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark3[1]}}</text>
-                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark3[0]!=0">{{byggmodalunit.mark3[0]}}</text>
+                    <div class="markicon" ng-show="byggmodalunit.mark3!=''" ng-click="select_mark=='mark3'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark1!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark3}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.nr3!=0">{{byggmodalunit.nr3}}</text>
                     </svg></div>
                   </div>
                 </div>

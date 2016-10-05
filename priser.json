@@ -138,13 +138,5 @@
 		"olja": [1],
 		"sten": [],
 		"djur": []
-	},
-	"infanteri":{
-		"typer": ["trupp","mekaniskt förband","lätt tank","tung tank","artilleri","bombplan","jaktplan","ubåt","slagskepp","transportskepp","transportplan"],
-		"plural": ["trupper","mekaniska förband","lätta tanks","tunga tanks","artilleri","bombplan","jaktplan","ubåtar","slagskepp","transportskepp","transportplan"],
-	},
-	"byggnader":{
-		"typer": ["stad", "by", "fabrik", "flygplats", "hamn", "oljerigg", "universitet", "väg", "bro"],
-		"plural": ["städer", "byar", "fabriker", "flygplatser", "hamnar", "oljeriggar", "universitet", "vägar", "broar"],
 	}
 }

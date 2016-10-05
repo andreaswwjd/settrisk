@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
-  <title>Settrisk 2.1</title>
+  <title>Settrisk 2.2</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="icon" type="image/png" href="images/jaktplan.png">
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
@@ -24,10 +25,11 @@
     var pusher = new Pusher('49150bc81042dacfac7d', {
       encrypted: true
     });
+
     var channel = pusher.subscribe('games_channel');
     channel.bind('my_event', function(data) {
       alert(data.new_val.message);
-    });
+    }); 
 
 
 
@@ -35,15 +37,28 @@
  //Angular app 
     var app = angular.module('myApp', []);
     app.controller('GamesController', function($scope, $http) {
-      $http.get('db/settrisk/games/all').success(function(data){
-        console.log(data);
-        var tmparr=[];
-        for(var i=0;i<data.length;i++){tmparr[data[i].index] = data[i];}
-        $scope.games=tmparr;
+      $http.get('list_all_games').success(function(data){
+        $scope.games=data;
         console.log($scope);
+        for(i in $scope.games){
+          $scope.generate_channelbinding($scope.games[i].index);
+        }
         $scope.spinningWheel=false;
       });
-      //Pusher
+      //Pusher Channel: "channel_game_1", Event: "update_players"
+      $scope.generate_channelbinding = function (game_index) {
+        var channel = pusher.subscribe('channel_game_'+(game_index+1));
+        channel.bind('update_players', function(data) {
+          console.log($scope);
+          $scope.games[game_index].players = data;
+          $scope.$apply();
+        }); 
+        channel.bind('update_active', function(data) {
+          console.log($scope);
+          $scope.games[game_index].active = data;
+          $scope.$apply();
+        }); 
+      }
       channel.bind('games_event', function(data) {
         console.log(data);
         var samma=false;
@@ -73,6 +88,7 @@
       $scope.current_game=0;
       $scope.spinningWheel=true;
 
+
       $scope.signInModal = function(value){$scope.current_game=value;};
 
       $scope.signIn = function(player){
@@ -98,10 +114,9 @@
           "players": []
         };
 
-        $http.get('db/settrisk/player_template/all').success(function(data){
+        $http.get('db/settrisk/player_template').success(function(data){
           $scope.new_game = $.extend($scope.new_game, data[0]);
           delete $scope.new_game.id;
-          console.log(data);
           console.log($scope);
         });
 
@@ -145,7 +160,9 @@
         }
       }
       $scope.uppdatera = function (players) {
-        $http.post('/ping', {players: players, id: $scope.games[$scope.current_game].id})
+        $http.post('/ping', {players: players, id: $scope.games[$scope.current_game].id}).success(function(pong){
+          console.log(pong);
+        });
       }
     });
 
@@ -194,7 +211,7 @@ h3{font-size: 40px !important;vertical-align: middle !important;}
       <div class="row col-xs-12" height='20px'></div>
       <div class="alert alert-warning" ng-show="<%= bool %>"><strong>Warning!</strong>
       <%= message %> </div> 
-      <h1>Settrisk 2.1</h1>
+      <h1>Settrisk 2.2</h1>
     
       <div ng-controller='GamesController'>
 
@@ -211,9 +228,9 @@ h3{font-size: 40px !important;vertical-align: middle !important;}
                 </tr>
               </thead>
               <tbody>
-                <tr ng-class='game.active' ng-repeat='game in games | orderBy:"index"' class='fade in success'>
+                <tr ng-class='game.active' ng-repeat='game in games | orderBy:"index"' class='fade in'>
                   <td><h2>{{game.index+1}}</h2></td>
-                  <td><button type="button" class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#signinModal" ng-click='signInModal(game.index)'><h2 style="display:inline-block;font-family:'Graduate';"> {{game.name}} </h2><span class='glyphicon glyphicon-chevron-right'></span></button></td>
+                  <td><button type="button" class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#signinModal" ng-click='uppdatera(games[current_game].players);signInModal(game.index);'><h2 style="display:inline-block;font-family:'Graduate';"> {{game.name}} </h2><span class='glyphicon glyphicon-chevron-right'></span></button></td>
                   <td><h2 ng-repeat='player in game.players' class='text-{{player.color}}' style='display:inline-flex;margin:3px;'> {{player.name}} </h2></td>
                   <td><h2>{{game.date}}</h2></td>
                   <td><button type="button" class="close" ng-click="deleteGame(game.id, game.index)">&times;</button></td>
@@ -236,7 +253,6 @@ h3{font-size: 40px !important;vertical-align: middle !important;}
               <div class="modal-body">
                 <form class="form-signin" action="/signin" method="post">
                   <div style='display:none'>
-                    <input name="id" value="{{games[current_game].id}}">
                     <input name="game" value="{{current_game+1}}">
                     <input name="player" value="{{current_player}}">
                   </div>
@@ -249,7 +265,6 @@ h3{font-size: 40px !important;vertical-align: middle !important;}
                     </tbody>
                   </table>
                 </form>
-                  <button class="btn btn-default" ng-click="uppdatera(games[current_game].players)">Uppdatera</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>  

@@ -39,11 +39,14 @@
     app.controller('mainController', function($scope, $http) {
       d = Date.now();
       $scope.game ={};
-      $scope.game.id = '<%=id %>';
       $scope.game.name= 'Game <%=game %>';
-      var players = JSON.parse(document.getElementById('players').value);
-      $scope.players = {}
-      for(i in players){$scope.players[players[i].name]=players[i];}
+      $http.get('db/game_<%=game %>/settings?withFields=players').success(function (data) {
+        var players = data[0].players;
+        $scope.players = {};
+        for(i in players){$scope.players[players[i].name]=players[i];}
+        $scope.$apply();
+        console.log($scope);
+      });
 
       $scope.d= Math.floor(Math.random()*10)+2;
 
@@ -410,13 +413,11 @@ h3{font-size: 40px !important;vertical-align: middle !important;}
 .dice{display:inline-block;margin:-10px 5px;width: 50px;height: 50px;background-color: rgb(229, 229, 229);border-radius: 5px;}
 .dice>div{width:10px; height:10px; background-color:white; border-radius:100%; box-shadow: 2px 2px 6px 2px rgb(139, 139, 139) inset; position:absolute; }
 .stockmarket, .handelsekort{height:300;width:520;border-radius: 7px; background-color: whitesmoke; }
+.bootbox-close-button.close{display:none;}
 
   </style>
 </head>
 <body ng-app='myApp'>
-  <div style="display:none;">
-    <input id="players" value="<%= JSON.stringify(players) %>">
-  </div>
   <div class='container' ng-controller='mainController'>
     <div class="col-sm-12">
       <h1 class='col-sm-6'>{{game.name}}</h1>
