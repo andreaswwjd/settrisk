@@ -15,19 +15,11 @@
     <script src="js/angular.min.js"></script>   
   </head>
   <body>
-  <div id="select_game" style="max-width: 300px; padding: 5px; margin: 0 auto; text-align: center; overflow: hidden; ">
-    <% for(i in games){ %>
-    <div class="game" style=" " data="<%= games[i].name %>"><%= games[i].date.toString().split(' ')[1]+' '+games[i].date.toString().split(' ')[2]+' '+games[i].date.toString().split(' ')[4] %></div>
-    <% } %>
-  </div>
-  <div id="newgame" hidden>
+  <div id="login">
     <div id="margintop" style="width:100%;"></div>
-    <form id="newgame_form" action="/newgame" method="post">
+    <form id="login_form" action="/index" method="post">
       <label id="reg_label" name="reg_label" style="" hidden>Ny</label>
-      <select class="focus" type="list" name="game" >
-        <option>Game 1</option>
-        <option>Game 2</option>
-      </select>
+      <input class="focus" type="text" name="username" value="Namn" autocapitalize="words" onkeyup="checkUser()" required>
       <!-- <label>Password</label> -->
       <input class="pass" type="number" name="password" value="" pattern="\d*" onkeyup="checkPass(this)" style="-webkit-text-security: disc;" required>
       <input id="registration" type="checkbox" name="registration" style="display: none;" default="false">
@@ -37,26 +29,11 @@
 
 
   <style type="text/css">
-    .game {
-      width: 100%; 
-      height: 60px; 
-      margin: 5px 0; 
-      background: #E6CCA4; 
-      border-radius: 5px; 
-      vertical-align: middle; 
-      font-size: x-large;
-      padding: 13px;
-      color: white;
-    }
-    .game.active{
-      background: gray;
-    }
-
     body {
       background-color: #F0D4AA;
       text-align: center;
     }
-    input, select {
+    input {
       display: block;
       margin: 10px auto;
       text-align: center; 
@@ -72,7 +49,7 @@
       height: 40px;
       padding: 8px;
     }
-    input:focus, select:focus, button:focus {
+    input:focus, button:focus {
       border-color: #f1c40f;
       color: white;
       outline: none;
@@ -81,7 +58,7 @@
       font-weight: 900;
       width: 160px;
     }
-    input.focus:focus, select.focus:focus, button:focus{
+    input.focus:focus, button:focus{
       background-color: #f1c40f;
     }
     button {
@@ -138,18 +115,15 @@
     inputtags = document.getElementsByTagName('input');
     var host = "192.168.1.73";
 
-    var user ={};
-
-    var games = document.getElementsByClassName('game');
-    for(i in games){
-      games[i].onclick = function(){
-        this.className += ' active';
-        user.game = this.getAttribute('data');
-        select_game.hidden = true;
-        newgame.hidden = false;
+    for(tag in inputtags){
+      console.log(typeof inputtags[tag]);
+      if(typeof inputtags[tag] == "object"){
+        inputtags[tag].onclick = function(){ 
+          if(this.value == "Namn"){ this.value = ""; } 
+          if(this.value == "Code"){ this.value = ""; this.type = "number"; } 
+        }
       }
     }
-
     function checkUser() {
       console.log('Checking user')
       var xmlhttp = new XMLHttpRequest();
@@ -247,21 +221,6 @@
 
     }
 
-    newgame_form.game.onblur = function(e){
-      if(newgame_form.registration.checked){
-        reg_label.hidden = false;
-      }
-    }
-    newgame_form.game.onfocus = function(e){
-      reg_label.hidden = true;
-      // this.value = "";
-      this.style.background = "";
-    }
-    newgame_form.password.onblur = function(e){
-      if(newgame_form.registration.checked){
-        login_form.password.style.backgroundPositionX = "-162px";
-      }
-    }
 
 
   </script>

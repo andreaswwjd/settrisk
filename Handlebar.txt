@@ -1,0 +1,62 @@
+var priserNODE = {'infanteri':{},'byggnader':{}};
+function generateItems(){
+  var generate = function(item, type){
+    console.log('generateItems();')
+    var prisdiv = document.createElement('div');
+    prisdiv.className = 'prisdivs';
+
+    var source   = document.getElementById('item-template').innerHTML;
+    var item_template = Handlebars.compile(source);
+
+    var b = item_template({item:item});
+    console.log(b);
+
+    // var b = document.createElement('button');
+    // b.className = 'btn shadow';
+    // b.innerHTML = '<img src="img/'+item+'.png" class="item_img">';
+
+    var m = document.createElement('div');
+    m.className = 'item_menu'
+    m.innerHTML = '<div class="buy_btn green" > Köp </div><div class="buy_btn red"> Ångra </div>'
+
+    var obj = new Item({
+      item: item,
+      type: type,
+      cost: data.priser[type][item],
+      button: b,
+      menu: m,
+      costNodes: {}
+    });
+    console.log(obj.cost['djur'])
+    // obj.button.disabled = false;
+    obj.button.disabled = obj.isAvailable();
+    
+    obj.costkeys.map(function(key){
+      obj.costNodes[key] = []
+      obj.cost[key].map(function(d,i,a){
+        var r = new Resurs({
+          type: key,
+          dyrt: i+1 > resurser[key].length 
+        });
+        obj.costNodes[key].push(r);
+      })
+    })
+    
+    priserNODE[type][item] = obj;
+    // prisdiv.appendChild(obj.button);
+    prisdiv.innerHTML += obj.button;
+    obj.costkeys.map(function(key){ obj.costNodes[key].map(function(resurs){ prisdiv.appendChild(resurs.node) }) })
+    //DOM objects
+    items_container.appendChild(prisdiv);
+    itemsmenu_container.appendChild(m);
+
+  }
+  Object.keys(data.priser.infanteri).map(function(item){generate(item, 'infanteri')})
+  Object.keys(data.priser.byggnader).map(function(item){generate(item, 'byggnader')})
+}
+
+
+
+<script id="item-template" type="text/x-handlebars-template">
+  <button class="btn shadow" ><img src="img/{{item}}.png" class="item_img"></button>
+</script>
