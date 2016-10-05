@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<head>
+  <title>Settrisk 2.1</title>
+  <link rel="icon" type="image/png" href="images/jaktplan.png">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="jquery/dist/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- Angular.js -->
+  <script src="angular/angular.min.js"></script>
+  <!-- Pusher -->
+  <script src="pusher/dist/pusher.min.js"></script>
+  <script>
+
+// Enable pusher logging - don't include this in production
+    Pusher.log = function(message) {
+      if (window.console && window.console.log) {
+        window.console.log(message);
+      }
+    };
+
+    var pusher = new Pusher('49150bc81042dacfac7d', {
+      encrypted: true
+    });
+    var channel = pusher.subscribe('games_channel');
+    channel.bind('my_event', function(data) {
+      alert(data.new_val.message);
+    });
+
+
+
+
+ //Angular app 
+    var app = angular.module('myApp', []);
+    app.controller('GamesController', function($scope, $http) {
+      $http.get('db/settrisk/games/all').success(function(data){
+        console.log(data);
+        var tmparr=[];
+        for(var i=0;i<data.length;i++){tmparr[data[i].index] = data[i];}
+        $scope.games=tmparr;
+        console.log($scope);
+        $scope.spinningWheel=false;
+      });
+      //Pusher
+      channel.bind('games_event', function(data) {
+        console.log(data);
+        var samma=false;
+        if(data.new_val==null){
+          for(var i=0;i<$scope.games.length;i++){
+            if(data.old_val.id==$scope.games[i].id){
+              $scope.games.splice(i, 1);
+              $scope.$apply();
+              break;
+            }
+          }
+        }else{
+          for(var i=0;i<$scope.games.length;i++){
+            if(data.new_val.id==$scope.games[i].id){
+              $scope.games[i]=data.new_val;
+              $scope.$apply();
+              samma=true;
+            }
+          }
+          if(!samma){
+            $scope.games.push(data.new_val);
+            $scope.$apply();
+          }
+        }
+      });
+      $scope.current_player='';
+      $scope.current_game=0;
+      $scope.spinningWheel=true;
+
+      $scope.signInModal = function(value){$scope.current_game=value;};
+
+      $scope.signIn = function(player){
+        console.log(player);
+        $scope.current_player=player;
+        
+        /*$http.post('/signin', {id: $scope.games[$scope.current_game].id, game: ($scope.current_game+1), player: $scope.current_player}).success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+            });*/
+      };
+
+      $scope.startNewGame = function(){
+        $scope.new_player_count=0;
+        $scope.new_player={"name":"Player1"};
+        $scope.monthARR=['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+        var d= new Date();
+        $scope.new_game = {
+          "index": $scope.games.length,
+          "name": "Game "+($scope.games.length+1),
+          "date": d.getDate()+' '+$scope.monthARR[d.getMonth()]+' '+d.getFullYear(), 
+          "active": "",
+          "players": []
+        };
+
+        $http.get('db/settrisk/player_template/all').success(function(data){
+          $scope.new_game = $.extend($scope.new_game, data[0]);
+          delete $scope.new_game.id;
+          console.log(data);
+          console.log($scope);
+        });
+
+      }
+      $scope.addNewPlayer= function(){
+        //if(!/[a-zA-Z0-9]/.test($scope.new_player.name)){ alert('not allowed'); die}
+        $scope.new_game.players.push({'name':$scope.new_player.name, 'color':'info', 'active':false, 'dintur':false, 'index':$scope.new_player_count}); 
+        $scope.new_player_count+=1; 
+        $scope.new_player.name='Player'+($scope.new_player_count+1);
+      }
+      $scope.addStartResurs = function(typ) {
+        var count=$scope.new_game.resurser[typ].length;
+        $scope.new_game.resurser[typ].push(count);
+      }
+      $scope.removeStartResurs = function() {
+        for(i in $scope.new_game.resurser){$scope.new_game.resurser[i]=[];}
+      }
+      
+      $scope.initiateNewGame = function() {
+        $scope.spinningWheel=true;
+        $scope.new_player_count=0;
+        /*$http.get('add/games/'+JSON.stringify($scope.new_game, null, 2)).success(function(data){
+            if(data.config_changes[0].new_val!=null){setTimeout(function() {$scope.spinningWheel=false;$scope.$apply();}, 500);};
+          console.log(data.config_changes[0].new_val);
+          console.log($scope);
+        });*/
+        $http.post('addGame', {new_game: $scope.new_game}).success(function(data){
+            setTimeout(function() {$scope.spinningWheel=false;$scope.$apply();}, 500);
+          console.log(data.generated_keys[0]);
+          console.log($scope);
+        });
+      }
+      $scope.deleteGame = function(id, index){
+        if(confirm('Do you really want to delete this game?')){
+          $scope.spinningWheel=true;
+          $http.get('delete/game_'+(index+1)+'/'+id).success(function(data){
+            if(data.config_changes[0].new_val==null){setTimeout(function() {$scope.spinningWheel=false;$scope.$apply();}, 500);};
+          console.log(data.config_changes[0].new_val);
+          console.log($scope);
+          });
+        }
+      }
+      $scope.uppdatera = function (players) {
+        $http.post('/ping', {players: players, id: $scope.games[$scope.current_game].id})
+      }
+    });
+
+
+
+  </script>
+  <style>
+@import url(http://fonts.googleapis.com/css?family=Graduate);
+h1{font-family: 'Graduate', sans serif;}
+
+h1{font-size: 80px !important;}
+h2{font-size: 60px !important;margin:12px !important;}
+h3{font-size: 40px !important;vertical-align: middle !important;}
+.btn-lg span{font-size: 40px !important;}
+
+@media only screen and (min-width: 1000px) {
+  h1{font-size: 50px !important;}
+  h2{font-size: 20px !important;margin:7px !important;}
+  h3{font-size: 20px !important;}
+  .btn-lg{padding: 0px 12px !important;}
+  .btn-lg span{font-size: 20px !important;}
+}
+.glyphicon.spinning {
+    animation: spin 2s infinite linear;
+    -webkit-animation: spin2 2s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+.modal-dialog{  width: 90%; max-width: 1000px;}
+.container{width: 100%; max-width: 1200px;}
+
+  </style>
+</head>
+<body ng-app='myApp'>
+  <div class=''>
+    <div class='container'>
+      <div class="row col-xs-12" height='20px'></div>
+      <div class="alert alert-warning" ng-show="<%= bool %>"><strong>Warning!</strong>
+      <%= message %> </div> 
+      <h1>Settrisk 2.1</h1>
+    
+      <div ng-controller='GamesController'>
+
+        <div class="row">
+          <div class="col-xs-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th><h2 style="display:inline-block">#</h2><div ng-show="spinningWheel" style="position:absolute;margin-top: -30px;"><button class="btn btn-lg btn-default"><span class="glyphicon glyphicon-repeat spinning"></span></button></div></th>
+                  <th><h2>Game</h2></th>
+                  <th><h2>Players</h2></th>
+                  <th><h2>Date</h2></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-class='game.active' ng-repeat='game in games | orderBy:"index"' class='fade in success'>
+                  <td><h2>{{game.index+1}}</h2></td>
+                  <td><button type="button" class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#signinModal" ng-click='signInModal(game.index)'><h2 style="display:inline-block;font-family:'Graduate';"> {{game.name}} </h2><span class='glyphicon glyphicon-chevron-right'></span></button></td>
+                  <td><h2 ng-repeat='player in game.players' class='text-{{player.color}}' style='display:inline-flex;margin:3px;'> {{player.name}} </h2></td>
+                  <td><h2>{{game.date}}</h2></td>
+                  <td><button type="button" class="close" ng-click="deleteGame(game.id, game.index)">&times;</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="signinModal" role="dialog">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h1 class="form-signin-heading"> {{games[current_game].name}} </h1><h3>Logga in som:</h3>
+              </div> 
+
+              <div class="modal-body">
+                <form class="form-signin" action="/signin" method="post">
+                  <div style='display:none'>
+                    <input name="id" value="{{games[current_game].id}}">
+                    <input name="game" value="{{current_game+1}}">
+                    <input name="player" value="{{current_player}}">
+                  </div>
+                  <table class="table">
+                    <tbody>
+                      <tr ><td><button class="btn btn-block btn-default" ng-click="signIn('Bank')" role="submit"><h2 style="display:inline-block;font-family:'Graduate';" >Bank</h2></button></td></tr>
+                      <tr ng-repeat="player in games[current_game].players" class="{{player.active}}">
+                        <td><button ng-disabled="player.active" class="btn-block btn btn-{{player.color}}" ng-click="signIn(player.name)" role="submit"><h2 style="display:inline-block;font-family:'Graduate';">{{player.name}}</h2><h2 style="display:inline-block;font-family:'Helvetica Neue',Helvetica;" ng-show="player.active"> <span class="glyphicon glyphicon-ok-sign"></span></h2></button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </form>
+                  <button class="btn btn-default" ng-click="uppdatera(games[current_game].players)">Uppdatera</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>  
+            <!-- Modal content-->
+            <!--div class="modal-content">
+              <div class="modal-body">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h1 class="form-signin-heading"> {{games[current_game].name}} </h1><h3>logga in som:</h3>
+                </div> 
+                <form class="form-signin" action="/signin" method="post">
+                  <ul class="nav nav-pills nav-stacked">
+                    <li ng-click="signIn('bank')"><a data-toggle="pill"><h2>Bank</h2></a></li>
+                    <li ng-class='player.active' ng-click="signIn(player.name)" ng-repeat="player in games[current_game].players">
+                      <a data-toggle="pill"><h2> {{player.name}} </h2></a>
+                    </li>
+                  </ul> 
+                  <div class="modal-footer">
+                    <div style='display:none'><input name="id" value="{{games[current_game].id}}"><input name="game" value="{{current_game+1}}"><input name="player" value="{{current_player}}"></div>
+                    <button class="btn btn-lg btn-primary" role="submit" value="Sign in"><h3>Sign in</h3></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </form>
+              </div>
+              
+            </div-->
+          </div>
+        </div>
+        
+
+        <!--h2>New Game</h2-->
+        <!-- Trigger the modal with a button -->
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#newgameModal" ng-click="startNewGame()"><h2>Start New Game</h2></button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="newgameModal" role="dialog">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-body">
+                <!-- Modal header-->
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h1 class="form-signin-heading"> Start New Game </h1>
+                </div> 
+                <!-- Modal players-->
+                <form class="form-horizontal" role="form" name="formNewGame">
+                  <div class="form-group">
+                    <div class="col-sm-12" ng-repeat="player in new_game.players">
+                      <label class="col-sm-4 control-label"><h2>{{player.name}}</h2></label>
+                      <div class="col-sm-4 dropdown" style="padding:10px;">
+                        <button class="btn btn-{{player.color}} dropdown-toggle col-sm-11" type="button" data-toggle="dropdown">Color
+                        <span class="caret"></span></button>
+                        <ul class="dropdown-menu" style="padding: 0px; margin: -45px 9px;">
+                          <div class="btn-group-vertical col-sm-12" style="padding: 0px;"><button class="btn btn-info col-sm-12" ng-click="player.color='info'">Lightblue</button>
+                          <button class="btn btn-success col-sm-12" ng-click="player.color='success'">Green</button>
+                          <button class="btn btn-warning col-sm-12" ng-click="player.color='warning'">Orange</button>
+                          <button class="btn btn-danger col-sm-12" ng-click="player.color='danger'">Red</button>
+                          <button class="btn btn-primary col-sm-12" ng-click="player.color='primary'">Blue</button></div>
+                        </ul> 
+                      </div>
+                      <button type="button" class="close col-sm-1" ng-click="new_game.players.splice(player.index, 1);" style="float:left;margin-top:15px">&times;</button>
+                    </div>
+                  <!-- Modal add player-->
+                    <div class="col-sm-12">
+                      <label class="col-sm-4 control-label"><h2></h2></label>
+                      <div class="col-sm-8" style="padding:10px;">
+                        <input class="form-control col-sm-6" id="focusedInput" style="width:50%;" type="text" name="pl" ng-model="new_player.name" pattern="[a-zA-Z0-9]{0,10}" title="Only letters and numbers allowed" required><button type="submit" class="btn btn-primary" ng-disabled="formNewGame.pl.$dirty && formNewGame.pl.$invalid" ng-click="addNewPlayer()"> <span class="glyphicon glyphicon-plus"></span> </button>
+                      </div>
+                    </div>  
+                  </div>
+                  
+                  <div style="height:1px;background-color:lightgray;margin:0"></div>
+
+                  <!-- Modal Resorces-->
+                  <div class="form-group">
+                    <div class="col-sm-12">
+                      <label class="col-sm-4 control-label"><h2>Start-resurser:</h2></label>
+                      <button class="btn col-sm-2 btn-default" ng-repeat="(resurs, antal) in new_game.resurser" ng-click="addStartResurs(resurs)" style="padding:0;width:10%;  margin: 15px 3px;"> {{resurs}} <span class="badge">{{antal.length}}</span></button>
+                      <button class="btn col-sm-1 btn-danger" ng-click="removeStartResurs()" style="padding:0;width:20px;height:22px;padding:0;  margin: 15px 3px;">&times;</button>
+                    </div>
+                  </div>
+
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-lg btn-primary" type="button" ng-click="initiateNewGame()" data-dismiss="modal">Load</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>

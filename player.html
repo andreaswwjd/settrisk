@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<head>
+  <title>Pusher Test</title>
+  <link rel="icon" type="image/png" href="images/jaktplan.png">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="jquery/dist/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- Angular.js -->
+  <script src="angular/angular.min.js"></script>
+  <!-- Pusher -->
+  <script src="pusher/dist/pusher.min.js"></script>
+  <script>
+    // Enable pusher logging - don't include this in production
+    Pusher.log = function(message) {
+      if (window.console && window.console.log) {
+        window.console.log(message);
+      }
+    };
+
+    var pusher = new Pusher('49150bc81042dacfac7d', {
+      encrypted: true
+    });
+    var channel = pusher.subscribe('private-channel');
+    /*channel.bind('update_event', function(data) {
+      if (data.alert!=undefined){alert(data.alert);}
+      eval(data.var_name+'=data');
+      window.console.log('Updated '+data.var_name);
+    });
+    channel.bind('pusher:subscription_succeeded', function() {
+      var triggered = channel.trigger('client-update_event', { "alert": "data" });
+      alert(triggered);
+    });*/
+  </script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+  <script>
+    var app = angular.module('myApp', []);
+    app.controller('mainController', function($scope, $http) {
+      $http.get('player_1.json').success(function(data){
+        $scope.player=data;
+      });
+      
+
+      
+      channel.bind('update_event', function(data) {
+        $scope.$apply(function() {
+          if (data.alert!=undefined){alert(data.alert);}
+          eval('$scope.'+data.var_name+'=data.data');
+          window.console.log('Updated '+data.var_name);
+        });
+      });
+      channel.bind('pusher:subscription_succeeded', function() {
+        $scope.$apply(function() {
+          var triggered = channel.trigger('client-update_event', { "alert": "data" });
+          alert(triggered+' '+window.location.href.split('/')[5]);
+        });
+      });
+      console.log("Log $scope:");
+      console.log($scope);
+    });
+  </script>
+  <style>
+.col-1 {width: 8.33%;}
+.col-2 {width: 16.66%;}
+.col-3 {width: 25%;}
+.col-4 {width: 33.33%;}
+.col-5 {width: 41.66%;}
+.col-6 {width: 50%;}
+.col-7 {width: 58.33%;}
+.col-8 {width: 66.66%;}
+.col-9 {width: 75%;}
+.col-10 {width: 83.33%;}
+.col-11 {width: 91.66%;}
+.col-12 {width: 100%;}
+  </style>
+</head>
+<body ng-app='myApp'>
+  <div id='body' ng-controller='mainController'>
+    <div id="notes_div"></div>
+    <button type="button" onclick="kasta()">Kasta tärningar</button>
+    <button type="button" onclick="uppdateraPriserInfanteri('all');uppdateraPriserByggnader('all');">Uppdatera priser</button>
+    <button type="button" onclick="uppdateraResurser();">Uppdatera resurser</button>
+    <div id='priser_infanteri' ng-repeat='unit in player.infanteri.units'>
+      <div id='{{unit}}' onclick="tillKorgen('{{unit}}', korginf, 1);\">
+        <img src='units/{{unit}}.png' width='20px'>
+          <div id='pris_{{unit}}'></div>
+      </div>
+      <script>korginf=[];</script>
+    </div>
+    <div id="priser_byggnader">
+    </div>
+    <button type="button" onclick="köpa()">Köp</button>
+    <button type="button" onclick="rensaKorg();">Rensa korg</button>
+    <div id="resurser"><h2>Du har inga resurser...</h2></div>
+  </div>
+</body>

@@ -1,0 +1,58 @@
+{
+	"player":{
+		"active": false,
+		"dintur": false,
+		"slå_tärningar": false
+	},
+	"utvecklingskort": {},
+	"resurser": {
+		"djur": [ ],
+		"olja": [ ],
+		"sten": [ ],
+		"säd": [ ],
+		"trä": [ ]
+	} ,
+	"infanteri": {
+		"artilleri": [ ],
+		"bombplan": [ ],
+		"jaktplan": [ ],
+		"lätt tank": [ ],
+		"mekaniskt förband": [ ],
+		"slagskepp": [ ],
+		"transportskepp": [ ],
+		"trupp": [ ],
+		"tung tank": [ ],
+		"ubåt": [ ]
+	} ,
+	"byggnader": {
+		"bro": [ ],
+		"by": [ ],
+		"fabrik": [ ],
+		"flygplats": [ ],
+		"hamn": [ ],
+		"oljerigg": [ ],
+		"stad": [ ],
+		"universitet": [ ],
+		"väg": [ ]
+	} ,
+	"byggnads-info": [ ],
+	"nationer": { } ,
+	"aktiemarknad":{
+		"stock_inset": {
+			"djur": [ ],
+			"olja": [ ],
+			"sten": [ ],
+			"säd": [ ],
+			"trä": [ ]
+		} ,
+		"stock_outcome": {
+			"djur": 0 ,
+			"olja": 0 ,
+			"sten": 0 ,
+			"säd": 0 ,
+			"trä": 0
+		} ,
+		"upper_limit_premie": [	0, 0, 0, 0, 0, 0 ] ,
+		"lower_limit_premie": [	0, 0, 0, 0, 0, 0 ]
+	}
+}

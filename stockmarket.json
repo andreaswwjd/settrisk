@@ -1,0 +1,41 @@
+{
+	"aktiemarknad": { 
+		"limit": 50,
+		"y50": 200,
+		"upper_limit": [15, 12, 9, 7, 4, 2],
+		"lower_limit": [-15,-13,-11,-9,-7,-5],
+
+		"coord": {
+			"säd":  [1],
+			"olja": [1],
+			"trä":  [1],
+			"sten": [1],
+			"djur": [1]
+		},
+
+		"derivata": {
+			"säd":  [0],
+			"olja": [0],
+			"trä":  [0],
+			"sten": [0],
+			"djur": [0]
+		},
+
+		"coord_txt": {
+			"säd":  "",
+			"olja": "",
+			"trä":  "",
+			"sten": "",
+			"djur": ""
+		}
+	},
+	"color": {
+        "säd":  "#f0cd4e",
+        "olja": "rgb(119, 67, 67)",
+        "trä":  "rgb(120, 147, 53)",
+        "sten": "darkgray",
+        "djur": "rgb(124, 202, 86)"
+    }
+}
+
+

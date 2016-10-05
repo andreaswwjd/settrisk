@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<head>
+  <title><%= player %> </title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="jquery/dist/jquery.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- Bootbox -->
+  <script src="bootbox/dist/pusher.min.js"></script>
+  <!-- Angular.js -->
+  <script src="angular/angular.min.js"></script>
+  <!-- Pusher -->
+  <script src="pusher/dist/pusher.min.js"></script>
+
+  <script>
+
+    // Enable pusher logging - don't include this in production
+    Pusher.log = function(message) {
+      if (window.console && window.console.log) {
+        window.console.log(message);
+      }
+    };
+
+    var pusher = new Pusher('49150bc81042dacfac7d', {
+      encrypted: true
+    });
+    var privateChannel = pusher.subscribe('private-channel_<%= player %>');
+    var gameChannel = pusher.subscribe('game_channel');
+
+    /*channel.bind('update_event', function(data) {
+      if (data.alert!=undefined){alert(data.alert);}
+      eval(data.var_name+'=data');
+      window.console.log('Updated '+data.var_name);
+    });
+    channel.bind('pusher:subscription_succeeded', function() {
+      var triggered = channel.trigger('client-update_event', { "alert": "data" });
+      alert(triggered);
+    });*/
+
+  </script>
+  <script>
+    var player = '<%= player %>' ;
+    var game = <%= game %> ;
+    var id = '<%= id %>' ;
+    
+
+    var app = angular.module('myApp', []);
+    app.controller('mainController', function($scope, $http) {
+      d=Date.now();
+      $scope.game='Game '+game;
+      $scope.slider=0;
+//Player settings
+      $scope.player = JSON.parse(document.getElementById('playerSettings').value);
+//Korg
+      $scope.player.korg = JSON.parse(document.getElementById('playerKorg').value);
+//Priser
+      $scope.priser = JSON.parse(document.getElementById('priser').value);
+//Players
+      $scope.players = JSON.parse(document.getElementById('players').value);
+//byggnads_info
+      //$scope.players = JSON.parse(document.getElementById('players').value);
+//din tur
+      $scope.player.player.dintur = <%= dintur %> ;
+
+//Pusher 
+      privateChannel.bind('pusher:subscription_succeeded', function() {
+        $scope.$apply(function() {
+            var triggered = privateChannel.trigger('client-log_event', { "note": player+" has logged in.", "color": "success"});
+            console.log($scope);
+          
+          //alert(triggered+' '+window.location.href.split('/')[5]);
+        });
+      });
+      console.log("Log $scope:");
+      console.log($scope);   
+
+      gameChannel.bind('update_prices_event', function (data) {
+        $scope.$apply(function() {
+          console.log('Priser uppdaterade: '+data);
+          console.log(data);
+          $scope.priser = data;
+          //eval('$scope.'+data.var_name+'=data.data;');
+          //console.log('Updated '+data.var_name);
+        });
+      });
+      gameChannel.bind('note_all_event', function (data) {
+          $scope.note=data;
+          $(".alert").addClass("active");
+          $scope.$apply();
+          setTimeout(function() {
+            $(".alert").removeClass("active");
+          }, 5000);
+      })
+      privateChannel.bind('client-log_event', function (data) {
+          $scope.note=data;
+          $(".alert").addClass("active");
+          $scope.$apply();
+          setTimeout(function() {
+            $(".alert").removeClass("active");
+          }, 5000);
+
+      });
+      privateChannel.bind('update_player_event', function (data) {
+          console.log(data);
+          $scope.clearKorg('infanteri');
+          $scope.clearKorg('byggnader');
+          $scope.player.infanteri = data.infanteri;
+          $scope.player.byggnader = data.byggnader;
+          $scope.player.resurser = data.resurser;
+          $scope.player.nationer = data.nationer;
+          $scope.player.player.dintur = data.player.dintur;
+          $scope.checkPrice();
+          $scope.$apply();
+      });
+      privateChannel.bind('update_player_byggnader_event', function (data) {
+          console.log(data);
+          for(i in $scope.player.byggnads_info){if($scope.player.byggnads_info[i].id == data.id){$scope.player.byggnads_info[i] = data;}}
+          $scope.$apply();
+      });
+      privateChannel.bind('client-ping', function (data) {
+          console.log(data);
+          $http.post('/pong', {player: player, id: id})
+      });
+
+//Functions
+      //Kan jag köpa?
+      $scope.noPurchase = {};
+      $scope.checkPrice = function (){
+        var d=Date.now();
+        angular.forEach( $scope.priser, function(reObj, type){
+          if(type!='id' && type!='infanteri' && type!='byggnader'){
+            var i=0, x=0;
+            angular.forEach( reObj, function(value, key){
+                x += value;
+                if($scope.player.resurser[key].length<value.length){i=1};
+            });
+            if(i==1||x==0){$scope.noPurchase[type]=true;}else{$scope.noPurchase[type]=false;}
+          }
+        });
+        console.log('Log $scope.noPurchase:')
+        console.log($scope.noPurchase);
+        console.log('Loading $scope.noPurchase: '+(Date.now()-d)+'ms');
+      }
+      $scope.checkPrice();
+      //
+      $scope.addItemToKorg = function (item, type){
+        var typeItem = $scope.player.korg[type];
+        typeItem[item].push(typeItem[item].length+1);
+          angular.forEach( $scope.priser[item], function(prisarr, res){
+            var i=0;
+            while(i<prisarr.length){
+              var x = $scope.player.resurser[res].shift();
+              $scope.player.korg.resurser[res].push(x);
+              i++;
+            }
+          });
+        $scope.checkPrice();
+        console.log($scope);
+      }
+
+      $scope.clearKorg = function (type){
+        var typeItem = $scope.player.korg[type];
+        angular.forEach( typeItem, function(antal, unit){
+          while(0<antal.length){
+            angular.forEach( $scope.priser[unit], function(arr, res){
+              for(j in arr){
+                var x = $scope.player.korg.resurser[res].pop();
+                $scope.player.resurser[res].unshift(x);
+              }
+            });
+            typeItem[unit].pop();
+          }
+        });
+        $scope.checkPrice();
+        console.log($scope);
+      }
+
+      $scope.buyKorg = function (type) {
+        d=Date.now();
+        if(type=='infanteri'){
+          $http.post('/buyItems', {game: 'game_<%= game %>', player: '<%= player %>', id: '<%= id %>', type: 'infanteri', data:{infanteri: $scope.player.korg.infanteri}}).
+            success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('infanteri');
+              console.log('Buy infantri: '+(Date.now()-d)+'ms');
+            });
+        }
+        if(type=='byggnader'){
+          $http.post('/buyItems', {game: 'game_<%= game %>', player: '<%= player %>', id: '<%= id %>', type: 'byggnader', data:{byggnader: $scope.player.korg.byggnader}}).
+            success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+              console.log('Buy byggnader: '+(Date.now()-d)+'ms');
+            });
+        }
+           
+      }
+      
+      $scope.mtoggle=false;
+      $scope.marketActivatePlayer = function (id){
+        d=Date.now();
+        if ($scope.mtoggle){
+          $('.pm').removeClass("X");
+          $('#x'+id).removeClass("Xactive");
+          $("#m1").removeClass("n n1");
+          $("#m2").removeClass("n n2");
+          $("#m3").removeClass("n n3");
+          $("#m4").removeClass("n n4");
+          $("#m5").removeClass("n n5");
+          $scope.mplayer = '';
+          $('#marknad_forklaring').addClass('hidem').removeClass("showm");
+        }else{
+          $('.pm').addClass("X");
+          $('#x'+id).addClass("Xactive");
+          $("#m1").addClass("n n1");
+          $("#m2").addClass("n n2");
+          $("#m3").addClass("n n3");
+          $("#m4").addClass("n n4");
+          $("#m5").addClass("n n5");
+          $scope.mplayer = id;
+          $('#marknad_forklaring').addClass('showm').removeClass("hidem");
+        }
+        $scope.mtoggle=!$scope.mtoggle;
+        console.log('marketActivatePlayer: '+(Date.now()-d)+'ms');
+      } 
+      $scope.sendResurs = function (res, id){
+        $scope.marketActivatePlayer(id);
+        $http.post('/sendResurs', {game: 'game_<%= game %>', player: '<%= player %>', id: '<%= id %>', 'resurs': res, 'toPlayer': id}).
+            success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+            });
+      } 
+
+      $scope.ockupera = function (nation){
+        $scope.player.nationer[nation]=!$scope.player.nationer[nation];
+        $http.post('/ockupera',{game: 'game_'+game, player: player, nationer: $scope.player.nationer}).success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+            });
+      }
+      $scope.success = function (bool){
+        if(bool){return 'success';}else{return 'danger';}
+      }
+      $scope.modalunit = function (unit) {
+        $scope.byggmodalunit=unit;
+      }
+      $scope.select_mark = 'mark1';
+      $scope.modalmark = function (mark, nr, value) {
+          $scope.byggmodalunit[mark][nr]=value;
+          if(mark=='mark3'&&nr==0){$scope.select_mark = 'nation'}
+          if(mark=='mark2'&&nr==0){$scope.select_mark = 'mark3'}
+          if(mark=='mark1'&&nr==0){$scope.select_mark = 'mark2'}
+          console.log($scope.byggmodalunit[mark]);
+          console.log($scope.select_mark);
+      }
+      $scope.placera = function (nation){
+        $scope.select_mark = 'mark1';
+        $scope.byggmodalunit['nation']=nation;
+        $http.post('/byggnads_info',{game: 'game_'+game, player: player, byggnads_info: $scope.byggmodalunit}).success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+            });
+      }
+
+      $(".container").on("swipeleft",function(){
+          if($scope.slider!=-200){$scope.slider-=100;}
+          $scope.$apply();
+      });
+      $(".container").on("swiperight",function(){
+          if($scope.slider!=0){$scope.slider+=100;}
+          $scope.$apply();
+      });
+
+      $scope.randomTop = {"trä": [58, 59, 25, 32, 54, 50, 28, 35, 68, 42],
+                          "säd": [67, 38, 59, 66, 33, 24, 30, 29, 58, 39],
+                          "olja": [25, 34, 41, 33, 22, 64, 27, 44, 65, 58],
+                          "sten": [31, 52, 66, 49, 30, 35, 68, 45, 63, 48],
+                          "djur": [57, 24, 45, 29, 26, 53, 43, 64, 44, 63]};
+      $scope.randomLeft = {"trä": [59, 93, 60, 87, 94, 59, 67, 60, 58, 75],
+                          "säd": [92, 91, 98, 78, 58, 103, 76, 88, 76, 90],
+                          "olja": [79, 86, 79, 100, 92, 77, 86, 76, 102, 61],
+                          "sten": [68, 74, 77, 60, 69, 58, 81, 96, 86, 80],
+                          "djur": [104, 74, 76, 102, 97, 64, 106, 65, 106, 104]};
+
+
+
+      console.log('Loading myApp: '+(Date.now()-d)+'ms');
+    });//Controller
+  var logout = function (player, id) {
+    $.post( "/logout", {playername: player, id: id});
+  }
+
+window.onbeforeunload=before;
+function before(evt){
+   var message="Du loggas nu ut!";
+   if(typeof evt=="undefined"){
+      evt=window.event;
+   }
+   if(evt){
+      $.post( "/logout", {playername: player, id: id});
+      evt.returnValue=message;
+   }
+}
+
+  </script>
+  <style>
+@import url(http://fonts.googleapis.com/css?family=Graduate);
+*{font-family: 'Graduate', sans serif;}
+
+@media only screen and (min-width: 1000px) {
+  #nav{display:none;}
+  .slider{width:100% !important;}
+  .unit{padding-top:89.25%;width: 100%;}
+  .resurs>div{height:23px !important;
+  width:23px !important;}
+  h1{font-size: 35px !important;}
+  p{font-size: 11px !important;color:black !important;}
+  .unitdiv>p{font-size: 11px !important;}
+  .tag>p{margin-top: -25px !important;
+  margin-left: 1px !important;
+  font-size: 19px !important;}
+  .tag{
+  font-size: 31px !important;
+  margin-top: 0px !important;
+  margin-left: 19px !important;}
+  .trash span{
+  font-size: 20px !important;
+  margin: 0px !important;}
+  .trash>button{margin:0 2px !important;}
+  .alert{font-size: 250% !important; }
+  .alert.active{height:55px !important;}
+  .market-div{height:100px !important;width:100px !important;}
+  h3{font-size: 17px !important;}
+  .Xactive {
+  height:110px;
+  width:110px;
+  margin-left: -55px;}
+  .X {margin-left:-50px !important;}
+  .n{margin-left:-10px !important;}
+  .n1{left:-16% !important;}
+  .n2{margin-top: -7% !important;left: 9% !important;}
+  .n3{margin-top: 5% !important;}
+  .n4{margin-top: -7% !important;left: 91% !important;}
+  .n5{left: 116% !important;}
+  .nation img{max-height:50px !important;max-width:60px !important;}
+  .form-bygg{transform: scale(1,1) !important;
+  margin: 0 !important;}
+  .true{border-width: 5px !important;}
+  #sendRes{height: 150px !important;}
+}
+div, button{ padding:0;}
+
+.slider{
+    transition: .5s;
+    height:100%;
+    width:300%;}
+.unit{padding-top:89.25%;width: 100%%;
+  box-shadow: 2px 2px 1px 1px black}
+.container {
+  width: 100%;
+  padding:0;
+    background-color: rgba(255, 239, 209, 1);
+    box-shadow: 0px 0px 500px rgba(219, 175, 117, 1) inset;
+}
+h1{font-size: 60px;}
+p{font-size: 27px;}
+.unitdiv>p{margin: 0;position: absolute;}
+.unit>img{
+  max-width: 52%;
+  max-height: 55%;
+  margin-top: -56%;
+  margin-left: -25%;
+  position:absolute;}
+.resurs{padding:0 5px;display:inline-block}
+.resurs>div{height:45px;
+  width:45px;
+  border-radius:100%;
+  display:inline-block;
+  box-shadow: -0.5px -2px 8px -2px black inset;}
+.olja{background-color: rgb(119, 67, 67)}
+.sten{background-color: darkgray}
+.trä{background-color: rgb(120, 147, 53)}
+.djur{background-color: rgb(124, 202, 86)}
+.säd{background-color: #f0cd4e}
+.true{border-color:white;border-style:solid;border-width: 11px;}
+.false{}
+
+.tag>p{color: black;
+  margin-top: -44px;
+  font-size: 32px;
+  margin-left: 0px;}
+.tag{  position: absolute;
+  font-size: 55px;
+  color: rgb(227, 6, 19);
+  text-shadow: 0px 0px 1px black;
+  margin-top: 9px;
+  margin-left: 25px;}
+.trash{
+  bottom: 3%;
+  right: 3%;
+  position: absolute;
+}
+.trash>button{
+  right: 0;
+  bottom: 0;
+  display: inline-block;
+  margin: 0 5px;
+}
+.trash span{
+  font-size: 40px;
+  margin: 15px;}
+.alert{font-size: 350%;height: 0; width: 100%; overflow: hidden; position: fixed;z-index: 1;padding: 0; transition: .7s;}
+.alert.active{height:80px;}
+.market-div{padding:0;
+margin:0;
+display:inline-block;
+border-radius:100%;
+position:absolute;
+height:180px;
+width:180px;
+transition: 0.5s;
+top:0;
+z-index: 1;}
+.market-div>h3{margin-top:40%;font-size: 30px;transition: 0.5s;}
+.X {
+left:50% !important;
+margin-left:-90px;
+}
+.Xactive {
+  height:220px;
+  width:220px;
+  margin-left: -110px;
+  z-index: 2;
+}
+.Xactive h3{font-size: 39px;}
+.m {
+top:50%;
+opacity:0;
+margin-top:-10px;
+left:0;
+z-index: 0;
+}
+.n{
+top:100%;
+opacity:1;
+margin-left:-40px;
+height:80px !important;
+width:80px !important;
+}
+.n p, .m p{margin-top:20px;color:white;}
+.n1{transition-delay: 0.10s;margin-top:-42px;left:-34%;}
+.n2{transition-delay: 0.13s;margin-top: 30px;left: 0%;}
+.n3{transition-delay: 0.16s;margin-top: 55px;left: 50%;}
+.n4{transition-delay: 0.19s;margin-top: 30px;left: 100%;}
+.n5{transition-delay: 0.22s;margin-top:-42px;left: 134%;}
+.nation img{max-height:150px;max-width:160px;}
+.markres{display:inline-block;margin-top:-41px;}
+.marknr{display:inline-block;margin: 5px;}
+.markicon{display:inline-block;margin: -5px;}
+.byggnad{position:absolute;width: 160px;text-align: center;}
+.byggnad img{max-width: 57px; margin-top: 28px;}
+.mark1{width: 160px;text-align:center;margin-top:-16px;padding:0;}
+.mark3{margin-bottom:-16px;}
+.modal-dialog{  width: 90%; max-width: 1000px;}
+.form-bygg{  width: 500px;
+  transform: scale(1.7,1.7);
+  margin: 160px 0 100px 130px;
+  text-align:center;}
+  .modal-header{min-height: 100.694px;}
+  .hidem{opacity: 0;}
+  .showm{opacity: 1;}
+</style>
+</head>
+
+
+
+<body ng-app='myApp' >
+  <div style="display:none;">
+    <input id="playerSettings" value="<%= JSON.stringify(playerSettings) %>">
+    <input id="playerKorg" value="<%= JSON.stringify(playerKorg) %>">
+    <input id="priser" value="<%= JSON.stringify(priser) %>">
+    <input id="players" value="<%= JSON.stringify(players) %>">
+  </div>
+
+
+
+  <div class="container" ng-controller="mainController">
+    <!-- Modal -->
+    <div class="modal fade" id="prisInfModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+              <h1><span class="glyphicon glyphicon-usd"></span> Infanteri</h1>
+            </div> 
+            <div>
+              <div id="infanteri" class="col-sm-6 col-lg-4" style="padding:0;" ng-repeat="inf in player.typer.infanteri" >
+                <div class="col-sm-4 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit" ng-click="" ng-disabled="false">
+                    <img src="infanteri/{{inf}}.png">
+                  </button>
+                </div>
+                <div class="col-sm-8 unitdiv" style="padding:0%;">
+                  <p>{{inf}}</p>
+                  <div class="col-sm-12 unitdiv" style="padding:0%;position:relative;">
+                    <div  style=" ">
+                      <div class="resurs" ng-repeat="(key, arr) in priser[inf]" style="padding: 0; margin-top:50px;position:relative:width:{{arr.length*10}}px;">
+                        <div ng-repeat="x in arr" class="{{key}} {{x>player.resurser[key].length}}" ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <div style='display:none'><input name="id" value="{{byggmodalunit.id}}"><input name="mark1" value="{{}}"><input name="player" value="{{}}"></div>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="prisByggModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              
+              <h1><span class="glyphicon glyphicon-usd"></span> Byggnader</h1>
+            </div> 
+            <div>
+              <div id="byggnader" class="col-sm-6 col-lg-4" style="padding:0;" ng-repeat="bygg in player.typer.byggnader" >
+                <div class="col-sm-4 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit" ng-click="" ng-disabled="false">
+                    <img src="byggnader/{{bygg}}.png">
+                  </button>
+                </div>
+                <div class="col-sm-8 unitdiv" style="padding:3%;">
+                  <p>{{bygg}}</p>
+                  <div style=" position: absolute; width: 100%;">
+                    <div class="resurs" ng-repeat="(key, arr) in priser[bygg]" style="padding: 0; margin-top:36px;position:relative:width:{{arr.length*10}}px;">
+                      <div ng-repeat="x in arr" class="{{key}} {{x>player.resurser[key].length}}"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                
+              <div class="modal-footer">
+                <div style='display:none'><input name="id" value="{{byggmodalunit.id}}"><input name="mark1" value="{{}}"><input name="player" value="{{}}"></div>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="infoByggModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h1><span class="glyphicon glyphicon-info-sign"></span> Information</h1>
+            </div> 
+            <div>
+
+              <div id="byggnader" class="col-sm-12 col-lg-7" style="padding:0;">
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="byggnader/fabrik.png">
+                  </button>
+                </div>
+                <h1 class="col-sm-2" style="margin-top: 37px; display: inline-block;"><span class="glyphicon glyphicon-arrow-right"> </span></h1>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/lätt tank.png">
+                  </button>
+                </div>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/tung tank.png">
+                  </button>
+                </div>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/artilleri.png">
+                  </button>
+                </div>
+              </div>
+
+              <div id="byggnader" class="col-sm-12 col-lg-7" style="padding:0;">
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="byggnader/flygplats.png">
+                  </button>
+                </div>
+                <h1 class="col-sm-2" style="margin-top: 37px; display: inline-block;"><span class="glyphicon glyphicon-arrow-right"> </span></h1>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/jaktplan.png">
+                  </button>
+                </div>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/bombplan.png">
+                  </button>
+                </div>
+              </div>
+
+              <div id="byggnader" class="col-sm-12 col-lg-7" style="padding:0;">
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="byggnader/hamn.png">
+                  </button>
+                </div>
+                <h1 class="col-sm-2" style="margin-top: 37px; display: inline-block;"><span class=" glyphicon glyphicon-arrow-right"> </span></h1>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/slagskepp.png">
+                  </button>
+                </div>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/transportskepp.png">
+                  </button>
+                </div>
+                <div class="col-sm-2 unitdiv" style="padding:3%;">
+                  <button class="btn btn-warning unit">
+                    <img src="infanteri/ubåt.png">
+                  </button>
+                </div>
+              </div>
+                
+              <div class="modal-footer">
+                <div style='display:none'><input name="id" value="{{byggmodalunit.id}}"><input name="mark1" value="{{}}"><input name="player" value="{{}}"></div>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height: 100%; width: 100%; overflow: hidden;">
+      <div class="alert alert-{{note.color}}" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        {{note.note}}
+      </div>
+      <!--div class="alert-danger" ng-show="player.player.dintur" style="position:fixed; padding: 0px 30px;z-index: 2;border-radius: 10px; z-index:2;"-->
+      <div class="alert-danger" ng-show="false" style="position:fixed; padding: 0px 30px;z-index: 2;border-radius: 10px; z-index:2;">
+        <h2><span class="glyphicon glyphicon-exclamation-sign"></span>Din tur!</h2>
+      </div>
+      <div class="btn-{{player.player.color}}" style="display:inline-block;width:100%;" ><div class="col-sm-3"><h1> {{player.player.name}}</h1></div>
+        <div id="resurser" class="col-sm-10" style="padding:0;max-width:700px;">
+            <div ng-repeat="(resurs, antal) in player.resurser" class="resurs" style="padding:0;margin:1% 0%;width:20%;"><div ng-repeat="x in antal" class="{{resurs}}"></div><p>{{resurs}}</p></div>
+        </div>
+      </div>
+      <div class="slider" style="margin-left: {{slider}}%;">
+        <div id="nations" class="col-sm-4" style="padding:0 1%;">
+          <div ></div>
+          <h1>Nationer</h1>
+          <table class="table">
+            <tr class="nation {{success(ockuperad)}}" ng-repeat="(nation, ockuperad) in player.nationer" ng-click="ockupera(nation)">
+              <td><p>{{nation}} </p>
+                <div class="btn" style="padding: 0;margin-right:-7px;" ng-repeat="unit in player.byggnads_info" ng-show="unit.nation==nation">
+                  <div class="byggnad" ><img src="/byggnader/{{unit.type}}.png"></div>
+                  <div class="mark1">
+                    <div class="markicon" ><svg width="82.333px" height="83.833px">
+                      <polygon fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark1[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark1[0]}}</text>
+                    </svg></div>
+                    <div class="markicon" ><svg width="82.333px" height="83.833px">
+                      <polygon  fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark2[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark2[0]}}</text>
+                    </svg></div>
+                  </div>
+                  <div class="mark1">
+                    <div class="markicon" ><svg width="82.333px" height="83.833px">
+                      <polygon fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{unit.mark3[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" >{{unit.mark3[0]}}</text>
+                    </svg></div>
+                  </div>
+                </div>
+                <h1 style="float: right;"><span ng-hide="ockuperad" class="glyphicon glyphicon-flash"></span><span ng-show="ockuperad" class="glyphicon glyphicon-flag"></span></h1>
+              </td>
+            </tr>
+            <tr class="nation warning">
+              <td><p>"Ingenmansland" </p><bytton class="btn" data-toggle="modal" data-target="#byggModal" ng-click="modalunit(unit)" ng-repeat="unit in player.byggnads_info" ng-show="{{unit.nation==''}}"><img src="byggnader/{{unit.type}}.png"></button></td></tr>
+          </table>
+          
+
+          ------------------------
+          <p ng-repeat="(unit, antal) in player.infanteri">{{unit}}: {{antal.length}}</p>
+          ------------------------
+          <p ng-repeat="(unit, antal) in player.byggnader">{{unit}}: {{antal.length}}</p>
+        </div>
+        <div id="buy_items" class="col-sm-4" style="padding:0 3%;">
+          <h1>Träna</h1>
+          <div id="infanteri" class="col-sm-12" style="padding:0;">
+            <div class="col-sm-3 unitdiv" ng-repeat="inf in player.typer.infanteri" style="padding:3%;">
+              <button class="btn btn-warning unit" ng-click="addItemToKorg(inf, 'infanteri')" ng-disabled="noPurchase[inf]">
+                <img src="infanteri/{{inf}}.png">
+                <div ng-repeat="antal in player.korg.infanteri[inf]" style=" position: absolute; width: 100%;">
+                  <div class="resurs" ng-repeat="(key, arr) in priser[inf]" style=" position: absolute; width: 100%;">
+                    <div ng-repeat="x in arr" class="{{key}}" style="margin-top: -{{randomTop[key][x+antal]}}%; position: absolute; margin-left: -{{randomLeft[key][x+antal]}}%;"></div>
+                  </div>
+                </div>
+                <span ng-hide="player.korg.infanteri[inf]==0" class="glyphicon glyphicon-certificate tag">
+                  <p>{{player.korg.infanteri[inf].length}}</p>
+                </span>
+              </button>
+              <p>{{inf}}</p>
+            </div>
+            <div class="col-sm-6 trash" style="padding:3%;">
+              <button class="btn btn-success" ng-click="buyKorg('infanteri')"><span class="glyphicon glyphicon-flag"></span></button>
+              <button class="btn btn-danger" ng-click="clearKorg('infanteri')"><span class="glyphicon glyphicon-trash"></span></button>
+              <button class="btn btn-warning" data-toggle="modal" data-target="#prisInfModal"><span class="glyphicon glyphicon-usd"></span></button>
+            </div>
+          </div>
+          <h1>Bygga</h1>
+          <div id="byggnader" class="col-sm-12" style="padding:0;">
+            <div class="col-sm-3 unitdiv" ng-repeat="bygg in player.typer.byggnader" style="padding:3%;">
+              <button class="btn btn-warning unit" ng-click="addItemToKorg(bygg, 'byggnader')" ng-disabled="noPurchase[bygg]">
+                <img src="byggnader/{{bygg}}.png">
+                <div ng-repeat="antal in player.korg.byggnader[bygg]" style=" position: absolute; width: 100%;">
+                  <div class="resurs" ng-repeat="(key, arr) in priser[bygg]" style=" position: absolute; width: 100%;">
+                    <div ng-repeat="x in arr" class="{{key}}" style="margin-top: -{{randomTop[key][x+antal]}}%; position: absolute; margin-left: -{{randomLeft[key][x+antal]}}%;"></div>
+                  </div>
+                </div>
+                <span ng-hide="player.korg.byggnader[bygg]==0" class="glyphicon glyphicon-certificate tag">
+                  <p>{{player.korg.byggnader[bygg].length}}</p>
+                </span>
+              </button>
+              <p>{{bygg}}</p>
+            </div>
+            
+            <div class="col-sm-8 trash" style="padding:3%;">
+              <button class="btn btn-info" data-toggle="modal" data-target="#infoByggModal"><span class="glyphicon glyphicon-info-sign"></span></button>
+              <button class="btn btn-success" ng-click="buyKorg('byggnader')"><span class="glyphicon glyphicon-flag"></span></button>
+              <button class="btn btn-danger" ng-click="clearKorg('byggnader')"><span class="glyphicon glyphicon-trash"></span></button>
+              <button class="btn btn-warning" data-toggle="modal" data-target="#prisByggModal"><span class="glyphicon glyphicon-usd"></span></button>
+              
+            </div>
+          </div>
+          
+        </div>
+        <div id="traiding" class="col-sm-4" style="padding:0 3%;">
+          <h1>Marknad</h1>
+          <div id="sendRes" class="col-sm-12" style="text-align:center;height:330px;">
+            <div class="resurs X market-div">
+              <div ng-repeat="res in [0,1,2,3,4]" id="m{{res+1}}" class="market-div m {{player.typer.resurser[res]}}" ng-click="sendResurs(player.typer.resurser[res], mplayer);"><p>{{player.typer.resurser[res]}}</p></div>
+            </div>
+            <div ng-repeat="player in players" id="x{{player.name}}"class="market-div pm btn-{{player.color}}" style="left:{{(player.index-1)*33}}%;top:0%;" ng-click="marketActivatePlayer(player.name)"><h3>{{player.name}}</h3></div>
+          </div>
+          <h3 id="marknad_forklaring" class="hidem" style="text-align:center;transition: 0.5s;">Skicka en resurs.</h3>
+        </div>
+      </div>
+      <div id="nav" class="col-sm-12">
+        <div id="slide1" class="col-sm-4"><button class="btn btn-info col-sm-12" ng-click="slider='0';"><h2>Nationer</h2></button></div>
+        <div id="slide1" class="col-sm-4"><button class="btn btn-info col-sm-12" ng-click="slider='-100';"><h2>Bygga</h2></button></div>
+        <div id="slide1" class="col-sm-4"><button class="btn btn-info col-sm-12" ng-click="slider='-200';"><h2>Marknad</h2></button></div>
+      </div>
+      <!-- Modal -->
+      <div class="modal fade" id="byggModal" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h1 class="form-heading" style="display:inline-block;"> {{byggmodalunit.type}} </h1>
+                <div style="margin: -69px 0 -81px 600px;">
+                  <div class="byggnad" ng-show="select_mark=='nation'"><img style="max-width: 57px; margin-top: 36px;" src="/byggnader/{{byggmodalunit.type}}.png"></div>
+                  <div class="mark1">
+                    <div class="markicon" ng-show="byggmodalunit.mark1[1]!=''" ng-click="select_mark=='mark1'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark1[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark1[0]!=0">{{byggmodalunit.mark1[0]}}</text>
+                    </svg></div>
+                    <div class="markicon" ng-show="byggmodalunit.mark2[1]!=''" ng-click="select_mark=='mark2'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark2[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark2[0]!=0">{{byggmodalunit.mark2[0]}}</text>
+                    </svg></div>
+                  </div>
+                  <div class="mark1 mark3">
+                    <div class="markicon" ng-show="byggmodalunit.mark3[1]!=''" ng-click="select_mark=='mark3'"><svg width="82.333px" height="83.833px">
+                      <polygon ng-show="byggmodalunit.mark1[1]!=''" fill="#CBBBA0" points="5.608,21.324 41.275,0.732 76.942,21.324 76.942,62.51 41.275,83.102 5.608,62.51 "/>
+                      <text transform="matrix(1 0 0 1 17.9595 42.3838)" font-size="21" >{{byggmodalunit.mark3[1]}}</text>
+                      <text transform="matrix(1 0 0 1 29.3984 64.2173)" font-size="24" ng-show="byggmodalunit.mark3[0]!=0">{{byggmodalunit.mark3[0]}}</text>
+                    </svg></div>
+                  </div>
+                </div>
+              </div> 
+              <form action="/byggnad" method="post" style="text-align:center;padding:45px;">
+                <div class="form-bygg">
+                  <div class="markres" ng-repeat="res in player.typer.resurser" ng-show="byggmodalunit[select_mark][1]==''" ng-click="modalmark(select_mark,1,res);"><svg width="150px" height="166px">
+                    <polygon fill="#CBBBA0" stroke-miterlimit="10" points="0,41.388 71.687,0 143.373,41.388 143.373,124.165 71.687,165.553 0,124.165 "/>
+                    <text transform="matrix(1 0 0 1 39.0762 91.6797)" font-size="29">{{res}}</text>
+                  </svg></div>
+                  <div class="marknr" ng-repeat="nr in [2,3,4,5,6,8,9,10,11,12]" ng-show="byggmodalunit[select_mark][0]==0 " ng-hide="byggmodalunit[select_mark][1]==''" ng-click="modalmark(select_mark,0,nr);"><svg width="81px" height="81px">
+                    <text transform="matrix(1 0 0 1 30 50)" font-size="29">{{nr}}</text>
+                    <circle fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10" cx="40" cy="40" r="38.5"/>
+                  </svg></div>
+                </div>
+                <div ng-show="byggmodalunit[select_mark]==''">
+                  <table class="table" style="text-align:left;">
+                    <tr><th><h2>I vilken nation?</h2></th></tr>
+                    <tr class="nation {{success(ockuperad)}}" ng-repeat="(nation, ockuperad) in player.nationer" ng-click="placera(nation)" data-dismiss="modal"><td><p>{{nation}} </p><div class="btn" ng-repeat="unit in player.byggnads_info" ng-show="{{unit.nation==nation}}"><img src="byggnader/{{unit.type}}.png"></div></td></tr>
+                    <tr class="nation"><td><h3>Lägg till nytt land! </h3><div class="input-group input-group-lg col-sm-7"><input style="height: 46px;" class="form-control col-sm-12" name="newNation" ng-model="newNation" placeholder="t.ex. 'Nation 1'" aria-describedby="sizing-addon1" ><span class="input-group-btn"><button class="btn btn-success" type="button" ng-click="player.nationer[newNation]=false;">Lägg till!</button></span></div></td></tr>
+                  </table>
+                </div>
+                
+                <div class="modal-footer">
+                  <div style='display:none'><input name="id" value="{{byggmodalunit.id}}"><input name="mark1" value="{{}}"><input name="player" value="{{}}"></div>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </form>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

@@ -1,0 +1,159 @@
+Settrisk_notes
+
+
+INFANTERI		BYGG		RESURSER
+trupp			stad		trä
+lätt tank 		by			säd
+tung tank		fabrik		olja
+artilleri		flygplats	grus
+bombplan		hamn		djur
+jaktplan		oljerig	
+ubåt			universitet	
+slagskepp		väg	
+transportskepp	bro	
+mek förband		
+
+
+########### index.php ############
+	Antal spelare
+	Namn
+	Start-resurser (p1_resurser.txt)
+	(Andra inställningar, tex specialregler, bonusar, börs, etc.)
+	Spelplanen: 
+		Lägg till Nation: 	nation="N01" (meny)
+		Anger marktyp:		mark="S"
+		Anger värde:		värde="08"
+							spelplan=[N01S08, ...] (append)
+		Färdigställ nation: (meny tillbaka)
+	
+	Starta spel: (om ej alla inställningar ifyllda: felmeddelande)
+	spelplan -> spelplan.txt	
+			 -> skapa grundfiler som player1.php etc.
+			 -> vidarebefodra till bank.php
+
+
+
+
+BANK sätter in premisserna för spelplanen. [Länder+Marker]
+Producerar .php och .txt filer:
+Spelplanen visas upp:
+  bank.php    -> spelplan.txt 	[Länder, Marker, Bonusar]
+  player1.php -> p1_resurser.txt + p1_spelkort.txt + marknad.txt [Resurser, Spelkort, Marknad]
+  player2.php -> p2_resurser.txt + p2_spelkort.txt + marknad.txt [Resurser, Spelkort, Marknad]
+  player3.php -> p3_resurser.txt + p3_spelkort.txt + marknad.txt [Resurser, Spelkort, Marknad]
+  player4.php -> p4_resurser.txt + p4_spelkort.txt + marknad.txt [Resurser, Spelkort, Marknad]
+
+  BANK
+  spelplan.txt	[Länder, Marker]
+  marknad.txt	[Marknad]
+  statestik.txt	[Resurser, Handel/Industri] (Utdelning, Köp)
+  priser.txt
+
+  PLAYER
+  p1_resurser.txt	[Resurser, Spelkort]
+  p1_spelkort.txt
+  p1_byggnader.txt	
+  p1_infanteri.txt
+
+:::NATIONER:::
+Index	Nation 	Mark 	
+###		N## 	S##
+
+
+:::BYGG:::
+Byggnad	Nation	Mark1	Mark2	Mark3
+fab 	N##		S##		T##		O##
+-------------------------------------
+stad			std
+by 				byy		
+fabrik			fab 	
+flygplats		fly 	
+hamn			ham 	
+oljerig			olj
+universitet		uni
+väg				vag
+bro 			bro
+
+:::INFANTERI:::
+Infanteri 	Antal
+tru 		999
+-----------------------
+trupp				tru
+mek förband 		mtr
+lätt tank 			ltk
+tung tank 			ttk
+artilleri 			art
+bombplan 			bpl
+jaktplan 			jpl
+ubåt 				ubt
+slagskepp 			sbt
+transportskepp 		tbt
+
+:::RESURSER:::
+Resurs 	Antal
+T 		999
+-------------
+trä		T
+säd		S
+olja	O
+grus	G
+djur	D
+
+:::BONUS:::
+Spelare		Trupper		Resurser/valmöjligheter
+p1			##			##TSOGD
+
+:::SPELKORT:::
+Kort	Utspelad
+Bomb 	OOO
+----------------
+
+TSOGD
+
+
+:::ATT BYGGA:::
+  Välja byggnad (pris?)
+  "Bekräfta köp"
+  bygg.php?p=1&q=fab000000000000 Bank kollar om köp är möjligt 
+  	- Om ej, skickas felmeddelande... Annars:
+  Bank drar av kostnaden i p1_resurser.txt
+  Bank lägger in byggnad i p1_byggnader.txt 
+  Bank bekräftar att köpet gått igenom
+  "Köp bekräftat"
+  Anger omgivning: Land, Mark1, Mark2, Mark3 bygg.php?p=1&q=fabN01S06T04O10
+  Bank lägger in: Land, Mark1, Mark2, Mark3 (fab, byy, std -> bonus.php)
+  Bank bekräftar
+  Meny försvinner
+
+:::TRÄNA INFANTERI:::
+  Välja infanteri
+  "Bekräfta köp"
+  Bank kollar om köp är möjligt
+  Bank drar av kostnaden
+  Bank lägger in infanteri i player.txt
+  Bank bekräftar att köpet gått igenom
+  "Köp bekräftat"
+  Meny försvinner
+
+:::MARKNAD SÄLJA:::
+  Vad vill du ha?
+  Vad erbjuder du?
+
+
+:::UPPDATERA:::
+Varje sekund: Uppdatering?  events.php?p=1 
+events.php: open p1_events.txt, read line, echo "update ... plz", pop line, else echo "no"
+if not "no", update "..."
+	swich:
+	"no": break;
+	"priser": read priser.txt -> priser=[] alert(...) break; (Händelsekort)
+	"resurser": read p1_resurser.txt -> resurser=[] alert(...) break; (Utdelning)
+	"din tur": alert("Din tur!"), Ange utfall, utfall.php?p=1&t=09, class=tärningar (ej bygga, bara marknad), break;
+	"...": read ...txt -> ...=[] break;
+	DEFAULT: alert("...") 
+	   (tex: "Placera ut en fabrik i nation 1", "Spelare 2 har köpt ditt grus.", "En jordbävning...", "Din tur! Du har fått XX i bonus.")
+
+KLAR:
+om class=tärningar blir knapp synlig "KLAR": nästa.php?p=1 -> write line in p2_events.txt, echo "class=hide_tärningar"
+
+

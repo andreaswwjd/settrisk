@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<head>
+  <title>Settrisk</title>
+  <link rel="icon" type="image/png" href="images/jaktplan.png">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="jquery/dist/jquery.min.js"></script>
+  <!-- Bootstrap -->
+  <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- Bootbox -->
+  <script src="bootbox/bootbox.js"></script>
+  <!-- Angular.js -->
+  <script src="angular/angular.min.js"></script>
+  <!-- Pusher -->
+  <script src="pusher/dist/pusher.min.js"></script>
+  <script>
+
+// Enable pusher logging - don't include this in production
+    Pusher.log = function(message) {
+      if (window.console && window.console.log) {
+        window.console.log(message);
+      }
+    };
+
+    var pusher = new Pusher('49150bc81042dacfac7d', {
+      encrypted: true
+    });
+    var channel = pusher.subscribe('games_channel');
+    channel.bind('my_event', function(data) {
+      alert(data.new_val.message);
+    });
+
+
+
+
+ //Angular app 
+    var app = angular.module('myApp', []);
+    app.controller('mainController', function($scope, $http) {
+      d = Date.now();
+      $scope.game ={};
+      $scope.game.id = '<%=id %>';
+      $scope.game.name= 'Game <%=game %>';
+      var players = JSON.parse(document.getElementById('players').value);
+      $scope.players = {}
+      for(i in players){$scope.players[players[i].name]=players[i];}
+
+      $scope.d= Math.floor(Math.random()*10)+2;
+
+      $scope.stock ={};
+      $scope.stock.coord_txt = {
+        'säd':  '0,200 10,198 20,200 30,186 40,190 50,182 60,182 70,172 80,176 90,168 100,164 110,158 120,158 130,144 140,150 150,140 160,140 170,122 180,128 190,116 200,112 210,106 220,106 230,92 240,98 250,88 260,88 270,70 280,76 290,76 300,72 310,82 320,88 330,102 ',
+        'olja': '0,200 ',
+        'trä':  '0,200 10,208 20,212 30,206 40,210 50,214 60,217 70,222 80,226 90,230 100,233 110,237 120,241 130,234 140,238 150,242 160,245 170,249 180,253 190,257 200,260 210,264 220,268 230,260 240,265 250,268 260,272 270,276 280,280 290,284 300,287 310,267 320,247 330,231 340,212 350,217 360,217  ',
+        'sten': '0,200 ',
+        'djur': '0,200 '
+      };
+      //Hämtas från Databas
+      $scope.stock.color = {
+        'säd':  '#f0cd4e',
+        'olja': 'rgb(119, 67, 67)',
+        'trä':  'rgb(120, 147, 53)',
+        'sten': 'darkgray',
+        'djur': 'rgb(124, 202, 86)'
+      };
+      $scope.stock.tag = {
+        'säd':  [330,102],
+        'olja': [0,200],
+        'trä':  [360,217],
+        'sten': [0,200],
+        'djur': [0,200]
+      };
+      $scope.stock.derivata = {
+        'säd':  [1.27],
+        'olja': [5.45],
+        'trä':  [(-6.34)],
+        'sten': [(-0.22)],
+        'djur': [1.95]
+      };
+      $scope.stock.derivata_triangle = {
+        'säd':  ['right', '#f0cd4e'],
+        'olja': ['top', 'rgb(124, 202, 86)'],
+        'trä':  ['bottom', 'red'],
+        'sten': ['right', '#f0cd4e'],
+        'djur': ['right', '#f0cd4e']
+      };
+      //Resurser: r.db('settrisk').table('events').orderBy('time').withFields('Andreas')
+      //infanteri: r.db('game_1').table('Andreas').withFields('byggnader', 'infanteri')
+      //Byggnader: 
+      $scope.players_all ={
+        "Andreas": {
+          "Resurser":{
+            "djur": 12 ,
+            "olja": 23 ,
+            "sten": 21 ,
+            "säd": 34 ,
+            "trä": 41
+          } ,
+          "Byggnader": {
+            "bro": 0,
+            "by": 1,
+            "fabrik": 1,
+            "flygplats": 1,
+            "hamn": 1,
+            "oljerigg": 1,
+            "stad": 1 ,
+            "universitet": 1,
+            "väg": 1
+          } ,
+          "Infanteri": {
+            "artilleri": 0,
+            "bombplan": 0,
+            "jaktplan": 1 ,
+            "lätt tank": 0,
+            "mekaniskt förband": 0,
+            "slagskepp": 0,
+            "transportskepp": 0,
+            "trupp": 35 ,
+            "tung tank": 12,
+            "ubåt": 0
+          } 
+        },
+
+        "Samuel": {
+          "Resurser": {
+            "djur": 16 ,
+            "olja": 23 ,
+            "sten": 21 ,
+            "säd": 12 ,
+            "trä": 14
+          } ,
+          "Byggnader": {
+            "bro": 0,
+            "by": 1,
+            "fabrik": 0,
+            "flygplats": 1,
+            "hamn": 0,
+            "oljerigg": 0,
+            "stad": 1 ,
+            "universitet": 1,
+            "väg": 1
+          } ,
+          "Infanteri": {
+            "artilleri": 0,
+            "bombplan": 1,
+            "jaktplan": 1 ,
+            "lätt tank": 57,
+            "mekaniskt förband": 0,
+            "slagskepp": 2,
+            "transportskepp": 0,
+            "trupp": 5 ,
+            "tung tank": 1,
+            "ubåt": 0
+          } 
+        },
+
+        "Hannes": {
+          "Resurser": {
+            "djur": 12 ,
+            "olja": 5 ,
+            "sten": 7 ,
+            "säd": 9 ,
+            "trä": 11
+          } ,
+          "Byggnader": {
+            "bro": 0,
+            "by": 1,
+            "fabrik": 1,
+            "flygplats": 1,
+            "hamn": 3,
+            "oljerigg": 1,
+            "stad": 1 ,
+            "universitet": 1,
+            "väg": 1
+          } ,
+          "Infanteri": {
+            "artilleri": 0,
+            "bombplan": 0,
+            "jaktplan": 1 ,
+            "lätt tank": 38,
+            "mekaniskt förband": 0,
+            "slagskepp": 0,
+            "transportskepp": 0,
+            "trupp": 3 ,
+            "tung tank": 0,
+            "ubåt": 0
+          } 
+        },
+
+        "Simon": {
+          "Resurser": {
+            "djur": 21 ,
+            "olja": 20 ,
+            "sten": 15 ,
+            "säd": 10 ,
+            "trä": 20
+          } ,
+          "Byggnader": {
+            "bro": 0,
+            "by": 1,
+            "fabrik": 12,
+            "flygplats": 1,
+            "hamn": 1,
+            "oljerigg": 1,
+            "stad": 1 ,
+            "universitet": 1,
+            "väg": 1
+          } ,
+          "Infanteri": {
+            "artilleri": 0,
+            "bombplan": 0,
+            "jaktplan": 1 ,
+            "lätt tank": 34,
+            "mekaniskt förband": 0,
+            "slagskepp": 0,
+            "transportskepp": 0,
+            "trupp": 3 ,
+            "tung tank": 0,
+            "ubåt": 0
+          }
+        }
+      };
+
+      $scope.players_summa={};
+      for(p in $scope.players_all){
+        $scope.players_summa[p]={};
+        for(u in $scope.players_all[p]){
+          $scope.players_summa[p][u]=0;
+          for(i in $scope.players_all[p][u]){
+            $scope.players_summa[p][u] += $scope.players_all[p][u][i];
+          }
+        }
+      }
+      $scope.totalt={
+        "Resurser": 0,
+        "Infanteri": 0,
+        "Byggnader": 0
+      };
+      $scope.max={
+        "Resurser": 50,
+        "Infanteri": 20,
+        "Byggnader": 5
+      };
+      for(p in $scope.players_summa){
+        for(u in $scope.players_summa[p]){
+          $scope.totalt[u] += $scope.players_summa[p][u];
+          if($scope.max[u] < $scope.players_summa[p][u]){$scope.max[u] = $scope.players_summa[p][u];}
+        }
+      }
+      console.log($scope.max);
+
+      $scope.procent = function (player, i) {
+        return Math.floor($scope.players_summa[player][i]/$scope.totalt[i]*100);
+      }
+      $scope.stapeltoggle =true;
+      $scope.stapeltogglef = function () {
+        $scope.stapeltoggle =!$scope.stapeltoggle;
+      }
+      
+
+
+      $scope.dialogbox = function () {
+        var d=Date.now();
+        var dice1 = (7*$scope.d-25);
+        var dice2 = (-($scope.d*7+5));
+        if($scope.d==3 || $scope.d==4 || $scope.d==6 || $scope.d==7 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d1_1 = '';}else{var d1_1 = 'hide';}
+        if($scope.d==5 || $scope.d==6 || $scope.d==8 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d1_2 = '';}else{var d1_2 = 'hide';}
+        if($scope.d==5 || $scope.d==6 || $scope.d==8 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d1_3 = '';}else{var d1_3 = 'hide';}
+        if($scope.d==3 || $scope.d==4 || $scope.d==6 || $scope.d==7 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d1_4 = '';}else{var d1_4 = 'hide';}
+        if($scope.d==2 || $scope.d==7 || $scope.d==10){var d1_5 = '';}else{var d1_5 = 'hide';}
+        if($scope.d==9 || $scope.d==11 || $scope.d==12){var d1_6 = '';}else{var d1_6 = 'hide';}
+        if($scope.d==9 || $scope.d==11 || $scope.d==12){var d1_7 = '';}else{var d1_7 = 'hide';}
+
+        if($scope.d==5 || $scope.d==6 || $scope.d==7|| $scope.d==8 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d2_1 = '';}else{var d2_1 = 'hide';}
+        if($scope.d==4 || $scope.d==7|| $scope.d==8 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d2_2 = '';}else{var d2_2 = 'hide';}
+        if($scope.d==4 || $scope.d==7|| $scope.d==8 || $scope.d==9 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d2_3 = '';}else{var d2_3 = 'hide';}
+        if($scope.d==5 || $scope.d==6 || $scope.d==7|| $scope.d==8 || $scope.d==10 || $scope.d==11 || $scope.d==12){var d2_4 = '';}else{var d2_4 = 'hide';}
+        if($scope.d==2 || $scope.d==3 || $scope.d==5 || $scope.d==9 || $scope.d==10 || $scope.d==11){var d2_5 = '';}else{var d2_5 = 'hide';}
+        if($scope.d==8 || $scope.d==12){var d2_6 = '';}else{var d2_6 = 'hide';}
+        if($scope.d==8 || $scope.d==12){var d2_7 = '';}else{var d2_7 = 'hide';}
+        console.log(d1_1);
+        bootbox.dialog({
+          message: 'Du har fått...',
+          title: '<h1 style="display:inline-block; margin:0px 5px;">'+$scope.d+'</h1>'+'<div style="display:inline-block;"><div class="dice" style="-webkit-transform: rotate('+dice1+'deg);"><div class="'+d1_1+'" style="left: 8px; top: 8px;"></div><div class="'+d1_2+'" style="left: 32px; top: 8px;"></div><div class="'+d1_3+'" style="left: 8px; top: 32px;"></div><div class="'+d1_4+'" style="left: 32px; top: 32px;"></div><div class="'+d1_5+'" style="left: 20px; top: 20px;"></div><div class="'+d1_6+'" style="left: 8px; top: 20px;"></div><div class="'+d1_7+'" style="left: 32px; top: 20px;"></div></div><div class="dice" style="-webkit-transform: rotate('+dice2+'deg);"><div class="'+d2_1+'" style="left: 8px; top: 8px;"></div><div class="'+d2_2+'" style="left: 32px; top: 8px;"></div><div class="'+d2_3+'" style="left: 8px; top: 32px;"></div><div class="'+d2_4+'" style="left: 32px; top: 32px;"></div><div class="'+d2_5+'" style="left: 20px; top: 20px;"></div><div class="'+d2_6+'" style="left: 8px; top: 20px;"></div><div class="'+d2_7+'" style="left: 32px; top: 20px;"></div></div></div>',
+          buttons: {
+            success: {
+              label: "Okej",
+              className: "btn-success",
+              callback: function() {
+                console.log("great success");
+              }
+            }
+          }
+        });
+        console.log('Loading dialogbox: '+(Date.now()-d)+'ms');
+      }
+/*
+      $http.get('db/settrisk/games/all').success(function(data){
+        console.log(data);
+        var tmparr=[];
+        for(var i=0;i<data.length;i++){tmparr[data[i].index] = data[i];}
+        $scope.games=tmparr;
+        console.log($scope);
+      });
+
+      $http.get('db/settrisk/events/all').success(function(data){
+        console.log(data);
+        $scope.events=data;
+        console.log($scope);
+      });
+
+      $http.get('db/settrisk/events/summa').success(function(data){
+        //console.log(data);
+        var tmparr=[];
+        for(var i=0;i<data.length;i++){tmparr[i] = data[i].summa;}
+        //$scope.utdelning.summa=tmparr;
+        $scope.utdelning.summa=[];
+        $scope.utdelning.totalt=0;
+        $scope.utdelning.turer=0;
+        //console.log('$scope.utdelning.summa=[];');
+        var typer = Object.keys(tmparr[0]);
+        for(res in typer){
+            //console.log('var '+typer[res]+' = [];');
+            eval('var '+typer[res]+' = [];');
+        }
+        for(tur in tmparr){
+          $scope.utdelning.summa[tur]=0;
+          //console.log('$scope.utdelning.summa['+tur+']=0;')
+          for(res in typer){
+            eval(typer[res]+'['+tur+'] = tmparr['+tur+'].'+typer[res]+';');
+            //console.log(typer[res]+'['+tur+'] = tmparr['+tur+'].'+typer[res]+';');
+            var txt = '$scope.utdelning.summa['+tur+'] += '+eval(typer[res]+'['+tur+'];')+';';
+            eval(txt);
+            //console.log(txt);
+            //console.log($scope.utdelning.summa[tur]);
+          }
+          $scope.utdelning.totalt += $scope.utdelning.summa[tur];
+          $scope.utdelning.turer +=1;
+        }
+        for(res in typer){
+            eval('$scope.utdelning.'+typer[res]+' = '+typer[res]+';');
+            //console.log('$scope.utdelning.'+typer[res]+' = '+typer[res]+';');
+          }
+        console.log($scope);
+      });
+      //for(p in $scope.players){var player= $scope.players[p].name;}
+      $scope.utdelning ={};
+      $http.get('db/settrisk/events/Andreas').success(function(data){
+        console.log(data);
+        var tmparr=[];
+        for(var i=0;i<data.length;i++){tmparr[i] = data[i].Andreas;}
+        $scope.utdelning.Andreas=tmparr;
+        console.log($scope);
+      });
+      
+
+      $scope.startaTur = function () {
+        var p = Math.floor(Math.random()*$scope.players.length);
+        console.log($scope.players[p].name);
+
+        $http.post('/dintur',{game: 'game_<%=game %>', id: $scope.game.id, newplayer: $scope.players[p].name, player: 'bank'}).success(function(data) {
+              console.log(data);
+              //$scope.clearKorg('byggnader');
+            });
+      }*/console.log('Loading myApp: '+(Date.now()-d)+'ms');
+    });
+
+
+
+  </script>
+  <style>
+@import url(http://fonts.googleapis.com/css?family=Graduate);
+h1{font-family: 'Graduate', sans serif;}
+
+h1{font-size: 80px !important;}
+h2{font-size: 60px !important;margin:12px !important;}
+h3{font-size: 40px !important;vertical-align: middle !important;}
+.btn-lg span{font-size: 40px !important;}
+
+@media only screen and (min-width: 1000px) {
+  h1{font-size: 50px !important;}
+  h2{font-size: 20px !important;margin:7px !important;}
+  h3{font-size: 20px !important;}
+  .btn-lg{padding: 0px 12px !important;}
+  .btn-lg span{font-size: 20px !important;}
+}
+.glyphicon.spinning {
+    animation: spin 2s infinite linear;
+    -webkit-animation: spin2 2s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+.modal-dialog{  width: 90%; max-width: 1000px;}
+.container{width: 100%; max-width: 1200px;}
+.olja{background-color: rgb(119, 67, 67)}
+.sten{background-color: darkgray}
+.trä{background-color: rgb(120, 147, 53)}
+.djur{background-color: rgb(124, 202, 86)}
+.säd{background-color: #f0cd4e}
+
+.dice{display:inline-block;margin:-10px 5px;width: 50px;height: 50px;background-color: rgb(229, 229, 229);border-radius: 5px;}
+.dice>div{width:10px; height:10px; background-color:white; border-radius:100%; box-shadow: 2px 2px 6px 2px rgb(139, 139, 139) inset; position:absolute; }
+.stockmarket, .handelsekort{height:300;width:520;border-radius: 7px; background-color: whitesmoke; }
+
+  </style>
+</head>
+<body ng-app='myApp'>
+  <div style="display:none;">
+    <input id="players" value="<%= JSON.stringify(players) %>">
+  </div>
+  <div class='container' ng-controller='mainController'>
+    <div class="col-sm-12">
+      <h1 class='col-sm-6'>{{game.name}}</h1>
+      <div class='col-sm-6' id="tärningar" style="text-align: right;">
+        <h1 style="display:inline-block; margin: 15px 5px 15px 5px;">{{d}}</h1>
+        <div class="dice" style="-webkit-transform: rotate({{7*d-25}}deg);">
+          <div style="left: 8px; top: 8px;" ng-show="d==3 || d==4 || d==6 || d==7 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 32px; top: 8px;" ng-show="d==5 || d==6 || d==8 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 8px; top: 32px;" ng-show="d==5 || d==6 || d==8 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 32px; top: 32px;" ng-show="d==3 || d==4 || d==6 || d==7 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 20px; top: 20px;" ng-show="d==2 || d==7 || d==10"></div>
+          <div style="left: 8px; top: 20px;" ng-show="d==9 || d==11 || d==12"></div>
+          <div style="left: 32px; top: 20px;" ng-show="d==9 || d==11 || d==12"></div>
+        </div>
+        <div class="dice" style="-webkit-transform: rotate(-{{d*7+5}}deg);">
+          <div style="left: 8px; top: 8px;" ng-show="d==5 || d==6 || d==7|| d==8 || d==10 || d==11 || d==12"></div>
+          <div style="left: 32px; top: 8px;" ng-show="d==4 || d==7|| d==8 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 8px; top: 32px;" ng-show="d==4 || d==7|| d==8 || d==9 || d==10 || d==11 || d==12"></div>
+          <div style="left: 32px; top: 32px;" ng-show="d==5 || d==6 || d==7|| d==8 || d==10 || d==11 || d==12"></div>
+          <div style="left: 20px; top: 20px;" ng-show="d==2 || d==3 || d==5 || d==9 || d==10 || d==11"></div>
+          <div style="left: 8px; top: 20px;" ng-show="d==8 || d==12"></div>
+          <div style="left: 32px; top: 20px;" ng-show="d==8 || d==12"></div>
+        </div>
+      </div>
+    </div>
+    <div id="vänsterspalt" class="col-sm-6">
+      <svg height="300" width="520" class="stockmarket">
+        <polyline points="0,200 525,200 525,300 0,300" style="fill:rgb(237, 237, 237);stroke-width:" />
+        <polyline ng-repeat="val in [1,2,3,4,5,6,7,8,9,10,11,12,13,14]" points="0,{{val*20}} 525,{{val*20}} " style="stroke:rgb(228, 226, 226);stroke-width:1" />
+        <polyline ng-repeat="val in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]" points="{{val*20}},0 {{val*20}},300 " style="stroke:rgb(228, 226, 226);stroke-width:1" />
+        <polyline ng-repeat="(res, points) in stock.coord_txt" points="{{points}}" style="fill:none;stroke:{{stock.color[res]}};stroke-width:3" />
+        <g ng-repeat="(res, pos) in stock.tag">
+          <path transform="matrix(1 0 0 1 {{pos[0]-2.33}} {{pos[1]-2.33}})" data="Obs! Ska transformeras -2.33 -2.33 från akuell punkt!" fill="darkgray" d="M36.767,20.69L17.132,0.888C16.568,0.319,15.802,0,15.001,0H3C1.343,0,0,1.343,0,3v12c0,0.794,0.315,1.557,0.876,2.119l19.678,19.719c0.586,0.587,1.354,0.881,2.124,0.881c0.766,0,1.532-0.292,2.118-0.875l11.959-11.917C37.926,23.76,37.932,21.864,36.767,20.69z M5.257,7.547c-1.22,0-2.208-0.989-2.208-2.208S4.037,3.13,5.257,3.13s2.208,0.989,2.208,2.208S6.477,7.547,5.257,7.547z"/>
+        </g>
+        <text ng-repeat="(res, pos) in stock.tag" transform="matrix(0.7071 0.7071 -0.7071 0.7071 {{pos[0]+3.2208}} {{pos[1]+9.2906}})" data="Obs! Ska transformeras +3.2208 +9.2906 från akuell punkt!" fill="#FFFFFF" font-family="'MyriadPro-Regular'" font-size="16">{{res}}</text>
+        
+        
+        
+        Sorry, your browser does not support inline SVG.
+      </svg>
+      <div style="display:block">
+        <div ng-repeat="(res, val) in stock.derivata_triangle" style="display:inline-block; margin:0 3px;" >
+          <h4> {{res}} <span class="glyphicon glyphicon-triangle-{{val[0]}}" style="color:{{val[1]}};">{{stock.derivata[res][0]}}</span></h2>
+        </div>
+      </div>
+      <div style="display:none">
+        <div ng-repeat="(res, value) in games[0].resurser">
+            {{res}}: {{utdelning[res]}} 
+            <span ng-repeat="i in [0,1]">
+               {{utdelning[res][i]/50*100}}%
+               {{(utdelning[res][i]/utdelning.turer*50)-(50/3)}}%
+            </span>
+          </div>
+        Summa: {{utdelning.summa}} </br>
+        Totalt: {{utdelning.totalt}}</br>
+        Turer: {{utdelning.turer}}</br>
+      </div>
+      <div id="stapeldiagram_spelare" ng-show="stapeltoggle" style="-webkit-transform: rotate(-90deg); -webkit-transform-origin: 45% 45%; width:400px; height: 400px;" >
+        <div ng-repeat="(player, obj) in players_summa">
+          <h2 style="-webkit-transform: rotate(90deg); -webkit-transform-origin: -5% 40%; font-family:'Graduate'">{{player}}</h2>
+          <div class="progress" ng-repeat="(i, val) in {'Resurser':90,'Infanteri':100,'Byggnader':110}" style="height:30px; width:350px; margin-bottom: 0px;">
+            <div class="progress-bar progress-bar-{{players[player].color}}" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: {{players_summa[player][i]/max[i]*90}}%; height:100%; -webkit-filter: brightness({{val}}%);">
+              <span><h5>{{i}} {{procent(player,i)}}%</h5></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="stapeldiagram_enheter" ng-hide="stapeltoggle" style="-webkit-transform: rotate(-90deg); -webkit-transform-origin: 45% 45%; width:400px; height: 400px;" >
+        <div ng-repeat="(i, val) in {'Resurser':100,'Infanteri':100,'Byggnader':100}">
+          <h2 style="-webkit-transform: rotate(90deg); -webkit-transform-origin: -5% 40%; font-family:'Graduate'">{{i}}</h2>
+          <div class="progress" ng-repeat="(player, obj) in players_summa" style="height:30px; width:350px; margin-bottom: 0px;">
+            <div class="progress-bar progress-bar-{{players[player].color}}" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: {{players_summa[player][i]/max[i]*90}}%; height:100%; -webkit-filter: brightness({{val}}%);">
+              <span><h5>{{player}} {{procent(player,i)}}%</h5></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-success" ng-click="stapeltogglef()" ng-show="true"><h2>Sortera <span class="glyphicon glyphicon-stats"></span></h2></button>
+      <button class="btn btn-success" ng-click="startaTur()" ng-show="false"><h2>Starta omgång!</h2></button>
+      <button class="btn btn-success" ng-click="dialogbox()" ng-show="true"><h2>Dialog test</h2></button>
+    </div>
+    <div id="högerspalt" class="col-sm-6" >
+      <div class="handelsekort" style="height:300;padding:30px;">
+        <h4 style="font-family:'Graduate'; font-size: 33px; margin: 0;display:inline-block;"><span class="glyphicon glyphicon-time" style="color:#d9534f;"></span> Händelsekort:</h4><h1 style="display:inline-block;"></h1>
+        <h2>Här ska det stå en förklaring till händelsen. Tex kanske det kan stå att det nu råder torka och alla åkrar ger 50% av normal avkastning.</h2>
+      </div>
+    </div>
+  </div>
+</body>

@@ -1,0 +1,10 @@
+tru	1	
+mtr		
+ltk		
+ttk		
+art	1	
+bpl		
+jpl		
+ubt		
+sbt		
+tbt		

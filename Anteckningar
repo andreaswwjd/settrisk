@@ -1,0 +1,113 @@
+***** SERVER *****
+INSTALLERA Node.js
+$ node --version
+
+Gå till directory, starta igång
+$ npm init
+
+Installera express
+$ npm install --save express
+
+Kolla så det ser bra ut:
+$ cat package.js
+
+
+
+
+Skapa server.js:
+	var express = require('express'),
+	    app 0 express();
+
+	app.get('/', function(req, res) {
+	    res.send('hello');
+	});
+
+	app.listen(3000, function(){
+	    console.log('Listening on port 3000');
+	})
+
+
+Starta server:
+$ node server.js
+
+HTTP web browser:
+http://localhost:3000/
+
+
+
+
+
+
+
+
+***** DATABASE *****
+INSTALLERA rethinkdb
+$ brew update && brew install rethinkdb
+eller
+$ brew install rethinkdb
+
+
+Starta rethinkdb
+$ rethinkdb
+
+Browser:
+http://localhost:8080/
+
+Connect to db
+var connection = null;
+r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
+    if (err) throw err;
+    connection = conn;
+})
+
+
+
+
+
+
+
+
+***** PUSHER *****
+SERVER: Node.js server.js
+	var Pusher = require('pusher');
+
+	var pusher = new Pusher({
+	  appId: '129524',
+	  key: '49150bc81042dacfac7d',
+	  secret: '62abcbeb19f142a64291',
+	  encrypted: true
+	});
+	pusher.port = 443;
+
+	pusher.trigger('test_channel', 'my_event', {
+	  "message": "hello world"
+	});	
+
+
+CLIENT: html: index.html
+	<!DOCTYPE html>
+	<head>
+	  <title>Pusher Test</title>
+	  <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
+	  <script>
+	    // Enable pusher logging - don't include this in production
+	    Pusher.log = function(message) {
+	      if (window.console && window.console.log) {
+	        window.console.log(message);
+	      }
+	    };
+
+	    var pusher = new Pusher('49150bc81042dacfac7d', {
+	      encrypted: true
+	    });
+	    var channel = pusher.subscribe('test_channel');
+	    channel.bind('my_event', function(data) {
+	      alert(data.message);
+	    });
+	  </script>
+	</head>
+
+
+
+
+
