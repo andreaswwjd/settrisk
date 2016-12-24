@@ -45,18 +45,22 @@ connect_to_rethinkdb();
 var games = [];
 //node.js server http requests
 app.get('/', function(req, res) {
-	if(req.session.user ){
-		res.render('index', {user: req.session.user});
-	} 
-	if(!req.session.user){
-		r.db('main').table('games').run(connection, function(err, cursor){
-			if(!err){
-				cursor.toArray(function(err, array){
-					games = array;
-					res.render('index', {user: {}, games: array});
-				})
-			}else{console.log(err)}
-		})
+	if(connection){
+		if(req.session.user ){
+			res.render('index', {user: req.session.user});
+		} 
+		if(!req.session.user){
+			r.db('main').table('games').run(connection, function(err, cursor){
+				if(!err){
+					cursor.toArray(function(err, array){
+						games = array;
+						res.render('index', {user: {}, games: array});
+					})
+				}else{console.log(err)}
+			})
+		}
+	} else {
+		res.render('404');
 	}
 });
 app.get('/logout', function(req, res) {
