@@ -404,25 +404,25 @@ io.sockets.on('connection', function(socket){
 				})
 			} else {console.log(err)}
 		})
-		console.log('Setting listener: '+socket.user.username+' events');
-		r.db(socket.user.game).table( 'events' ).changes().run(connection, function(err, cursor){
-			if(!err){
-				cursor.each(function(err){
-					r.db(socket.user.game).table( 'events' ).orderBy({index: r.desc('time')}).limit(7).run(connection, function(err, cursor){
-						if(!err){
-							cursor.toArray(function(err, data){
-								// console.log(datana);
-								console.log('last dice set:')
-								console.log(data[0]);
-								socket.lastdice = data[0];
-								socket.emit('notify',{note: socket.lastdice.username+' kastade '+socket.lastdice.dices+'.', lines: 1});
-								socket.emit( 'events' , data);
-							});
-						} else {console.log(err)}
-					})		
-				})
-			} else {console.log(err)}
-		})
+		// console.log('Setting listener: '+socket.user.username+' events');
+		// r.db(socket.user.game).table( 'events' ).changes().limit(7).run(connection, function(err, cursor){
+		// 	if(!err){
+		// 		cursor.each(function(err){
+		// 			r.db(socket.user.game).table( 'events' ).orderBy({index: r.desc('time')}).run(connection, function(err, cursor){
+		// 				if(!err){
+		// 					cursor.toArray(function(err, data){
+		// 						// console.log(datana);
+		// 						console.log('last dice set:')
+		// 						console.log(data[0]);
+		// 						socket.lastdice = data[0];
+		// 						socket.emit('notify',{note: socket.lastdice.username+' kastade '+socket.lastdice.dices+'.', lines: 1});
+		// 						socket.emit( 'events' , data);
+		// 					});
+		// 				} else {console.log(err)}
+		// 			})		
+		// 		})
+		// 	} else {console.log(err)}
+		// })
 
 		// Add listeners
 
@@ -604,17 +604,26 @@ io.sockets.on('connection', function(socket){
 
 	socket.on('buy_byggnad', function(item){
 		console.log(item);
-		keys = Object.keys(socket.user.priser.byggnader[item])
+		keys = Object.keys(socket.user.priser.byggnader[item]);
 		keys.map(function(res){
-			if(socket.user.resurser[res][0]){
+			if(socket.user.resurser[res].length >= socket.user.priser.byggnader[item][res].length){
 				socket.user.priser.byggnader[item][res].map(function(){
 					socket.user.resurser[res].pop();
 				})
 			}else{
-				getTable('resurser')
-				socket.emit('notify',{note: 'Tyvärr, du har inte råd!', lines: 1})
+				getTable('resurser');
+				socket.emit('notify',{note: 'Tyvärr, du har inte råd!', lines: 1});
 				return
 			}
+			// if(socket.user.resurser[res][0]){
+			// 	socket.user.priser.byggnader[item][res].map(function(){
+			// 		socket.user.resurser[res].pop();
+			// 	})
+			// }else{
+			// 	getTable('resurser')
+			// 	socket.emit('notify',{note: 'Tyvärr, du har inte råd!', lines: 1})
+			// 	return
+			// }
 		})
 		// var query = 'r.db("'+socket.user.game+'").table("byggnader").filter({username: "'+socket.user.username+'"}).update({byggnader: r.row.getField("byggnader").append({time: r.now(), player:"'+socket.user.username+'", type:"'+item+'", nation: false, marker:[] }) }).run(connection, function(err){console.log(err)})';
 		// var query = 'r.db("'+socket.user.game+'").table("byggnader").insert({time: r.now(), username:"'+socket.user.username+'", type:"'+item+'", nation: false, marker:[] }).run(connection, function(err){console.log(err)})';
@@ -623,7 +632,7 @@ io.sockets.on('connection', function(socket){
 			stad: [1,2],
 			fabrik: [1,2,3]
 		};
-		var utdelning = socket.user.utdelning;
+		//var utdelning = socket.user.utdelning;
 		var utd = [];
 		utdelning[item] ? utd = utdelning[item] : 'pass' ;
 		r.db(socket.user.game).table("byggnader").insert({time: r.now(), username: socket.user.username, type: item, nation: false, marker:[{mark: "", nr: "?", value: "?"}], utdelning: utd }).run(connection, function(err){

@@ -147,8 +147,9 @@ function Item(options) {
     if(self.type == 'infanteri'){
       socket.emit('buy_infanteri', self.item);
     }
-    if(self.type == 'byggnad'){
+    if(self.type == 'byggnader'){
       socket.emit('buy_byggnad', self.item);
+      console.log('self.ite3m');
     }
     self.empty();
   }
