@@ -1,186 +1,16 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
   <head>
     <meta charset="utf-8">
-    <title>Settrisk App</title>
+    <title>Settrisk Version 3.0</title>
     <meta http-equiv="cleartype" content="on">
     <meta name="MobileOptimized" content="320">
     <meta name="HandheldFriendly" content="True">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" > 
+    <script src="static/slideout.js"></script>
 
-    <link rel="apple-touch-icon-precomposed" href="img/Settrisk-icon-152x152-04.png">
-
-    <script src="js/angular.min.js"></script>
-    <script src="js/slideout.js"></script>
-    <script >
-var touch = {
-  'start': 'touchstart',
-  'move': 'touchmove',
-  'end': 'touchend'
-};
-
-
-function Resurs(options) {
-  this.movable = options.movable || false;
-  this.type = options.type || '';
-  this.x = options.left || 0;
-  this.y = options.top || 0;
-  this.dyrt = options.dyrt ? 'dyrt': '';
-
-  // Create resorce node element:
-  var r = document.createElement('div');
-  r.className = 'resurs '+this.dyrt;
-  r.style.left = this.x;
-  r.style.top = this.y;
-  r.innerHTML = '<div class="'+this.type+'"><svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100"><use xlink:href="#svg-'+this.type+'"></use></svg></div>';
-
-  this.node = r;
-
-  if(this.movable){
-    this._initTouchEvents();
-  }
-}
-
-Resurs.prototype._initTouchEvents = function() {
-  var self = this;
-  /**
-   * Resets values on touchstart
-   */
-  this._resetTouchFn = function(eve) {
-    if (typeof eve.touches === 'undefined') { return; }
-    slideout._touch = false;
-  };
-  this.node.addEventListener(touch.start, this._resetTouchFn);
-
-  /**
-   * Resets values on touchcancel
-   */
-  this._onTouchCancelFn = function() {
-    slideout._touch = true;
-  };
-  this.node.addEventListener('touchcancel', this._onTouchCancelFn);
-
-  /**
-   *  on touchend
-   */
-  this._onTouchEndFn = function(eve) {
-    slideout._touch = true;
-    self.x = eve.changedTouches[0].clientX-12.5+'px';
-    self.y = eve.changedTouches[0].clientY-12.5+'px';
-  };
-  this.node.addEventListener(touch.end, this._onTouchEndFn);
-
-  /**
-   * on touchmove
-   */
-  this._onTouchMoveFn = function(eve) {
-    var x = 0;
-    if ( slideout.isOpen2() ){ return }
-    if ( slideout.isOpen() ){ x = slideout._padding; } 
-    eve.stopPropagation();
-    eve.preventDefault();
-    self.node.style.top = eve.touches[0].clientY-12.5+'px';
-    self.node.style.left = eve.touches[0].clientX-12.5-x+'px';
-  };
-  this.node.addEventListener(touch.move, this._onTouchMoveFn);
-};
-      
-</script>
-
-
-
-
-<script >
-
-function Item(options) {
-  var self = this;
-
-  this.item = options.item;
-  this.cost = options.cost;
-  this.costkeys = Object.keys(options.cost); 
-  this.costNodes = options.costNodes;
-  this.button = options.button;
-  this.menu = options.menu;
-  this.buy_btn = this.menu.firstElementChild;
-  this.undo_btn = this.menu.lastElementChild;
-  this.korg = 0;
-  this.isAvailable = function(){ 
-    return !resurserKeys.map(function(resurs){
-      return self.cost[resurs].length <= resurser[resurs].length;
-    }).sort()[0];
-  }
-  this.button.onclick = function() {
-    korg.items.push(self.item);
-    self.costkeys.map(function(key) {
-      if(self.cost[key]){
-        self.cost[key].map(function(v,i,a){
-          var r = resurser[key].pop();
-          if(!korg[key]){korg[key]=[]}
-          resurser['i_'+key].push(r);
-          korg[key].push(r);
-          self.button.appendChild(r.node);
-          self.menu.style.marginLeft = 0;
-          r.node.style.top = 2.5+Math.random()*35+'px';
-          r.node.style.left = 2.5+Math.random()*35+'px';
-          self.korg++;
-          self.button.className += ' korg';
-          updateItems();
-        })
-      }
-    })
-  }
-  this.buy_btn.onclick = function() {
-    console.log('buy '+self.item);
-    self.menu.style.marginLeft = '-150px';
-    while(korg.items.indexOf(self.item)!=-1){
-      var item = korg.items.splice(korg.items.indexOf(self.item),1);
-      // Post buy item;
-      self.costkeys.map(function(key) {
-        self.cost[key].map(function(v,i,a){
-          var r = resurser['i_'+key].pop();
-          //resurser[key].push(r);
-          korg[key].pop();
-          self.button.removeChild(r.node);
-          self.menu.style.marginLeft = '-150px';
-          // r.node.style.top = r.y;
-          // r.node.style.left = r.x;
-          self.korg--;
-          self.button.className = self.button.className.replace(' korg','');
-          updateItems();
-        })
-      })
-    }
-  }
-  this.undo_btn.onclick = function() {
-    console.log('undo');
-    self.menu.style.marginLeft = '-150px';
-    while(korg.items.indexOf(self.item)!=-1){
-      korg.items.splice(korg.items.indexOf(self.item),1);
-      self.costkeys.map(function(key) {
-        self.cost[key].map(function(v,i,a){
-          var r = resurser['i_'+key].pop();
-          resurser[key].push(r);
-          korg[key].pop();
-          resurs_container.appendChild(r.node);
-          self.menu.style.marginLeft = '-150px';
-          r.node.style.top = r.y;
-          r.node.style.left = r.x;
-          self.korg--;
-          self.button.className = self.button.className.replace(' korg','');
-          updateItems();
-        })
-      })
-    }
-  }
-}
-      
-    </script>
-
-
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <!-- <div ng-include="'svg/svg-defs.svg'">  -->
-
+    
     <svg style="display: none;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
    width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
 <defs>
@@ -492,404 +322,82 @@ C85.827,47.66,64.263,29.09,64.263,29.09L34.453,71.155z"/>
 </defs>
 </svg>
 
-<!-- </div> --> 
-
   </head>
-  <body style=" height:100%;" ng-app="myApp">
+  <body>
+  	<context id="context"></context>
+    <!-- built files will be auto injected -->
+    <style type="text/css">
 
-    <header id="header" style="position:fixed; left:0px; top:0px; height:0px; width:100%; background: #34495e; z-index: 10; transition: 0.5s; overflow: hidden;">
-      <div id="note" style="bottom:0; position: absolute; width: 100%; display: flex; display: -webkit-flex; flex-wrap: wrap;
-    flex-direction: row;
-    align-items: stretch; justify-content: space-around;">
-      </div>
-    </header>
+  html {
+    position: fixed;
+    overflow: hidden;
+  }  
+	body {
+    position: fixed;
+    overflow: hidden;
+    scroll-behavior: none;
+	  width: 100%;
+	  height: 100%;
+	  margin: 0;
+	  padding: 0;
+	  /*font-family: 'Calibri', Verdana, Geneva, sans-serif;*/
+	  font-family: "Courier", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	  font-size: 14px;
+	  line-height: 1.42857143;
+	  color: #333;
+	  background-color: #F0D4AA;
+      text-align: center;
+	}
+  .context{
 
+  }
+	p, h1, h2, h3, h4, h5, h6 {
+	  font-family: 'Calibri', Verdana, Geneva, sans-serif;
+	  color: #fff;
+	}
+	h5 {color: black;}
+	p{
+	  font-size: 1.1em;
+	  margin: 3px;
+	}
 
-    <div id="nationsmenu" class="overlay hide" ng-controller="nationsOLController" style="height: 0px;"">
-      <div id="nation_content" class="inside" style="bottom:0; width:100%; position: relative; /*flex-direction: row;  flex-wrap: wrap;*/ justify-content: center;">
-        
-        <!-- BYGGNADER -->
-        <p style="margin:20px; width: 90%;">Byggnader</p>
-        <div id="byggnader_container" style="text-align: center; width: 100%;"></div>
-        <div ng-repeat="byggnad in byggnader" style="margin: 2px; text-align: center; display: inline-block; margin: 10px; /*display: flex; display: -webkit-flex; flex-direction: row;  flex-wrap: wrap;*/ justify-content: center;" ng-class="{active: byggnad.active}" ng-click="nation.select(byggnad)">
-          <!-- UPP  -->
-          <div style="display: inline-block;" ng-if="!byggnad.nation" ng-repeat="i in [0,1]" id="{{byggnad.id+i}}"  >
-            <div class="mark" ng-click="modal.set(byggnad.marker[i]); modal.open(byggnad.id+i, 0, 10, $event); modal.slide($event)" ng-if="byggnad.marker[i]">
-              <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100" ><use xlink:href="{{'#svg-'+byggnad.marker[i].mark}}"></use></svg>
-              <svg class="hexagon" version="1.1" x="0px" y="0px" width="60px" height="69.28px" viewBox="0 0 60 69.28">
-                <polygon fill="{{byggnad.marker[i].occupied ? '#e74c3c' : '#F0D5A7'; }}" points="0,17.18 30,-0.14 60,17.18 60,51.82 30,69.14 0,51.82 "/>
-                <text transform="matrix(1 0 0 1 30 44)" font-family="'Calibri'" font-size="27" text-anchor="left">{{byggnad.marker[i].nr}}</text>
-              </svg>
-            </div>
-            <div class="byggnad" ng-if="i==0" ng-click="modal.set(byggnad); modal.open(byggnad.id+i, 0, 5, $event); modal.slide($event)" style="left: 50px; bottom: 25px;">
-              <img ng-src="{{'img/'+byggnad.type+'.png'}}">
-            </div>
-          </div>
-          <div  style="width: 100%; height: 0px;" ></div>
-          <!-- NER -->
-          <div style="display: inline-block;" ng-if="!byggnad.nation" ng-repeat="i in [2]" id="{{byggnad.id+i}}" >
-            <div class="mark" ng-click="modal.set(byggnad.marker[i]); modal.open(byggnad.id+i, 0, 10, $event); modal.slide($event)" ng-if="byggnad.marker[i]">
-              <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100" ><use xlink:href="{{'#svg-'+byggnad.marker[i].mark}}"></use></svg>
-              <svg class="hexagon" version="1.1" x="0px" y="0px" width="60px" height="69.28px" viewBox="0 0 60 69.28">
-                <polygon fill="{{byggnad.marker[i].occupied ? '#e74c3c' : '#F0D5A7'; }}" points="0,17.18 30,-0.14 60,17.18 60,51.82 30,69.14 0,51.82 "/>
-                <text transform="matrix(1 0 0 1 30 44)" font-family="'Calibri'" font-size="27" text-anchor="left">{{byggnad.marker[i].nr}}</text>
-              </svg>
-            </div>
-          </div>
-          <div  style="width: 100%; height: 20px;" ></div>
-        </div>
+	button:focus {
+      border-color: #f1c40f;
+      color: white;
+      outline: none;
+      background-color: #f1c40f;
+    }
+	button.round_btn, button.big_btn {
+	  margin: 3px 0;
+      min-width: 38px;
+      color: white;
+      font-weight: 200;
+      opacity: 1;
+      font-size: large;
+      background-color: #f5cf38;
+    }
+    button.round_btn {
+      border: solid white 1px;
+      border-radius: 20px;
+      padding: 8px;
 
-        <!-- NATIONER -->
-        <div style="width: 90%; height: 70px; " >
-          <p style="width: 30%; display: inline-block;">Nationer</p>
-          <div style="width: 100%"></div>
-          <button ng-click="nation.toggle()" id="new_btn"><p>Markera</p></button>
-          <button ng-if="!modal.active" ng-disabled="nation.selection.length < 1" ng-click="nation.create()" id="new_btn"><p>Slå ihop</p></button>
-        </div>
-        <div style="width: 100%; height: 10px;"></div>
-        <div ng-repeat="nation in nationer" ng-click="modal.addNationMenu(nation)" style="width:100%; text-align: center; display: inline-block; margin: 10px; /*display: flex; display: -webkit-flex; flex-direction: row;  flex-wrap: wrap;*/ justify-content: center;">
-          <!-- UPP -->
-          <div style="display: inline-block;" ng-repeat="i in nation.range.upp" id="n{{nation.index}}upp{{i}}" >
-            <div class="mark" ng-click="modal.set(nation.marker.upp[i]); modal.open('n'+nation.index+'upp'+i, (31-(nation.range.upp.length/2)*62+i*62), 10); modal.slide($event)" >
-              <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100"><use xlink:href="{{'#svg-'+nation.marker.upp[i].mark}}"></use></svg>
-              <svg class="hexagon" style="{{nation.marker.upp[i]? 'opacity: 1;' : 'opacity: 0;' ;}}" version="1.1" x="0px" y="0px" width="60px" height="69.28px" viewBox="0 0 60 69.28">
-                <polygon fill="{{ nation.marker.upp[i].occupied ? '#e74c3c' : '#F0D5A7'; }}" points="0,17.18 30,-0.14 60,17.18 60,51.82 30,69.14 0,51.82 "/>
-                <text transform="matrix(1 0 0 1 30 44)" font-family="'Calibri'" font-size="27" text-anchor="left">{{nation.marker.upp[i].nr}}</text>
-              </svg>
-            </div>
-            <div class="byggnad" ng-repeat="byggnad in nation.byggnader.upp[i]" ng-click="modal.set(byggnad); 
-            modal.open('n'+nation.index+'upp'+i, ([0,31,31][byggnad.p-1]+31-(nation.range.upp.length/2)*62+i*62), [-40,-30,5][byggnad.p-1]); modal.slide($event)" ng-class="'pos_'+byggnad.p+'_upp'">
-              <img ng-show="byggnad" ng-src="{{'img/'+byggnad.type+'.png'}}">
-            </div>
-          </div>
-          <!-- EXTRA -->
-          <!-- <div  style=" width: 60px; margin: 1px;" ng-hide="(nation.range.upp.length+nation.range.ner.length)%2==1"></div> -->
-          <div  style="{{ nation.range.alla.length%2 ? 'display: none;' : 'display: inline-block; width: 60px; height: 69.28px;' ; }} "></div>
-          <div style="display: block; width: 100%; height: 0px; " ></div>
-          <!-- NER -->
-          <div style="display: inline-block; " ng-repeat="i in nation.range.ner" id="n{{nation.index}}ner{{i}}" >
-            <div style="position: relative;" class="mark" ng-click="modal.set(nation.marker.ner[i]); modal.open('n'+nation.index+'ner'+i, ((nation.range.alla.length+1)%2*31+31-(nation.range.ner.length/2)*62+i*62), 10); modal.slide($event) " >
-              <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100"><use xlink:href="{{'#svg-'+nation.marker.ner[i].mark}}"></use></svg>
-              <svg class="hexagon"  style="{{nation.marker.ner[i]? 'opacity: 1;' : 'opacity: 0;' ;}}" version="1.1" x="0px" y="0px" width="60px" height="69.28px" viewBox="0 0 60 69.28" >
-                <polygon fill="{{nation.marker.ner[i].occupied ? '#e74c3c' : '#F0D5A7'; }}" points="0,17.18 30,-0.14 60,17.18 60,51.82 30,69.14 0,51.82 "/>
-                <text transform="matrix(1 0 0 1 30 44)" font-family="'Calibri'" font-size="27" text-anchor="left">{{nation.marker.ner[i].nr}}</text>
-              </svg>
-              <div class="star" ng-if="nation.bonus && i == (nation.range.ner.length-1)">
-                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                   width="30px" height="30px" viewBox="0 0 30 30" enable-background="new 0 0 30 30" xml:space="preserve">
-                <path fill="#F1C40F" stroke="#c9a50e" stroke-width="2" stroke-miterlimit="10" d="M28.805,11.515
-                  c-0.059-0.181-0.216-0.313-0.403-0.34l-8.95-1.301l-4.003-8.11c-0.168-0.342-0.729-0.342-0.896,0l-4.003,8.11l-8.95,1.301
-                  c-0.188,0.027-0.345,0.159-0.404,0.34c-0.059,0.181-0.01,0.379,0.126,0.512l6.477,6.313L6.27,27.254
-                  c-0.032,0.188,0.045,0.378,0.199,0.489c0.154,0.112,0.359,0.128,0.527,0.038L15,23.572l8.006,4.209
-                  c0.073,0.039,0.152,0.058,0.232,0.058c0.104,0,0.207-0.032,0.294-0.096c0.154-0.111,0.231-0.301,0.199-0.489l-1.529-8.914
-                  l6.476-6.313C28.814,11.894,28.863,11.695,28.805,11.515z"/>
-                </svg>
-            </div>
-            <div class="byggnad" ng-repeat="byggnad in nation.byggnader.ner[i]" ng-click="modal.set(byggnad);
-            modal.open('n'+nation.index+'ner'+i, ([0,31,31][byggnad.p-1]+(nation.range.alla.length+1)%2*31+31-(nation.range.ner.length/2)*62+i*62), [20,5,-25][byggnad.p-1]); modal.slide($event)" ng-class="'pos_'+byggnad.p+'_ner'" >
-              <img ng-show="byggnad" ng-src="{{'img/'+byggnad.type+'.png'}}">
-              </div>
-            </div>
-          </div>
-          
-          <div style="display: inline-block;width: 100%; height: 20px;" ></div>
-        </div>
-
-        <div id="modal_hidingplace" style="opacity: 0; pointer-events: none;">
-          <div id="modal" style="z-index: 10;">
-            <div id="modal_arrow" ></div>
-            <div id="modal_content">
-              <p ng-repeat="item in modal.menu" ng-click="modal.trigger(item); " >{{item.title}}</p>
-              <div style="width:85%; height: 1px; background: lightgray; margin-left: 7.5%;"></div>
-              <p ng-click="modal.close()" >Close</p>
-            </div>
-          </div>
-        </div>
-
-        <div id="nations_margin_bottom" style="width: 90%; height: 70px; " ></div>
-      </div>
-    </div>
-
-
-    <div id="trademenu" class="" style="position:fixed; left:0px; top:0px; height:0%; width:100%; z-index: 2; transition: 0.5s; overflow: hidden; background: radial-gradient(at 40% 0%, rgb(70, 173, 201), rgb(57, 148, 175));"ng-controller="tradeOLController">
-      <div id="trade" style="bottom:0; width:100%; position: absolute; /*display: flex; display: -webkit-flex;  flex-direction: row;  flex-wrap: wrap;*/ justify-content: center; text-align: center;">
-        <svg onclick="close_all_menues(trademenu); trademenu.toggle()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-          <use xlink:href="#svg-hands"></use>
-        </svg>
-        <div style="width: 100%; height: 25px; /*display: flex; display: -webkit-flex; flex-direction: row; flex-wrap: wrap;*/ justify-content: center;">
-          <!-- <div ng-repeat="res in trade.korg" class="resurs"><div class="{{res.type}}">
-            <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100" ><use xlink:href="{{'#svg-'+res.type}}"></use></svg>
-          </div></div> -->
-          <div id="trade_container" style="/*display: flex;*/display: inline-block;"></div>
-          <div ng-click="trade.del()" class="resurs" style="display: inline-block;" ><div style="float: right; opacity: {{trade.korg[0] ? 1 : 0;}}; margin-left: {{trade.korg[0] ? '0px' : '-25px';}}; transition: 0.2s cubic-bezier(0, 0, 0.12, 1); color: black; background: rgb(62, 158, 186); text-align: center; box-shadow: 0px 0px 1px 0px black inset">x</div></div>
-        </div>
-        <div style="width: 100%; height: 20px;"></div>
-        <!-- Resurs buttons -->
-        <button ng-repeat="resurs in resurserKeys" class="res shadow_blue txtshadow {{resurs}}" ng-click="trade.add(resurs)" ng-disabled="!resurser[resurs][0]"> {{resurs}} </button>
-        <div class="" style="width: 100%; height: 20px;"></div>
-        <!-- To buttons -->
-        <button ng-repeat="player in players" ng-disabled="trade.korg.length < 1" ng-click="trade.send(player.player)" class="player shadow_blue txtshadow"><p>{{player.player}}</p></button>
-        <button ng-disabled="trade.isTradable()" ng-click="trade.tradeWithBank()" class="player shadow_blue txtshadow"><p>Bank</p></button>
-        <div id="trade_margin_bottom" style="width: 100%; height: 70px;" ></div>
-
-      </div>
-    </div>
-
-    
-
-
-    <div id="eventsmenu" ng-controller="eventController" style="position:fixed; left:0px; top:0px; height:0%; width:100%; background: radial-gradient(at 40% 0%, #e74c3c, #a82d27) 0% 0% repeat scroll transparent; z-index: 2; transition: 0.5s; box-shadow: 0 2px 2px rgba(0, 0, 0, 0.45); overflow: hidden;opacity: 0.9"> 
-      <div id="event" style="bottom:0; position: absolute; width: 100%; text-align: center;">
-        <div id="dxy" class="resurs" style="position: absolute; top: -200px; left: 100px;">
-          <div class="trä">
-            <svg width="25px" height="25px" viewBox="0 0 100 100" ><use xlink:href="#svg-trä"></use></svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="menu" style="background: transparent radial-gradient(at top left, rgb(249, 236, 210), #F0D4AA) repeat scroll 0% 0%; /*z-index:1;*/" ng-controller="priserSlideoutController">
-      <div style="height: 30px"></div>
-      <div id="items_container"></div>
-      <div style="height: 60px"></div>
-    </div>
-
-    <main id="panel" onclick="slideout.close(); " style="box-shadow: -3px 0 23px rgba(0, 0, 0, 0.25); " ng-controller="mainboardOLController">
-      <div id="resurs_container" style="width:100%; height:100%; margin-left:0px; position: relative; background: radial-gradient(at top 20% left 20%, rgb(255, 244, 223), rgb(255, 229, 181))" >
-        <div id="itemsmenu_container" style="position: absolute;  z-index:1; overflow: hidden; transition: left 0.3s; padding: 0 5px;">
-          <div style="height: 30px"></div>
-        </div>
-        <div class="resurs_staplar">
-          <div class="stapel" ng-repeat="resurs in resurserKeys">
-            <svg class="" width="25px" height="25px" viewBox="0 0 100 100" ><use xlink:href="{{'#svg-'+resurs}}"></use></svg>
-            <h5>{{ resurser[resurs].length + resurser['i_'+resurs].length + resurser['t_'+resurs].length }}</h5>
-          </div>
-        </div>
-      </div>
-    </main>
-    
-    
-    <footer style="position:fixed; left:0px; bottom:0px; height:50px; width:100%; background: #F0D4AA; z-index: 2; display: flex; 
-  flex-wrap: wrap; flex-direction: row; align-items: center; justify-content: space-around;">
-      <div class="spacer"></div>
-      <svg class="icon" version="1.1" onclick="close_all_menues(); slideout.toggle(); " id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-        <use xlink:href="#svg-dollar"></use>
-      </svg>
-      <svg class="icon" onclick="close_all_menues(trademenu); trademenu.toggle()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-        <use xlink:href="#svg-hands"></use>
-      </svg>
-      <svg class="icon" onclick="close_all_menues(nationsmenu); nationsmenu.toggle()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-   width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-        <use xlink:href="#svg-flag"></use>
-      </svg>
-      <svg class="icon" onclick="close_all_menues(eventsmenu); eventsmenu.toggle(); dintur_slide.style.height = '100%';" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-   width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-        <use xlink:href="#svg-eventcard"></use>
-      </svg>
-      <div class="spacer"></div>
-    </footer>
-
-
-    <div id="dintur_slide" ng-controller="dinturController" style="position:fixed; left:0px; top:0px; height:0%; width:100%; background: radial-gradient(at 40% 0%, #e74c3c, #a82d27) 0% 0% repeat scroll transparent; z-index: 20; transition: 0.5s; box-shadow: 0 2px 2px rgba(0, 0, 0, 0.45); overflow: hidden;opacity: 1"> 
-      <div style="bottom:0; position: absolute; width: 100%; text-align: center;">
-        <div style="margin-bottom: 100px;">
-          <h1>Din tur!</h1>
-        </div>
-        <div id="dices" ng-click="rollDices()" style="margin-bottom: 20px;">
-          <!-- <h1 style="display:inline-block; margin: 15px 5px 15px 5px;">{{d}}</h1> -->
-          <div id="dice_1" class="dice" style="-webkit-transform: rotate({{7*d-25}}deg);">
-            <div style="left: 8px; top: 8px;" ng-show="d==3 || d==4 || d==6 || d==7 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 32px; top: 8px;" ng-show="d==5 || d==6 || d==8 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 8px; top: 32px;" ng-show="d==5 || d==6 || d==8 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 32px; top: 32px;" ng-show="d==3 || d==4 || d==6 || d==7 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 20px; top: 20px;" ng-show="d==2 || d==7 || d==10"></div>
-            <div style="left: 8px; top: 20px;" ng-show="d==9 || d==11 || d==12"></div>
-            <div style="left: 32px; top: 20px;" ng-show="d==9 || d==11 || d==12"></div>
-          </div>
-          <div id="dice_2" class="dice" style="-webkit-transform: rotate(-{{d*7+5}}deg);">
-            <div style="left: 8px; top: 8px;" ng-show="d==5 || d==6 || d==7|| d==8 || d==10 || d==11 || d==12"></div>
-            <div style="left: 32px; top: 8px;" ng-show="d==4 || d==7|| d==8 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 8px; top: 32px;" ng-show="d==4 || d==7|| d==8 || d==9 || d==10 || d==11 || d==12"></div>
-            <div style="left: 32px; top: 32px;" ng-show="d==5 || d==6 || d==7|| d==8 || d==10 || d==11 || d==12"></div>
-            <div style="left: 20px; top: 20px;" ng-show="d==2 || d==3 || d==5 || d==9 || d==10 || d==11"></div>
-            <div style="left: 8px; top: 20px;" ng-show="d==8 || d==12"></div>
-            <div style="left: 32px; top: 20px;" ng-show="d==8 || d==12"></div>
-          </div>
-        </div>
-        <div id="du_fick" style="height: 30px; width: 100%; transition: 1s; overflow: hidden; margin-bottom: 30px; opacity: 1;">
-          <p>Slå tärningarna</p>
-        </div>
-        <div id="turer" style="height: 0px; width: 100%; transition: 1s; overflow: hidden;">
-          <p>Du har 3 drag, vad vill du göra?</p>
-          <button id="armedrag" class="drag btn">Armedrag</button>
-          <button id="forska" class="drag btn">Forska</button>
-          <button id="kort" class="drag btn">Spela kort</button>
-          <div ng-repeat="dr in drag">{{dr.drag}}</div>
-        </div>
-        <div style="height: 130px; width: 100%"></div>
-
-      </div>
-    </div>
-
-    <script type="text/javascript" src="js/nations.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
-    <script>
-      document.getElementById('panel').style.height = document.documentElement.clientHeight+'px';
-      document.getElementById('trade_margin_bottom').style.height = (document.documentElement.clientHeight - 350)*0.5+'px';
-      document.getElementById('nations_margin_bottom').style.height = (document.documentElement.clientHeight - 350)*0.5+'px';
-
-
-      var slideout = new Slideout({
-        'panel': document.getElementById('panel'),
-        'menu': document.getElementById('menu'),
-        'padding': 75,
-        'padding2': 175,
-        'tolerance': 35,
-        'speed': 1,
-        'both': false,
-        'limit': false
-      });
-
-
-      // Create the event.
-      var event_notis = document.createEvent('Event');
-      var event_trademenu = document.createEvent('Event');
-      var event_nationsmenu = document.createEvent('Event');
-      var event_eventsmenu = document.createEvent('Event');
-
-      // var e_touchmove = document.createEvent('TouchEvent');
-      // e_touchmove.initEvent('ev_touchmove', true, true);
-
-
-      // Define that the event name is 'notis'.
-      event_notis.initEvent('notis', true, true);
-      var note = "Welcome! Here is a message brought to you by this amazing app.. You are welcome!";
-      var header = document.getElementById('header');
-      header.addEventListener('notis', function(){
-        document.getElementById('note').innerHTML= '<p>'+note+'</p>';
-        var self = this;
-        setTimeout(function() {self.style.height = '0px';}, 5000);
-        this.style.height = '50px';
-      });
-      //Set off the event.
-      setTimeout(function(){header.dispatchEvent(event_notis)},1000)
-
-
-      // Define that the event name is 'trade'.
-      event_trademenu.initEvent('open_trademenu', true, true);
-      var trademenu = document.getElementById('trademenu');
-      trademenu.isOpen = false;
-      trademenu.toggle = function(){
-        this.isOpen ? this.isOpen = false : this.isOpen = true ;
-        this.dispatchEvent(event_trademenu);
-      }
-      trademenu.addEventListener('open_trademenu', function(){
-        this.isOpen ? this.style.height = '100%' : this.style.height = '0%';
-      });
-
-      // Define that the event name is 'nations'.
-      event_nationsmenu.initEvent('open_nationsmenu', true, true);
-      var nationsmenu = document.getElementById('nationsmenu');
-      nationsmenu.isOpen = false;
-      nationsmenu.currentY = 0;
-      nationsmenu.toggle = function(){
-        this.isOpen ? this.isOpen = false : this.isOpen = true ;
-        if(this.isOpen){
-          var a = this.className; 
-          a = a.replace(/ hide/,'');
-          this.className = a; 
-        } 
-        this.dispatchEvent(event_nationsmenu);
-        //this.currentY = 0
-        //this.firstElementChild.style.bottom = '0px';
-      }
-      nationsmenu.addEventListener('touchstart', function(e) {
-        e.stopImmediatePropagation()
-        this.startY = e.touches[0].clientY; 
-      });
-      nationsmenu.addEventListener('touchmove', function(e) {
-        this.firstElementChild.style.bottom = (this.startY - e.touches[0].clientY + this.currentY) + 'px';
-
-        e.preventDefault();       
-      });
-      nationsmenu.addEventListener('touchend', function(e) {
-        this.currentY += this.startY - e.changedTouches[0].clientY; 
-      });
-      nationsmenu.addEventListener('transitionend', function() {
-        //this.firstElementChild.style.bottom = '0px';
-        //this.currentY = 0;
-        if(!this.isOpen){ 
-          this.className += ' hide';
-        }
-      });
-      nationsmenu.slide = function(distance) {
-        var pos = 0;
-        var id = setInterval(frame, 5);
-        if(distance < 0){ distance = -distance; var factor=-1}else{var factor = 1;}
-        function frame() {
-          if (pos*factor > distance-10) {
-            nationsmenu.currentY += pos;
-            clearInterval(id);
-          } else {
-            // pos+=factor;
-            var left = distance-pos*factor;
-            left/20 < 1 ? pos+=factor : pos+=factor*left/20;
-            nationsmenu.firstElementChild.style.bottom = (nationsmenu.currentY + pos) + 'px'; 
-          }
-        }
-      }
-
-      nationsmenu.addEventListener('open_nationsmenu', function(){
-        this.isOpen ? this.style.height = document.documentElement.clientHeight+'px' : this.style.height = '0px';
-      });
-
-      // Define that the event name is 'nations'.
-      event_eventsmenu.initEvent('open_eventsmenu', true, true);
-      var eventsmenu = document.getElementById('eventsmenu');
-      eventsmenu.isOpen = false;
-      eventsmenu.toggle = function(){
-        this.isOpen ? this.isOpen = false : this.isOpen = true ;
-        this.dispatchEvent(event_eventsmenu);
-      }
-
-      eventsmenu.addEventListener('open_eventsmenu', function(){
-        this.isOpen ? this.style.height = '100%' : this.style.height = '0%';
-      });
-
-      close_all_menues = function(menu){
-        if(!menu){
-          trademenu.isOpen = false
-          nationsmenu.isOpen = false
-          eventsmenu.isOpen = false
-        }else if(menu.isOpen){
-          trademenu.isOpen = false
-          nationsmenu.isOpen = false
-          eventsmenu.isOpen = false
-          menu.isOpen = true
-          slideout.close()
-        }else{
-          trademenu.isOpen = false
-          nationsmenu.isOpen = false
-          eventsmenu.isOpen = false
-          slideout.close()
-        }
-        trademenu.dispatchEvent(event_trademenu)
-        nationsmenu.dispatchEvent(event_nationsmenu)
-        eventsmenu.dispatchEvent(event_eventsmenu)
-      }
-
-      menu.onscroll = function(e){
-        itemsmenu_container.style.top = '-'+e.target.scrollTop+'px';
-      }
-
-      var setMargin = function(){ 
-        this.style.height = (640 - 350)*0.5+'px';
-      }
-
-
-      // dintur_slide.style.height = "100%";
-
+    }
+    button.big_btn {
+      border: none;
+      padding: 15px;
+      border-radius: 5px;
+      background: #dcc39f;
+      width: 80%;
+      max-width: 300px;
+    }
+	button:disabled {
+      opacity: 0.3;
+    }
+    </style>
+    <script type="text/javascript">
+     /* document.addEventListener("touchmove", function(event){
+          event.preventDefault();
+      });*/
     </script>
-
   </body>
 </html>

@@ -1,0 +1,153 @@
+<template>
+  <div id='trade'>
+    <h1> Trademarket </h1>
+    <svg mmmonclick="trademenu.toggle(); emptyTrade()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <use xlink:href="#svg-hands"></use>
+    </svg>
+    <div style="width: 100%; height: 25px; justify-content: center;">
+      <div id="trade_container" style="display: inline-block;">
+        <div v-for="resurs in resurserKeys"><div v-for="i in trade_korg[resurs]" v-on:click="del(resurs)">{{resurs}}</div></div>
+      </div>
+    </div>
+    <div style="width: 100%; height: 20px;"></div>
+    <!-- Resurs buttons -->
+    <button v-for="resurs in resurserKeys" v-bind:class="'res ' + resurs" v-on:click="add(resurs)" v-bind:disabled="!$props.resurser[resurs][0]"> {{ resurs }} </button>
+    <div class="" style="width: 100%; height: 20px;"></div>
+    <!-- To buttons -->
+    <button v-for="player in players" mmmng-disabled="trade.korg.length < 1" mmmng-if="player.username != user.username" mmmng-click="trade.send(player)" class="player shadow_blue txtshadow"><p>"{ {player.username} }"</p></button>
+    <button mmmng-disabled="trade.isTradable()" mmmng-click="trade.tradeWithBank()" class="player shadow_blue txtshadow"><p>Bank</p></button>
+     
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'menuitem',
+  props: {
+    resurser: Object
+  },
+  data () {
+    return {
+      resurserKeys: Object.keys(this.$props.resurser),
+      trade_korg: {}
+    }
+  },
+  computed:{
+  	
+  },
+  methods: {
+    add: function(type){
+      if(!this.$props.resurser[type][0]){return}
+      var r = this.$props.resurser[type].pop();
+      this.trade_korg[type].push(r);
+    },
+    del: function(type){
+      var r = this.trade_korg[type].pop();
+      this.$props.resurser[type].push(r);
+    }
+  },
+  mounted: function() {
+    var obj = {};
+    Object.keys(this.$props.resurser).map(function(res){
+      obj[res] = [];
+    })
+    this.trade_korg = obj;
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+
+.resurs{ 
+  margin: 2px;
+}
+#panel .resurs{
+  position: absolute;
+}
+
+.resurs>div {
+    height: 25px;
+    width: 25px;
+    border-radius: 100%;
+    display: inline-block;
+    box-shadow: -0.5px -2px 8px -2px black inset;
+}
+.trä{background-color: #1abc9c;}
+.sten{background-color: #FFFFFF;}
+.olja{background-color: #B697D8;}
+.säd{background-color: #f1c40f;}
+.djur{background-color: #75B96B;}
+
+
+.res{ width: 25%; height: 35px; }
+.player{ width: 40%; height: 50px; }
+.resurs {display: inline-block;}
+
+.resurs_staplar {
+    display: inline-block;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+.resurs_staplar * {
+    display: inline-block;
+    vertical-align: middle;
+}
+.resurs_staplar .stapel {
+    display: inline-block;
+    margin: 5px;
+}
+.stapel h5 {
+    text-indent: -5px;
+}
+
+/*#trade .res, #trade .player {
+  justify-content: center;
+  border-radius: 15px;    
+  box-shadow: 0 0 0 1px rgb(79, 147, 169), 0 2px 1px 1px #5CB7D4 inset, 0 -2px 1px 1px #4697B0 inset, 0 4px 1px 1px rgba(11, 41, 49, 0.27), 0 5px 1px 2px #5FAFC7, 0 -2px 0px 3px #3994AF;
+  background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);
+  font-size: 20px;
+  margin: 10px 7px;
+  text-shadow: 0 2px 2px gray;
+  color: white;
+}
+#trade .res:disabled, #trade .res:active, #trade .player:disabled, #trade .player:active {
+  box-shadow: 0 0 0 1px rgb(79, 147, 169), 0 2px 1px 1px #4697B0 inset, 0 -2px 2px 0px rgba(1, 54, 68, 0.93), 0 5px 1px 2px #5FAFC7, 0 -2px 0px 3px #3994AF;
+  background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);
+}*/
+#trade .res:disabled, #trade .player:disabled {
+  opacity: 0.5;
+}
+/*#trade .res, #trade .player {
+  justify-content: center;
+  border-radius: 100px;    
+  overflow: hidden;
+  box-shadow: -1px -1px 0px 1px rgb(60, 130, 152);
+  background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);
+  font-size: 20px;
+  margin: 10px 7px;
+  text-shadow: 0 2px 2px gray;
+  color: white;
+}*/
+#trade .res:disabled, #trade .res:active, #trade .player:disabled, #trade .player:active { 
+  box-shadow: none;  
+  opacity: 0.7;
+  /*box-shadow: 0 0 0 1px rgb(79, 147, 169), 0 2px 1px 1px #4697B0 inset, 0 -2px 2px 0px rgba(1, 54, 68, 0.93), 0 5px 1px 2px #5FAFC7, 0 -2px 0px 3px #3994AF;
+  background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);
+  text-shadow: 2px 1px 0 rgba(61, 132, 148, 0.99333), 1px 1px 0.2px rgba(47, 147, 172, 0.99333),2px 2px 0.4px rgba(47, 147, 172, 0.98667),3px 3px 0.6px rgba(47, 147, 172, 0.98),4px 4px 0.8px rgba(47, 147, 172, 0.97333),5px 5px 1px rgba(47, 147, 172, 0.96667),6px 6px 1.2px rgba(47, 147, 172, 0.96),7px 7px 1.4px rgba(47, 147, 172, 0.95333),8px 8px .6px rgba(47, 147, 172, 0.94667),9px 9px .8px rgba(47, 147, 172, 0.94),10px 10px 2px rgba(47, 147, 172, 0.93333),11px 11px .2px rgba(47, 147, 172, 0.92667),12px 12px 2.4px rgba(47, 147, 172, 0.92),13px 13px 2.6px rgba(47, 147, 172, 0.91333),14px 14px 2.8px rgba(47, 147, 172, 0.90667),15px 15px 3px rgba(47, 147, 172, 0.9),16px 16px 3.2px rgba(47, 147, 172, 0.89333),17px 17px 3.4px rgba(47, 147, 172, 0.88667),18px 18px 3.6px rgba(47, 147, 172, 0.88),19px 19px 3.8px rgba(47, 147, 172, 0.87333),20px 20px 4px rgba(47, 147, 172, 0.86667); 
+*/}
+#trade .res, #trade .player {
+  justify-content: center;
+  border-radius: 100px;    
+  overflow: hidden;
+  font-size: 20px;
+  margin: 10px 7px;
+  color: white;
+  box-shadow: 1px 2px 1px 1px #3994AF;
+  background: #54ADC7;
+  /*box-shadow: 0 1px 0px 1px #5CB7D4 inset, 0 0px 0px 0px #4697B0 inset, 0 3px 0px 0px rgba(11, 41, 49, 0.27), 0 0px 0px 3px #3994AF, 0 2px 0px 3px #5DB5D0;*/
+  /*background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);*/
+  /*text-shadow: 2px 1px 0 rgba(61, 132, 148, 0.99333), 1px 1px 0.2px rgba(47, 147, 172, 0.99333),2px 2px 0.4px rgba(47, 147, 172, 0.98667),3px 3px 0.6px rgba(47, 147, 172, 0.98),4px 4px 0.8px rgba(47, 147, 172, 0.97333);*/
+}
+</style>
