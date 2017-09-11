@@ -29,6 +29,7 @@ export default {
 
   methods: {
   	tstart: function(e){
+            if(this.$props.panel.noscroll){return}
 					  this.allowUp = (this.menuitem.scrollTop > 0);
             this.allowDown = (this.menuitem.scrollTop < this.menuitem.scrollHeight - this.menuitem.clientHeight);
             this.slideBeginY = e.touches[0].pageY;
@@ -36,6 +37,7 @@ export default {
             this.menuitem.classList.remove('transition');
 					},
 		tmove: function(e){
+            if(this.$props.panel.noscroll){return}
             var up = (e.touches[0].pageY > this.slideBeginY);
             var down = (e.touches[0].pageY < this.slideBeginY);
             this.slideBeginY = e.touches[0].pageY;
@@ -50,6 +52,7 @@ export default {
             }
 			    },
     tend: function(e){
+            if(this.$props.panel.noscroll){return}
             if(this.dismissOverlayPX < -100 ){
               this.$emit('close')
             }

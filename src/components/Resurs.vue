@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="'resurs ' + $props.resurs.dyrt" v-bind:style="{left: $props.resurs.x+'px', top: $props.resurs.y+'px'}" v-on:touchmove="_onTouchMoveFn">
+  <div v-bind:class="'resurs ' + $props.options.dyrt" v-bind:style="{left: $props.resurs.x+'px', top: $props.resurs.y+'px'}" v-on:touchmove="_onTouchMoveFn">
     <div v-bind:class="$props.resurs.type">
       <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100"><use v-bind:xlink:href="'#svg-' + $props.resurs.type "></use></svg>
     </div>

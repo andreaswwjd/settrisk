@@ -4,9 +4,10 @@
     <svg mmmonclick="trademenu.toggle(); emptyTrade()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
       <use xlink:href="#svg-hands"></use>
     </svg>
-    <div style="width: 100%; height: 25px; justify-content: center;">
-      <div id="trade_container" style="display: inline-block;">
-        <div v-for="resurs in resurserKeys"><div v-for="i in trade_korg[resurs]" v-on:click="del(resurs)">{{resurs}}</div></div>
+    <div style="width: 100%; height: 40px; justify-content: center;">
+      <div id="trade_container" >
+        <p style="font-size: 10px; margin: 0; transition: 0.7s; opacity: 0" v-bind:class="{show: !tradeKorgIsEmpty}" >TAP TO REMOVE</p>
+        <div v-for="res in resurserKeys"><div v-for="resurs in trade_korg[res]" v-on:click="del(res)"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div></div>
       </div>
     </div>
     <div style="width: 100%; height: 20px;"></div>
@@ -21,6 +22,8 @@
 </template>
 
 <script>
+import Resurs from '@/components/Resurs'
+
 export default {
   name: 'menuitem',
   props: {
@@ -33,7 +36,14 @@ export default {
     }
   },
   computed:{
-  	
+  	tradeKorgIsEmpty: function(){
+      var a = []
+      for(var res in this.resurserKeys){
+        a = a.concat(this.trade_korg[this.resurserKeys[res]])
+      }
+      console.log(a)
+      return a.join()=='';
+    }
   },
   methods: {
     add: function(type){
@@ -52,7 +62,8 @@ export default {
       obj[res] = [];
     })
     this.trade_korg = obj;
-  }
+  },
+  components: { Resurs }
 }
 </script>
 
@@ -149,5 +160,11 @@ export default {
   /*box-shadow: 0 1px 0px 1px #5CB7D4 inset, 0 0px 0px 0px #4697B0 inset, 0 3px 0px 0px rgba(11, 41, 49, 0.27), 0 0px 0px 3px #3994AF, 0 2px 0px 3px #5DB5D0;*/
   /*background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);*/
   /*text-shadow: 2px 1px 0 rgba(61, 132, 148, 0.99333), 1px 1px 0.2px rgba(47, 147, 172, 0.99333),2px 2px 0.4px rgba(47, 147, 172, 0.98667),3px 3px 0.6px rgba(47, 147, 172, 0.98),4px 4px 0.8px rgba(47, 147, 172, 0.97333);*/
+}
+#trade_container div {
+  display: inline-block;
+}
+.show {
+  opacity: 1 !important;
 }
 </style>

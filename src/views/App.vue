@@ -1,7 +1,7 @@
 <template>
   <div class="app" v-bind:style="{height: height}" >
     <buypanel></buypanel>
-    <panel v-bind:resurser="resurser" v-on:close="slideoutClose" v-on:touchmove="noscroll"></panel>
+    <panel v-bind:resurser="resurser" v-on:close="slideoutClose" v-on:touchmove="noscroll" v-on:trigger="trigger"></panel>
     <overlay v-bind:panel="trade_panel" v-on:close="closeOverlay('trade_panel')"><trade v-bind:resurser="resurser"></trade></overlay>
     <overlay v-bind:panel="map_panel" v-on:close="closeOverlay('map_panel')"><karta></karta></overlay>
     <overlay v-bind:panel="cards_panel" v-on:close="closeOverlay('cards_panel')"><cards></cards></overlay>
@@ -55,7 +55,8 @@ export default {
       },
       map_panel: {
         isOpen: false,
-        color: '#75B96B'
+        color: '#f0d4aa',
+        noscroll: true
       },
       cards_panel: {
         isOpen: false,
@@ -98,6 +99,9 @@ export default {
       if(this.panelIsOpen){this.closeOverlay(this.panelIsOpen)}
       this.slideout.toggle()
       this.panelIsOpen = '';
+    },
+    trigger: function(obj){
+      console.log('Kalas!', obj.msg)
     }
   },
   mounted: function(){
@@ -167,6 +171,7 @@ export default {
 footer {
   position:fixed; left:0px; bottom:0px; height:50px; width:100%; background: #F0D4AA; z-index: 2; display: flex; 
   flex-wrap: wrap; flex-direction: row; align-items: center; justify-content: space-around;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.06);
 }
 .spacer{
   margin: 0 10px;

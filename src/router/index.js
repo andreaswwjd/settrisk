@@ -10,6 +10,7 @@ import Bank from '@/views/Bank'
 import Rules from '@/views/Rules'
 import Guide from '@/views/Guide'
 import About from '@/views/About'
+//import Gameboard from '@/views/Gameboard'
 
 Vue.use(Router)
 
@@ -30,6 +31,11 @@ export default new Router({
       name: 'New',
       component: New
     },
+    // {
+    //   path: '/games/new/board',
+    //   name: 'Gameboard',
+    //   component: Gameboard
+    // },
     {
       path: '/game/app',
       name: 'App',

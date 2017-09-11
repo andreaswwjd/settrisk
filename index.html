@@ -8,6 +8,7 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" > 
+    <link rel="apple-touch-icon-precomposed" href="static/Settrisk_logo_152x152.png">
     <script src="static/slideout.js"></script>
 
     
@@ -325,8 +326,10 @@ C85.827,47.66,64.263,29.09,64.263,29.09L34.453,71.155z"/>
   </head>
   <body>
   	<context id="context"></context>
+
     <!-- built files will be auto injected -->
     <style type="text/css">
+
 
   html {
     position: fixed;
@@ -348,18 +351,32 @@ C85.827,47.66,64.263,29.09,64.263,29.09L34.453,71.155z"/>
 	  background-color: #F0D4AA;
       text-align: center;
 	}
-  .context{
-
-  }
 	p, h1, h2, h3, h4, h5, h6 {
 	  font-family: 'Calibri', Verdana, Geneva, sans-serif;
 	  color: #fff;
+    margin-bottom: 0px;
 	}
 	h5 {color: black;}
 	p{
 	  font-size: 1.1em;
 	  margin: 3px;
 	}
+
+  @media all and (orientation:landscape) {
+    #context:before {
+      content: "";
+      background: url("/static/flip.png");
+      background-color: lightgray;
+      position: fixed;
+      z-index: 30;
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      left: 0;
+      top: 0;
+    }
+  }
 
 	button:focus {
       border-color: #f1c40f;
