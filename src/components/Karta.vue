@@ -1,7 +1,7 @@
 <template>
   <div id='karta'>
     <!-- <h1> Map of Nations </h1> -->
-    <svg width="600" height="498" v-bind:viewBox="viewBox.join(' ')" v-on:touchstart.prevent="mapMoveStart" v-on:touchmove.prevent="mapMove" v-on:touchend.prevent="mapMoveEnd">
+    <svg width="600" height="498" v-bind:viewBox="viewBox.join(' ')" v-on:touchstart="mapMoveStart" v-on:touchmove.prevent.stop="mapMove" v-on:touchend="mapMoveEnd">
       <defs>
         <filter id="shadow" x="0" y="0" width="200%" height="200%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> 
@@ -17,7 +17,7 @@
         <g id="svg-map">
           <g class="boardpiece" id="13f4-e834-5ddd">
           <g id="fields_13f4-e834-5ddd">
-          <g id="9ee9-382f" class="field säd" type="säd">
+          <g id="9ee9-382f" class="field säd" type="säd" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?selectField({pos:{x:480,y:177.22}}):'';" >
           <polygon points="450,185.88457268119896 470,185.88457268119896 460,168.5640646055102"></polygon>
           <polygon points="450,185.88457268119896 470,185.88457268119896 460,203.20508075688775"></polygon>
           <polygon points="460,168.5640646055102 480,168.5640646055102 470,185.88457268119896"></polygon>
@@ -407,7 +407,7 @@
           <text id="nr-5315-43e0" transform="matrix(1 0 0 1 300 234.1858428704209)">3</text>
           </g>
           </g>
-          <g id="562f-fc7c" class="field säd" type="säd">
+          <g id="562f-fc7c" class="field säd" type="säd" >
           <polygon points="190,81.96152422706632 210,81.96152422706632 200,99.2820323027551"></polygon>
           <polygon points="210,116.60254037844388 230,116.60254037844388 220,133.92304845413264"></polygon>
           <polygon points="220,133.92304845413264 240,133.92304845413264 230,151.24355652982143"></polygon>
@@ -633,7 +633,7 @@
           <polygon points="340,133.92304845413264 360,133.92304845413264 350,151.24355652982143"></polygon>
           <g class="number">
           <circle cx="350" cy="90.62177826491072" r="8.1"></circle>
-          <text id="nr-8edc-fe31" transform="matrix(1 0 0 1 350 95.62177826491072)">3</text>
+          <text id="nr-8edc-fe31" transform="matrix(1 0 0 1 350 95.62177826491072)">12</text>
           </g>
           </g>
           </g>
@@ -796,19 +796,28 @@
 
       <g id="svg-board">
         <use xlink:href="#svg-map"></use>
-         <!-- v-bind:style="{transform: 'translate('+move.x+'px,'+move.y+'px)'}" v-on:touchstart.stop="startMove" v-on:touchmove="startMove" v-on:touchend.stop="moveEnd"  -->
-        <g v-bind:style="{transform: 'translate('+ viewBox[0] +'px,'+ viewBox[1] +'px)', background: 'red'}">
-          <rect width="100%" height="60" style="fill:#ad9d85; filter: url('#shadow')"/>
+
+        <g v-bind:style="{transform: 'translate('+ viewBox[0] +'px,'+ viewBox[1] +'px)'}">
+          <rect width="100%" style="fill:#ad9d85; filter: url('#shadow')" v-bind:style="{height: new_buildings.length==0 ? '0' : '60'}" />
           <g class="new_building" v-for="building in new_buildings" v-bind:style="{transform: 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)'}"
-          v-on:touchstart.stop="buildingMoveStart($event, building)" v-on:touchmove.stop="buildingMove($event, building)" v-on:touchend.stop="buildingMoveEnd($event, building)"
+          v-on:touchstart="buildingMoveStart($event, building)" v-on:touchmove.stop.prevent="buildingMove($event, building)" v-on:touchend="buildingMoveEnd($event, building)"
           v-on:transitionend="transitionEnd($event)">
             <title>empty djur empty empty</title>
             <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764"></polygon>
           </g> 
         </g> 
+ 
+        <g class="set_building" v-for="building in set_buildings" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?selectBuilding(building):'';" v-bind:style="{transform: 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)'}">
+          <title>{{building.type}}</title>
+          <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
+          </polygon>
+          <!-- <image v-bind:href="'static/img/'+building.type+'.png'" x="-20" y="-17.32"></image> -->
+        </g> 
+
+        <use class="occupy_flag" xlink:href="#svg-occupy" transform="translate(350,90.62) scale(0.3)"></use>
       </g>
     </svg>
-    <modalmenu v-bind:modal="modal" v-on:buildAtSite="buildAtSite"></modalmenu>
+    <modalmenu v-bind:modal="modal" v-on:buildAtSite="buildAtSite" v-on:surrenderTo="surrenderTo" v-on:occupyField="occupyField"></modalmenu>
     
   </div>
 </template>
@@ -822,25 +831,24 @@ export default {
   components: { Modalmenu },
   data () {
     return {
-      new_buildings: [{
+      modal: {},
+      currentViewBox: [90,-44,600,498],
+      moveViewBox: [0,0],
+      building_pos: [],
+      buildings: [{
         id: 'k2l1-jdi3',
         type: 'fabrik',
         pos: {x:30, y:30},
-        fields: []
+        fields: [],
+        isBuild: false
       },{
         id: 'k2l1-jdi3',
         type: 'by',
         pos: {x:80, y: 30},
-        fields: []
-      }],
-      move: {
-        x: 60,
-        y: 100
-      },
-      currentViewBox: [0,0,600,498],
-      moveViewBox: [0,0],
-      building_pos: [], 
-      modal: {}
+        fields: [],
+        isBuild: false
+      }], 
+      c: false
     }
   },
   computed:{
@@ -852,7 +860,17 @@ export default {
         this.currentViewBox[2], 
         this.currentViewBox[3]
       ]
-    }
+    },
+    new_buildings: function(){
+      return this.buildings.filter((b)=>{return b.isBuild == false })
+    },
+    set_buildings: function(){
+      return this.buildings.filter((b)=>{return b.isBuild == true })
+    },
+    occupyFlags: function(){
+      return this.fields.filter((b)=>{return b.isBuild == true })
+    },
+
     // 1. Nya byggnader ska kunna sättas på byggnads-site. DONE
     // 2. Klicka på byggnad för att få upp meny.
     //      - Surrender building to enemy.
@@ -879,9 +897,15 @@ export default {
     },
     buildingMoveStart: function(e, building){
       this.currentBuildingStartPos = building.pos;
+      this.flag = true;
+      e.currentTarget.closest('g').setAttribute('filter', 'url(#shadow)')
     },
     buildingMove: function(e, building){
-      e.currentTarget.closest('g').setAttribute('filter', 'url(#shadow)')
+      /* Limiter for transitions */
+      // if(!this.flag){ return }
+      // this.flag = false;
+      // var self = this;
+      // setTimeout(function(){ self.flag = true; }, 50);
       
       var pos = {
         x: e.touches[0].clientX + this.viewBox[0],
@@ -907,11 +931,14 @@ export default {
       if(this.closestSite){
         this.modal = {
           isOpen: true,
-          title: 'Vill du bygga här?',
-          msg: 'Kontrollera att platsen verkligen motsvarar verkligheten.<br> <strong>OBS!</strong> Bekräftan går ej att ångra.',
           type: 'confirm',
-          action: 'buildAtSite',
-          html: '<svg width="100%" height="140px" viewBox="'+(this.closestSite.pos.x-width*zoom/2)+' '+(this.closestSite.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+          svg: '<svg width="100%" height="140px" viewBox="'+(this.closestSite.pos.x-width*zoom/2)+' '+(this.closestSite.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+          content: [{
+            title: 'Vill du bygga här?',
+            msg: '<strong>OBS!</strong> Bekräftan går ej att ångra.',
+            button1: {text: 'Ja', action:'buildAtSite', response: true, then: 'close'},
+            button2: {text: 'Avbryt', action:'buildAtSite', response: false, then: 'close'}
+          }],
           evt: e,
           building: building
         }
@@ -922,91 +949,87 @@ export default {
         e.currentTarget.closest('g').setAttribute('filter', '');
       }
     },
-    // startMove(evt) { //Skala ner denna funktion!!!
-    //   evt.preventDefault()
-    //   const touch = evt.type === "touchstart";
-    //   if (!touch && evt.button !== 0) return;
-    //   const events = touch
-    //     ? {
-    //         move: "touchmove",
-    //         stop: "touchend"
-    //       }
-    //     : {
-    //         move: "mousemove",
-    //         stop: "mouseup"
-    //       };
-    //   const elem = evt.currentTarget.closest("svg");
-    //   const point = elem.createSVGPoint();
-    //   const transform = elem.getScreenCTM().inverse();
-    //   const getPos = touch ? getTouchPos : getMousePos;
-
-    //   this.moving = true;
-    //   var newPt;
-
-    //   const updateFn = () => {
-    //     if (this.moving) requestAnimationFrame(updateFn);
-
-    //     // Map the screen pixels back to svg coords
-    //     newPt = point.matrixTransform(transform);
-    //     newPt.y -= 17.320508075688764;
-    //     // this.move.y -= 20; 
-    //     var r = this.building_pos.find((a)=>{return Math.pow(a.x-newPt.x,2)<625 && Math.pow(a.y-newPt.y, 2)<625});
-    //     if(r){ 
-    //       this.move = r
-    //     }else{
-    //       this.move = newPt;
-    //     }
-    //   };
-    //   const moveFn = evt => getPos(evt, point);
-    //   const stopFn = evt => {
-    //     this.moving = false;
-    //     elem.removeEventListener(events.move, moveFn);
-    //     elem.removeEventListener(events.stop, stopFn);
-    //   };
-
-    //   requestAnimationFrame(updateFn);
-    //   moveFn(evt);
-
-    //   elem.addEventListener(events.move, moveFn);
-    //   elem.addEventListener(events.stop, stopFn);
-
-    //   evt.currentTarget.closest('g').style.pointerEvents = 'none'
-    //   evt.currentTarget.closest('g').setAttribute('filter', 'url(#shadow)')
-    // },
-    // moveEnd(evt){
-    //   evt.currentTarget.closest('g').style.pointerEvents = 'all'
-    //   evt.currentTarget.closest('g').setAttribute('filter', '')
-    //   if(this.building_pos.find((a)=>{return a.x==this.move.x && a.y==this.move.y}) ){
-    //     this.modal = {
-    //       isOpen: true,
-    //       title: 'Vill du bygga här?',
-    //       msg: 'Kontrollera att platsen verkligen motsvarar verkligheten.<br> <strong>OBS!</strong> Bekräftan går ej att ångra.',
-    //       type: 'confirm',
-    //       action: 'buildAtSite',
-    //       html: '<svg width="100%" height="140px" viewBox="'+(this.move.x-335*0.8/2)+' '+(this.move.y-140*0.8/2)+' '+335*0.8+' '+140*0.8+'"><use xlink:href="#svg-board"></use></svg>',
-    //       evt: evt
-    //     }
-    //   }else{
-    //     evt.target.closest('g').style.transition = '0.5s transform'
-    //     evt.target.closest('g').style.transform = 'translate(60px,100px)'
-    //   }
-    // },
     transitionEnd(e){
       e.target.closest('g').style.transition = ''
       e.currentTarget.closest('g').setAttribute('filter', '');
     },
-    buildAtSite: function(modal){
-      if(modal.confirmed){
-        //Build at site
+
+
+    /*** Byggnad ***/
+
+    buildAtSite: function(confirmed, modal){
+      if(confirmed){
         modal.evt.target.closest('g').setAttribute('filter', '');
+        
+        //Build at site
+        modal.building.id = this.closestSite.id
+        modal.building.pos = this.closestSite.pos
+        modal.building.fields = this.closestSite.fields
+        modal.building.isBuild = true
+
         console.log('Building established')
       }else{
         modal.evt.target.closest('g').style.transition = '0.5s transform'
         modal.building.pos = this.currentBuildingStartPos;
       }
     },
-    selectBuilding(pos){
-    }
+    selectBuilding: function(building){
+      var width = screen.availWidth-20;
+      var height = 140;
+      var zoom = 1.2;
+      this.modal = {
+        isOpen: true,
+        type: 'building_menu',
+        dismissable: true,
+        svg: '<svg width="100%" height="140px" viewBox="'+(building.pos.x-width*zoom/2)+' '+(building.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+        content: [{
+            title: 'Byggnad: '+building.type,
+            html: 'Info: '+building.type+' '+building.fields.map((f)=>{return f.type+' '+f.number}).join(', '),
+            menu: [{
+              text: 'Överge...', then: 'slide'
+            }]
+          },{ 
+            menu: [{
+              text: '...till Samuel', action:'surrenderTo', response: {building: building, to: 'Samuel'}, then: 'close'
+            },{
+              text: '...till Dan-Jakob', action:'surrenderTo', response: {building: building, to: 'Dan-Jakob'}, then: 'close'
+            },{
+              text: '...till Simon', action:'surrenderTo', response: {building: building, to: 'Simon'}, then: 'close'
+            }]
+          }],
+          building: building
+      }
+    },
+    // surrenderBuilding: function(building){
+
+    // },
+    surrenderTo: function(res){
+      this.$socket.emit('surrenderTo', res)
+    },
+
+
+
+    /*** Fält ***/
+    selectField: function(field){
+      var width = screen.availWidth-20;
+      var height = 140;
+      var zoom = 0.7;
+      this.modal = {
+        isOpen: true,
+        dismissable: true,
+        svg: '<svg width="100%" height="140px" viewBox="'+(field.pos.x-width*zoom/2)+' '+(field.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+        content: [{
+            // title: ,
+            menu: [{
+              text: 'Ockupera', action:'occupyField', response: field, then: 'close'
+            }]
+          }],
+          field: field
+      }
+    },
+    occupyField: function(field){
+      field.occupiedBy = 'Andreas';
+    },
   },
   mounted: function() {
 
@@ -1026,13 +1049,18 @@ export default {
           "fields": [
             {
               "refid": "a388-c1f0",
-              "type": "tr\u00e4"
+              "type": "tr\u00e4",
+              number: 3,
+              occupiedBy: 'none'
             },
             {
               "refid": "2f26",
-              "type": "empty"
+              "type": "hamn",
+              number: '?',
+              occupiedBy: 'none'
             }
-          ]
+          ],
+          isBuild: false
         });
         // roads.item(i).style.display = 'none'
       }
@@ -1044,13 +1072,19 @@ export default {
         {
           "id": "a388-c1f0",
           "type": "tr\u00e4",
+          pos: {
+            x: 113,
+            y: 17.32
+          },
           "number": {
             "_pos": {
               "_x": 13,
               "_y": 7,
             },
             "nr": "?"
-          }
+          },
+          occupiedBy: 'none',
+          innerSVG: '<polygon...>'
         }
       ],
       "buildings": [
@@ -1081,18 +1115,6 @@ export default {
     }]
   }
 }
-
-
-function getMousePos(mouseEvent, point) {
-  point.x = mouseEvent.clientX;
-  point.y = mouseEvent.clientY;
-}
-
-function getTouchPos(touchEvent, point) {
-  point.x = touchEvent.touches[0].clientX;
-  point.y = touchEvent.touches[0].clientY;
-}
-
 
 </script>
 
@@ -1151,8 +1173,13 @@ function getTouchPos(touchEvent, point) {
   }
   .new_building {
       fill: white;
-      fill-opacity: 1;
-      pointer-events: all;
+  }
+
+  .set_building {
+      fill: white;
+  }
+  .occupy_flag {
+     transform-origin: -10px -29px; fill:#ad4d25;
   }
 
 

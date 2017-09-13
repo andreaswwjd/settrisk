@@ -1,12 +1,22 @@
 <template>
   <div id="modal" v-bind:class="{closing: closing}" v-bind:style="{height: height, opacity: opacity}" v-on:click.stop>
-    <div id="modal-content" v-bind:style="{top: top}" v-on:transitionend="closing = false" >
-      <span class="close" v-on:click="respond(false)">&times;</span>
-        <div id="select_container" v-html="modal.html"></div>
-        <h1 style=" color: darkgray;" v-if="modal.title">{{modal.title}}</h1>
-        <p style=" color: darkgray;" v-if="modal.msg" v-html="modal.msg"></p>
-        <button class="round_btn" v-on:click="respond(true)">{{ modal.type == 'alert' ? 'Okej' : 'Ja' }}</button>
-        <button class="round_btn" v-on:click="respond(false)" v-if="modal.type == 'confirm'">Avbryt</button>
+    <div id="modal-content" v-bind:style="{top: top}" v-on:transitionend="closeTransitionEnd" >
+      <span class="back" v-if="currentMenuIndex" v-on:click="back()"><</span>
+      <span class="close" v-if="modal.dismissable" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?close():'';">&times;</span>
+      <div id="selection_svg" v-if="modal.svg" v-html="modal.svg"></div>
+      <div id="menues_container">
+        <div id="menu_slider" v-bind:style="{transform: 'translateX('+(currentMenuIndex*(-25))+'%)'}" v-on:transitionend.stop>
+          <div class="menu" v-for="content in modal.content" >
+            <h1 style=" color: darkgray;" v-if="content.title">{{content.title}}</h1>
+            <p style=" color: darkgray;" v-if="content.msg" v-html="content.msg"></p>
+            <div class="content_html" v-if="content.html" v-html="content.html"></div>
+            <div v-if="content.menu" style="height:10px; width:100%"></div>
+            <div class="menu_item" v-if="content.menu" v-for="item in content.menu" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(item.action, item.response, item.then):'';">{{ item.text }}</div>
+            <button class="round_btn" v-if="content.button1" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(content.button1.action, content.button1.response, content.button1.then):'';">{{ content.button1.text }}</button>
+            <button class="round_btn" v-if="content.button2" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(content.button2.action, content.button2.response, content.button1.then):'';">{{ content.button2.text }}</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div style="height: 100px; width: 100%"></div>
   </div>
@@ -20,7 +30,9 @@ export default {
   },
   data(){
     return {
-      closing: false
+      closing: false,
+      currentMenuIndex: 0,
+      c: false
     }
   },
   computed: {
@@ -42,13 +54,21 @@ export default {
       this.$props.modal.isOpen = false;
       this.closing = true;
     },
-    respond: function(response){
-      if(this.$props.modal.type=='confirm'){
-        this.$props.modal.confirmed = response;
-        this.$emit(this.$props.modal.action, this.$props.modal);
+    action: function(action, response, then){
+      if(action){
+        this.$emit(action, response, this.$props.modal);
       }
-      this.close()
-
+      this[then]()
+    },
+    slide: function(){
+      this.currentMenuIndex += 1;
+    },
+    back: function(){
+      this.currentMenuIndex -= 1;
+    },
+    closeTransitionEnd: function() {
+      this.closing = false
+      this.currentMenuIndex = 0;
     }
   }
 }
@@ -59,13 +79,13 @@ export default {
 <style scoped>
 
 
-#select_container {
+#selection_svg {
     position: relative;
     height: 140px;
     overflow: hidden;
     border-radius: 10px 10px 0 0;
 }
-#select_container:before {
+#selection_svg:before {
     content: "";
     background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 50px, rgba(0,0,0,0.2) 0%);
     width: 100%;
@@ -102,6 +122,7 @@ export default {
   /*top: calc(-100%);*/
   border-radius: 10px;
   opacity: 1;
+  overflow: hidden;
 }
 #modal-content:after {
     content: "";
@@ -126,14 +147,19 @@ export default {
 }
 
 .close {
-    /*color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0 10px;*/
     position: absolute;
     top: 10px;
     right: 10px;
+    margin: 0 10px;
+    z-index: 1;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+}
+.back {
+    position: absolute;
+    top: 10px;
+    left: 10px;
     margin: 0 10px;
     z-index: 1;
     font-size: 28px;
@@ -147,4 +173,29 @@ export default {
   margin: 15px;
 }
 
+#menues_container{
+  width: 100%; overflow: hidden;
+}
+#menu_slider{
+  width: 400%;
+  transition: 0.3s transform;
+}
+.menu {
+  display: inline-block; 
+  width: 25%; 
+  float: left;
+}
+.menu_item{
+    width: 80%;
+    height: 30px;
+    background: lightblue;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 0 auto 10px auto;
+    font-size: 20px;
+}
+.content_html{
+  text-align: left;
+  padding: 0 20px;
+}
 </style>

@@ -214,9 +214,6 @@
   </defs>
     <g id="gridbehind"></g>
     <g id="boardgame"></g>
-    <g id="fields"></g>
-    <g id="roads"></g>
-    <g id="buildings"></g>
     <g id="gridforground"><g id="grid"></g></g>
     <g id="griddots" style="display: none"></g>
     <g id="menu">

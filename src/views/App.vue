@@ -8,16 +8,16 @@
 
     <footer>
       <div class="spacer"></div>
-      <svg class="icon" v-on:click="slideoutToggle" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?slideoutToggle():'';" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
         <use xlink:href="#svg-dollar"></use>
       </svg>
-      <svg class="icon" v-on:click="toggleOverlay('trade_panel')" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleOverlay('trade_panel'):'';" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
         <use xlink:href="#svg-hands"></use>
       </svg>
-      <svg class="icon" v-on:click="toggleOverlay('map_panel')" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-        <use xlink:href="#svg-flag"></use>
+      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleOverlay('map_panel'):'';" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+        <use xlink:href="#svg-flag" fill="#FDFDFD"></use>
       </svg>
-      <svg class="icon" v-on:click="toggleOverlay('cards_panel')" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleOverlay('cards_panel'):'';" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
         <use xlink:href="#svg-eventcard"></use>
       </svg>
       <div class="spacer"></div>
