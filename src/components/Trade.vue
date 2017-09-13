@@ -7,15 +7,15 @@
     <div style="width: 100%; height: 40px; justify-content: center;">
       <div id="trade_container" >
         <p style="font-size: 10px; margin: 0; transition: 0.7s; opacity: 0" v-bind:class="{show: !tradeKorgIsEmpty}" >TAP TO REMOVE</p>
-        <div v-for="res in resurserKeys"><div v-for="resurs in trade_korg[res]" v-on:click="del(res)"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div></div>
+        <div v-for="res in resurserKeys"><div v-for="resurs in trade_korg[res]" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?del(res):'';"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div></div>
       </div>
     </div>
     <div style="width: 100%; height: 20px;"></div>
     <!-- Resurs buttons -->
-    <button v-for="resurs in resurserKeys" v-bind:class="'res ' + resurs" v-on:click="add(resurs)" v-bind:disabled="!$props.resurser[resurs][0]"> {{ resurs }} </button>
+    <button v-for="resurs in resurserKeys" v-bind:class="'res ' + resurs" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?add(resurs):'';" v-bind:disabled="!$props.resurser[resurs][0]"> {{ resurs }} </button>
     <div class="" style="width: 100%; height: 20px;"></div>
     <!-- To buttons -->
-    <button v-for="player in players" mmmng-disabled="trade.korg.length < 1" mmmng-if="player.username != user.username" mmmng-click="trade.send(player)" class="player shadow_blue txtshadow"><p>"{ {player.username} }"</p></button>
+    <button v-for="player in players" v-bind:disabled="'trade.korg.length' < 1" v-if="player.username != user.username" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?send(player):'';" class="player shadow_blue txtshadow"><p>{{player.username}}</p></button>
     <button mmmng-disabled="trade.isTradable()" mmmng-click="trade.tradeWithBank()" class="player shadow_blue txtshadow"><p>Bank</p></button>
      
   </div>
@@ -27,7 +27,9 @@ import Resurs from '@/components/Resurs'
 export default {
   name: 'menuitem',
   props: {
-    resurser: Object
+    resurser: Object,
+    players: Array,
+    user: Object
   },
   data () {
     return {
@@ -54,6 +56,9 @@ export default {
     del: function(type){
       var r = this.trade_korg[type].pop();
       this.$props.resurser[type].push(r);
+    },
+    send: function(player){
+      console.log(player)
     }
   },
   mounted: function() {
@@ -156,8 +161,9 @@ export default {
   margin: 10px 7px;
   color: white;
   box-shadow: 1px 2px 1px 1px #3994AF;
+  border-width: 0;
   background: #54ADC7;
-  /*box-shadow: 0 1px 0px 1px #5CB7D4 inset, 0 0px 0px 0px #4697B0 inset, 0 3px 0px 0px rgba(11, 41, 49, 0.27), 0 0px 0px 3px #3994AF, 0 2px 0px 3px #5DB5D0;*/
+  box-shadow: 0 1px 0px 1px #5CB7D4 inset, 0 0px 0px 0px #4697B0 inset, 0 3px 0px 0px rgba(11, 41, 49, 0.27), 0 0px 0px 3px #3994AF, 0 2px 0px 3px #5DB5D0;
   /*background: radial-gradient(at top 55% left 55%, #47AFCC, #45ABC5, #3C92A9);*/
   /*text-shadow: 2px 1px 0 rgba(61, 132, 148, 0.99333), 1px 1px 0.2px rgba(47, 147, 172, 0.99333),2px 2px 0.4px rgba(47, 147, 172, 0.98667),3px 3px 0.6px rgba(47, 147, 172, 0.98),4px 4px 0.8px rgba(47, 147, 172, 0.97333);*/
 }

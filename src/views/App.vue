@@ -2,8 +2,8 @@
   <div class="app" v-bind:style="{height: height}" >
     <buypanel></buypanel>
     <panel v-bind:resurser="resurser" v-on:close="slideoutClose" v-on:touchmove="noscroll" v-on:trigger="trigger"></panel>
-    <overlay v-bind:panel="trade_panel" v-on:close="closeOverlay('trade_panel')"><trade v-bind:resurser="resurser"></trade></overlay>
-    <overlay v-bind:panel="map_panel" v-on:close="closeOverlay('map_panel')"><karta></karta></overlay>
+    <overlay v-bind:panel="trade_panel" v-on:close="closeOverlay('trade_panel')"><trade v-bind:resurser="resurser" v-bind:players="players" v-bind:user="user"></trade></overlay>
+    <overlay v-bind:panel="map_panel" v-on:close="closeOverlay('map_panel')"><karta v-bind:players="players" v-bind:user="user"></karta></overlay>
     <overlay v-bind:panel="cards_panel" v-on:close="closeOverlay('cards_panel')"><cards></cards></overlay>
 
     <footer>
@@ -68,7 +68,9 @@ export default {
         "olja":[{"type":"olja","x":227,"y":386},{"type":"olja","x":111,"y":280},{"type":"olja","x":127,"y":353}],
         "sten":[{"type":"sten","x":191,"y":234},{"type":"sten","x":255,"y":316},{"type":"sten","x":176,"y":321}],
         "djur":[{"type":"djur","x":117,"y":225},{"type":"djur","x":217,"y":224}]
-      }
+      },
+      players:[{username: 'Samuel', color:'#e74c3c'},{username: 'Dan-Jakob', color:'#9b59b6'},{username: 'Simon', color:'#3498db'}],
+      user: {username: 'Andreas', color:'#27ae60'},
     }
   },
   computed: {

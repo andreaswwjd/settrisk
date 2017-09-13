@@ -2,7 +2,7 @@
   <div id='panel' v-on:click="$emit('close')">
     <div class="margintop" style="width:100%; height: 100px;"></div>
     <!-- <h1> Main panel </h1> -->
-    <div v-for="res in resurserKeys"><resurs v-for="resurs in $props.resurser[res]" v-bind:resurs="resurs" v-bind:options="{movable:true}" v-on:trigger="trigger"></resurs></div>
+    <div v-for="res in resurserKeys"><resurs v-for="resurs in $props.resurser[res]" :key="resurs.type" v-bind:resurs="resurs" v-bind:options="{movable:true}" v-on:trigger="trigger"></resurs></div>
   <br>
   </div>
 </template>
