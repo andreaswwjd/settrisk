@@ -786,7 +786,7 @@
 					this.array = this.arrayFn()
 					var hamnid = c4();
 					return this.array.map(function(a){
-						return a.refid ? {refid: a.refid, bp_id: a.bp_id, type: a.type} : {refid: hamnid, bp_id: a.bp_id, type: 'hamn'};
+						return a.refid ? {refid: a.refid, bp_id: a.bp_id, type: a.type, nr: a} : {refid: hamnid, bp_id: a.bp_id, type: 'hamn'};
 					}).unique(); 
 				}
 			}

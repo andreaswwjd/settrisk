@@ -60,5 +60,6 @@ export default {
 .olja{background-color: #B697D8;}
 .säd{background-color: #f1c40f;}
 .djur{background-color: #75B96B;}
+.people{background-color: #5bc0de; }
 
 </style>

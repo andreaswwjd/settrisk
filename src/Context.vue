@@ -3,7 +3,6 @@
     <div id="curtain" v-bind:style="{height: curtain}" v-on:transitionend="curtainRollEnd()">
       <Login v-on:closeLoginPanel="curtainDown"></Login>
     </div>
-    <!-- <modal v-bind:modal="modal" v-on:response="modalResponse"></modal> -->
     <router-view id="router" v-on:openLoginPanel="curtainUp" v-on:closeLoginPanel="curtainDown"></router-view>
     
   </div>
@@ -11,32 +10,28 @@
 
 <script>
 import Login from './views/Login'
-import Modal from './components/Modal'
 import Router from 'vue-router'
 
 export default {
   name: 'context',
-  components: { Login, Modal },
+  components: { Login },
   data() {
     return {
       curtain: '0%',
       destination: '',
       username: '',
-      user_id: '',
-      modal: {}
+      user_id: ''
     }
   },
   methods: {
     curtainUp: function(dest_onend){
       this.curtain = '100%'
-      console.log('Curtain up!')
       if(dest_onend){
         this.destination = dest_onend
       }
     },
     curtainDown: function(dest_onstart){
       this.curtain = '0%'
-      console.log('Curtain down!')
       if(dest_onstart){
         this.$router.push(dest_onstart)
       }
@@ -46,25 +41,10 @@ export default {
         this.$router.push(this.destination)
         this.destination = '';
       }
-    },
-    modalResponse: function(res){
-      console.log(res)
     }
   },
   mounted: function(){
-    // var evt = document.body.createEvent('Event');
-    // evt.initEvent('openModal', true, true)
-    // document.body.addEventListener("openModal", this.openModal, false); 
-    // var modal = document.getElementById('modal');
-    // modal.open = this.openModal;
-    // modal.close = this.closeModal;
-    // var self = this;
-    // setTimeout(function() {self.modal = {
-    //   isOpen: true,
-    //   title: "Är du säker?",
-    //   msg: "Loggar du in kommer du inte kunna logga ut."
-    // }}, 1000);
-    
+   
   }
 }
 

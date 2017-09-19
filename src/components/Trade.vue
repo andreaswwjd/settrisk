@@ -1,18 +1,18 @@
 <template>
   <div id='trade'>
     <h1> Trademarket </h1>
-    <svg mmmonclick="trademenu.toggle(); emptyTrade()" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+    <svg mmmonclick="trademenu.toggle(); emptyTrade()" width="70px" height="100px" viewBox="0 0 100 100">
       <use xlink:href="#svg-hands"></use>
     </svg>
     <div style="width: 100%; height: 40px; justify-content: center;">
       <div id="trade_container" >
-        <p style="font-size: 10px; margin: 0; transition: 0.7s; opacity: 0" v-bind:class="{show: !tradeKorgIsEmpty}" >TAP TO REMOVE</p>
-        <div v-for="res in resurserKeys"><div v-for="resurs in trade_korg[res]" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?del(res):'';"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div></div>
+        <p style="font-size: 10px; margin: 0; transition: 0.7s; opacity: 0" v-bind:class="{show: trade[0]}" >TAP TO REMOVE</p>
+        <div v-for="resurs in resurser.trade" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?del(resurs):'';"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div>
       </div>
     </div>
     <div style="width: 100%; height: 20px;"></div>
     <!-- Resurs buttons -->
-    <button v-for="resurs in resurserKeys" v-bind:class="'res ' + resurs" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?add(resurs):'';" v-bind:disabled="!$props.resurser[resurs][0]"> {{ resurs }} </button>
+    <button v-for="resurs in resurser.typeNames" v-bind:class="'res ' + resurs" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?add(resurs):'';" v-bind:disabled="!$props.resurser.find(resurs)"> {{ resurs }} </button>
     <div class="" style="width: 100%; height: 20px;"></div>
     <!-- To buttons -->
     <button v-for="player in players" v-bind:disabled="'trade.korg.length' < 1" v-if="player.username != user.username" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?send(player):'';" class="player shadow_blue txtshadow"><p>{{player.username}}</p></button>
@@ -33,29 +33,22 @@ export default {
   },
   data () {
     return {
-      resurserKeys: Object.keys(this.$props.resurser),
-      trade_korg: {}
+
     }
   },
   computed:{
-  	tradeKorgIsEmpty: function(){
-      var a = []
-      for(var res in this.resurserKeys){
-        a = a.concat(this.trade_korg[this.resurserKeys[res]])
-      }
-      console.log(a)
-      return a.join()=='';
+  	trade: function(){
+      return this.$props.resurser.trade;
     }
   },
   methods: {
     add: function(type){
-      if(!this.$props.resurser[type][0]){return}
-      var r = this.$props.resurser[type].pop();
-      this.trade_korg[type].push(r);
+      var resurs = this.$props.resurser.pop(type);
+      if(resurs){this.trade.push(resurs)};
     },
-    del: function(type){
-      var r = this.trade_korg[type].pop();
-      this.$props.resurser[type].push(r);
+    del: function(resurs){
+      var res = this.trade.splice(this.trade.indexOf(resurs),1)[0]
+      this.$props.resurser.push(res);
     },
     send: function(player){
       console.log(player)

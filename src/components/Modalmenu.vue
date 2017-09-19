@@ -1,15 +1,15 @@
 <template>
-  <div id="modal" v-bind:class="{closing: closing}" v-bind:style="{height: height, opacity: opacity}" v-on:click.stop>
-    <div id="modal-content" v-bind:style="{top: top}" v-on:transitionend="closeTransitionEnd" >
+  <div id="modal" v-bind:class="{closing: closing}" v-bind:style="{height: height, opacity: opacity}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&modal.dismissable?close():'';" v-on:click.stop v-on:touchend.stop>
+    <div id="modal-content" v-bind:style="{top: top}" v-on:transitionend="closeTransitionEnd" v-on:touchend.stop>
       <span class="back" v-if="currentMenuIndex" v-on:click="back()"><</span>
       <span class="close" v-if="modal.dismissable" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?close():'';">&times;</span>
-      <div id="selection_svg" v-if="modal.svg" v-html="modal.svg"></div>
+      <div v-bind:class="modal.svgClass" v-if="modal.svg" v-html="modal.svg"></div>
       <div id="menues_container">
-        <div id="menu_slider" v-bind:style="{transform: 'translateX('+(currentMenuIndex*(-25))+'%)'}" v-on:transitionend.stop>
-          <div class="menu" v-for="content in modal.content" >
+        <div id="menu_slider" v-bind:style="{transform: 'translateX('+(currentMenuIndex * (-100) / modal.content.length)+'%)', width: (100 * modal.content.length) +'%'}" v-on:transitionend.stop>
+          <div class="menu" v-for="content in modal.content" v-bind:style="{width: (100 / modal.content.length) +'%'}">
             <h1 style=" color: darkgray;" v-if="content.title">{{content.title}}</h1>
             <p style=" color: darkgray;" v-if="content.msg" v-html="content.msg"></p>
-            <div class="content_html" v-if="content.html" v-html="content.html"></div>
+            <div v-bind:class="content.htmlClass" v-if="content.html" v-html="content.html"></div>
             <div v-if="content.menu" style="height:10px; width:100%"></div>
             <div class="menu_item" v-if="content.menu" v-for="item in content.menu" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(item.action, item.response, item.then):'';">{{ item.text }}</div>
             <button class="round_btn" v-if="content.button1" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(content.button1.action, content.button1.response, content.button1.then):'';">{{ content.button1.text }}</button>
@@ -67,8 +67,11 @@ export default {
       this.currentMenuIndex -= 1;
     },
     closeTransitionEnd: function() {
-      this.closing = false
-      this.currentMenuIndex = 0;
+      if(this.closing){
+        this.closing = false
+        this.currentMenuIndex = 0;
+        this.$emit('nextModuleInQueue');
+      }
     }
   }
 }
@@ -79,13 +82,13 @@ export default {
 <style scoped>
 
 
-#selection_svg {
+.selection {
     position: relative;
     height: 140px;
     overflow: hidden;
     border-radius: 10px 10px 0 0;
 }
-#selection_svg:before {
+.selection:before {
     content: "";
     background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 50px, rgba(0,0,0,0.2) 0%);
     width: 100%;
@@ -122,7 +125,7 @@ export default {
   /*top: calc(-100%);*/
   border-radius: 10px;
   opacity: 1;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 #modal-content:after {
     content: "";
@@ -174,15 +177,16 @@ export default {
 }
 
 #menues_container{
-  width: 100%; overflow: hidden;
+  width: 100%; 
+  overflow: hidden;
 }
 #menu_slider{
-  width: 400%;
+  /*width: 400%;*/
   transition: 0.3s transform;
 }
 .menu {
   display: inline-block; 
-  width: 25%; 
+  /*width: 25%;*/ 
   float: left;
 }
 .menu_item{
@@ -194,8 +198,13 @@ export default {
     margin: 0 auto 10px auto;
     font-size: 20px;
 }
-.content_html{
+.left{
   text-align: left;
   padding: 0 20px;
+}
+.center{
+  text-align: center;
+  padding-top: 20px;
+  margin-bottom: -20px;
 }
 </style>

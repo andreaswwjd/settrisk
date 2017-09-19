@@ -194,14 +194,14 @@ var priserNODE = {'infanteri':{},'byggnader':{}};
 function generateItems(){
   var generate = function(item, type){
     console.log('generateItems();')
-    var prisdiv = document.createElement('div');
+    var prisdiv = document.createElement('div'); // '<div class="prisdivs">'
     prisdiv.className = 'prisdivs';
 
-    var b = document.createElement('button');
+    var b = document.createElement('button'); // '<div id="items_container"><div class="prisdivs"><button class="btn shadow"><img class="item_img" src="img/'+item+'.png"></button></div></div>'
     b.className = 'btn shadow';
     b.innerHTML = '<img src="img/'+item+'.png" class="item_img">';
 
-    var m = document.createElement('div');
+    var m = document.createElement('div'); // '<div id="itemsmenu_container"><div class="item_menu"><div class="buy_btn green"> Köp </div><div class="buy_btn red"> Ångra </div></div></div>'
     m.className = 'item_menu'
     m.innerHTML = '<div class="buy_btn green" > Köp </div><div class="buy_btn red"> Ångra </div>'
 

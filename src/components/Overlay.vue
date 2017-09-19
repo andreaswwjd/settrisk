@@ -25,6 +25,9 @@ export default {
   	height: function(){
   	  return this.$props.panel.isOpen ? (document.documentElement.clientHeight + this.dismissOverlayPX)+'px' : '0px';
   	},
+    menuitem: function(){
+      return this.$el.firstElementChild;
+    }
   },
 
   methods: {
@@ -81,9 +84,7 @@ export default {
           }
   },
   mounted: function() {
-    this.menuitem = this.$el.firstElementChild;
-    console.log(this.menuitem)
-
+    // this.menuitem = this.$el.firstElementChild;
   }
 }
 </script>
