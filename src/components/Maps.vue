@@ -68,7 +68,7 @@
           <use v-bind:xlink:href="'#'+building.type" fill="black"></use>
         </g> 
 
-        <g class="yield" v-for="resurs in yield">
+        <g class="yield" v-for="resurs in resurser.yield">
               <circle v-bind:cx="resurs.x" v-bind:cy="resurs.y" r="10" v-bind:style="{fill: types[resurs.type].color, filter: 'url(#shadow)', stroke: '#606060', strokeWidth: '1'}"></circle>
               <use v-bind:xlink:href="'#svg-'+ resurs.type" v-bind:style="{transform: 'translate('+(resurs.x-10)+'px,'+(resurs.y-10)+'px) scale(0.2)'}"></use>
         </g>
@@ -332,7 +332,20 @@ export default {
 
     collectYield: function(){
       console.log('Collect yield')
-      // this.resurser.push(this.resurser.yield.pop())
+      console.log(this.resurser.yield)
+      var transformPos = {}
+      Object.keys(this.resurser.types).map((res,i,a)=>{
+            transformPos[res] = {
+                  x: (i+0.5) * document.documentElement.clientWidth/a.length , 
+                  y: document.documentElement.clientHeight-100
+            }
+      })
+      while(this.resurser.yield[0]){
+            var resurs = this.resurser.yield.pop()
+            resurs.x = transformPos[resurs.type].x + Math.random()*20-10;
+            resurs.y = transformPos[resurs.type].y + Math.random()*20-10;
+            this.resurser.push(resurs)
+      }
     },
 
     getBp: function(f){
@@ -369,7 +382,7 @@ export default {
                               var bp = self.getBp(f)
                               var field = self.getField(f)
                               if(field && Object.keys(self.types).indexOf(field.type) != -1 && field.number.nr == self.dices.nr() && (field.occupiedBy=='none' || field.occupiedBy==self.$props.user.username) ){
-                                    self.yield.push({
+                                    self.resurser.yield.push({
                                           type: field.type, 
                                           x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
                                           y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
