@@ -39,22 +39,6 @@
 
       <g id="svg-board">
         <use xlink:href="#svg-map"></use>
-
-        <g v-bind:style="{transform: 'translate('+ viewBox[0] +'px,'+ viewBox[1] +'px)'}">
-          <rect width="100%" style="fill:#ad9d85; filter: url('#shadow')" v-bind:style="{height: new_buildings.length==0 ? '0' : '60'}" />
-          
-          <g class="new_building" 
-          v-for="building in new_buildings" 
-          v-bind:style="{transform: building.pos.x && building.pos.y ? 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)' : 'translate('+ (new_buildings.indexOf(building)*41+30) +'px,'+ 30 +'px)', filter: 'url(#shadow)'}"
-          v-on:touchstart="buildingMoveStart($event, building)" 
-          v-on:touchmove.stop.prevent="buildingMove($event, building)" 
-          v-on:touchend="buildingMoveEnd($event, building)"
-          v-on:transitionend="transitionEnd($event)">
-            <title>empty djur empty empty</title>
-            <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764"></polygon>
-            <use v-bind:xlink:href="'#'+building.type" fill="black"></use>
-          </g> 
-        </g> 
  
         <g class="set_building" 
         v-for="building in set_buildings" 
@@ -72,6 +56,21 @@
               <circle v-bind:cx="resurs.x" v-bind:cy="resurs.y" r="10" v-bind:style="{fill: types[resurs.type].color, filter: 'url(#shadow)', stroke: '#606060', strokeWidth: '1'}"></circle>
               <use v-bind:xlink:href="'#svg-'+ resurs.type" v-bind:style="{transform: 'translate('+(resurs.x-10)+'px,'+(resurs.y-10)+'px) scale(0.2)'}"></use>
         </g>
+
+        <g v-bind:style="{transform: 'translate('+ viewBox[0] +'px,'+ viewBox[1] +'px)'}">
+          <rect width="100%" style="fill:#ad9d85; filter: url('#shadow')" v-bind:style="{height: new_buildings.length==0 ? '0' : '60'}" />
+          <g class="new_building" 
+          v-for="building in new_buildings" 
+          v-bind:style="{transform: building.pos.x && building.pos.y ? 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)' : 'translate('+ (new_buildings.indexOf(building)*41+30) +'px,'+ 30 +'px)', filter: 'url(#shadow)'}"
+          v-on:touchstart="buildingMoveStart($event, building)" 
+          v-on:touchmove.stop.prevent="buildingMove($event, building)" 
+          v-on:touchend="buildingMoveEnd($event, building)"
+          v-on:transitionend="transitionEnd($event)">
+            <title>empty djur empty empty</title>
+            <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764"></polygon>
+            <use v-bind:xlink:href="'#'+building.type" fill="black"></use>
+          </g> 
+        </g> 
 
         
       </g>
@@ -143,6 +142,9 @@ export default {
     },
     set_buildings: function(){
       return this.$props.buildings.filter((b)=>{return b.isBuild == true })
+    },
+    yieldgiving_buildings: function(){
+      return this.$props.buildings.filter((b)=>{return ['By','Stad','Storstad','Fabrik'].indexOf(b.type) != -1 }).length;
     },
     occupyFlags: function(){
       return this.fields.filter((b)=>{return b.isBuild == true })
@@ -278,10 +280,11 @@ export default {
         svg: '<svg width="100%" height="140px" viewBox="'+(building.pos.x-width*zoom/2)+' '+(building.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
         content: [{
             title: 'Byggnad: '+building.type,
+            htmlClass: 'left',
             html: 'Info: '+building.fields.map((f)=>{ 
                   var field = this.getField(f); 
                   return field ? f.type+' '+field.number.nr : f.type;
-            }).join(', ') +'<br><span style="font-size:11px;font-weight:bold;">Utdelning: % / tot'+ Object.keys(building.yieldStat).map((res)=>{return '<div style="background:'+this.types[res].color+';height:13px;width:'+(building.yieldStat[res]/this.yieldStat.tot*100)+'%;margin:2px 0;white-space: nowrap;"> '+building.yieldStat[res]+'st / '+Math.floor(building.yieldStat[res]/this.yieldStat[res]*100)+'%</div>'}).join('')+'</span>',
+            }).join(', ') +'<br><span style="font-size:11px;font-weight:bold;">Utdelning: % / tot<br>'+ Object.keys(building.yieldStat).map((res)=>{return '<div style="background:'+this.types[res].color+';height:13px;width:'+(building.yieldStat[res]/(this.yieldStat.tot/this.yieldgiving_buildings)*50)+'%;margin:2px 0; white-space:nowrap; display:inline-block;"> '+building.yieldStat[res]+'st</div><span style="float: right;">≈'+Math.floor(building.yieldStat[res]/this.yieldStat[res]*100)+'%/all '+res+'</span><br>'}).join('')+'</span>',
             menu: [
                   {text: 'Överge...', then: 'slide'},
                   {text: 'Radera...', action: 'delete', response: building}

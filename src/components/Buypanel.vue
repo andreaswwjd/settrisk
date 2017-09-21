@@ -1,9 +1,9 @@
 <template>
-  <div id='buypanel'>
+  <div id='buypanel' >
     <h1> Buy & Build </h1>
     <div id="items_container">
       <div class="item" v-for="item in Object.keys(buildingitems)">
-        <button class="btn building_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?buy(item):'';">
+        <button class="btn building_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?buy(item):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <polygon fill="#FAFAFA" points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
               </polygon>
@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="item" v-for="item in Object.keys(armyitems)">
-        <button class="btn army_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?buy(item):'';">
+        <button class="btn army_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?buy(item):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <rect fill="#FAFAFA" style="x: -14;y: -14; height: 28px;width: 28px; transform: rotate(45deg);" ></rect>
             <use v-bind:xlink:href="'#'+item"></use>
@@ -291,7 +291,7 @@ export default {
           },
           info: 'Möjliggör fartygs-produktion, samt byteshandel med andra spelare som har hamn.'
         },
-        // "oljerigg": {
+        // "Oljerigg": {
         //   "trä": [],
         //   "säd": [],
         //   "olja": [],
@@ -327,7 +327,19 @@ export default {
     }
   },
   computed:{
-  	
+  	available: function(){
+      var obj = {};
+      let itemkeys =Object.keys(this.buildingitems).concat(Object.keys(this.armyitems));
+      itemkeys.map((item)=>{
+        let itemgroup = this.armyitems[item] ? 'armyitems' : 'buildingitems';
+        let pricekeys = Object.keys(this[itemgroup][item].price) ;
+        let unavailable = pricekeys[0] ? pricekeys.find((res)=>{ 
+          return !this.resurser.has(res, this[itemgroup][item].price[res].length)
+        }) : true ;
+        obj[item] = !unavailable;
+      })
+      return obj;
+    }
   },
   methods: {
     buy: function(item){

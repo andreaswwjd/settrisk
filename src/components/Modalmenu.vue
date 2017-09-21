@@ -99,30 +99,24 @@ export default {
 }
 
 #modal{
-  /*height: 0px;*/
   height: 0;
-  /*transition: 0.7s height;*/
   opacity: 0;
   transition: 0.3s opacity;
   background-color: rgba(0,0,0,0.5);
   z-index: 25;
-  overflow: auto;
+  overflow: hidden;
+  /*overflow: auto;  SCROLL? */
     width: 100%;
     top: 0;
     position: absolute;
 }
 #modal-content {
-  /*background: url("/static/flip.png");*/
   background-color: #f7f7f7;
   position: absolute;
   z-index: 25;
   width: calc(100% - 20px);
   transition: 0.5s top;
-  /*height: calc(100% - 20px);*/
-  background-position: center;
-  background-repeat: no-repeat;
   left: 10px;
-  /*top: calc(-100%);*/
   border-radius: 10px;
   opacity: 1;
   /*overflow: hidden;*/

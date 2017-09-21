@@ -247,7 +247,7 @@ Slideout.prototype._initTouchEvents = function() {
 
     // console.log(self._currentOffsetX);
 
-                                              //console.log('translateX: '+translateX+' \nself._padding: '+self._padding+' \nself._orientation: '+ self._orientation+' \nself._opening: '+ self._opening +' \nself._opened: '+ self._opened +' \nself._opened2: '+ self._opened2 );
+                                              console.log('translateX: '+translateX+' \nself._padding: '+self._padding+' \nself._orientation: '+ self._orientation+' \nself._opening: '+ self._opening +' \nself._opened: '+ self._opened +' \nself._opened2: '+ self._opened2 );
 
     if (self._limit && Math.abs(translateX) > self._padding) { return; } // STANNAR VID MAX.
     

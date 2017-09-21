@@ -1,7 +1,7 @@
 <template>
   <div class="app" v-bind:style="{height: screenheight}" >
     <buypanel class="slideout-menu" v-bind:modals="modals" v-bind:resurser="resurser"></buypanel>
-    <panel class="slideout-panel" v-bind:resurser="resurser" v-bind:dices="dices" v-on:close="slideoutClose" v-on:touchmove.prevent.stop></panel>
+    <panel  v-bind:resurser="resurser" v-bind:dices="dices" v-on:close="slideoutClose" v-on:touchmove.prevent.stop></panel>
     <overlay v-bind:panel="trade_panel" v-on:close="closeOverlay('trade_panel')"><trade v-bind:resurser="resurser" v-bind:players="players" v-bind:user="user"></trade></overlay>
     <overlay 
       v-bind:panel="map_panel"  
@@ -88,18 +88,20 @@ export default {
       dices: {
         a: Math.ceil(Math.random()*6), 
         b: Math.ceil(Math.random()*6),
+        rotation_dice1: Math.random()*180,
+        rotation_dice2: Math.random()*180,
         nr: function(){
             return this.a + this.b
         },
         roll: function(){
           this.a = Math.ceil(Math.random()*6)
           this.b = Math.ceil(Math.random()*6)
+          this.rotation_dice1 = Math.random()*180
+          this.rotation_dice2 = Math.random()*180
           console.log(this.a)
         },
         render: function(){
-          var diceCSS = 'display:inline-block;margin:-10px 5px;width: 50px;height: 50px;background-color: rgb(229, 229, 229);border-radius: 5px;';
-          var dotCSS = 'width:10px; height:10px; background-color:white; border-radius:100%; box-shadow: 2px 2px 6px 2px rgb(139, 139, 139) inset;position:absolute;';
-          return '<div class="dice" style="transform: rotate('+(Math.random()*180)+'deg);">'+
+          return '<div class="dice" style="transform: rotate('+this.rotation_dice1+'deg);">'+
             '<div style="left: 8px; top: 8px;" class="'+'hide'.repeat(this.a<4)+'"></div>'+
             '<div style="left: 20px; top: 8px;" class="'+'hide'.repeat(this.a<6)+'"></div>'+
             '<div style="left: 32px; top: 8px;" class="'+'hide'.repeat(this.a<2)+'"></div>'+
@@ -107,7 +109,7 @@ export default {
             '<div style="left: 8px; top: 32px;" class="'+'hide'.repeat(this.a<2)+'"></div>'+
             '<div style="left: 20px; top: 32px;" class="'+'hide'.repeat(this.a<6)+'"></div>'+
             '<div style="left: 32px; top: 32px;" class="'+'hide'.repeat(this.a<4)+'"></div>'+
-          '</div><div class="dice" style="transform: rotate('+(Math.random()*180)+'deg);">'+
+          '</div><div class="dice" style="transform: rotate('+this.rotation_dice2+'deg);">'+
             '<div style="left: 8px; top: 8px;" class="'+'hide'.repeat(this.b<4)+'"></div>'+
             '<div style="left: 20px; top: 8px;" class="'+'hide'.repeat(this.b<6)+'"></div>'+
             '<div style="left: 32px; top: 8px;" class="'+'hide'.repeat(this.b<2)+'"></div>'+
@@ -261,16 +263,16 @@ export default {
     //this.trade_panel.open()
     
     this.$emit('openLoginPanel')
-    this.slideout = new Slideout({
-      'panel': document.getElementById('panel'),
-      'menu': document.getElementById('buypanel'),
-      'padding': 75,
-      'padding2': 185,
-      'tolerance': 35,
-      'speed': 1,
-      'both': false,
-      'limit': false
-    });
+    // this.slideout = new Slideout({
+    //   'panel': document.getElementById('panel'),
+    //   'menu': document.getElementById('buypanel'),
+    //   'padding': 75,
+    //   'padding2': 185,
+    //   'tolerance': 35,
+    //   'speed': 1,
+    //   'both': false,
+    //   'limit': false
+    // });
 
 
   },
@@ -306,7 +308,7 @@ export default {
   /*background: gray;*/
 }
 
-.slideout-panel {
+.slideoutpanel {
   position: absolute;
   position:fixed;
   width:100%;

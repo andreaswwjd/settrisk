@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="'resurs ' + $props.options.dyrt" v-bind:style="{left: $props.resurs.x+'px', top: $props.resurs.y+'px'}" v-on:touchmove="_onTouchMoveFn">
+  <div v-bind:class="'resurs ' + $props.options.dyrt" v-bind:style="{left: resurs.x+'px', top: resurs.y+'px'}" v-on:touchmove.stop.prevent="_onTouchMoveFn">
     <div v-bind:class="$props.resurs.type">
       <svg class="icon_resurs" width="25px" height="25px" viewBox="0 0 100 100"><use v-bind:xlink:href="'#svg-' + $props.resurs.type "></use></svg>
     </div>
@@ -11,7 +11,8 @@ export default {
   name: 'resurs',
   props: {
     resurs: Object,
-    options: Object
+    options: Object,
+    panelX: Number
   },
   data () {
     return {
@@ -23,13 +24,11 @@ export default {
   },
   methods: {
     _onTouchMoveFn: function(eve) {
-      var x = 0;
-      //if ( slideout.isOpen2() ){ return }
-      //if ( slideout.isOpen() ){ x = slideout._padding; } 
-      eve.stopPropagation();
-      eve.preventDefault();
-      this.$props.resurs.y = eve.touches[0].clientY-12.5;
-      this.$props.resurs.x = eve.touches[0].clientX-12.5-x;
+      let x = this.$props.panelX ? this.$props.panelX : 0 ;
+      let screenHeight = document.documentElement.clientHeight;
+      this.$props.resurs.y = eve.touches[0].clientY > screenHeight - 62.5 ? screenHeight - 75 : eve.touches[0].clientY - 12.5;
+      this.$props.resurs.x = eve.touches[0].clientX < x + 12.5 ? 0 : eve.touches[0].clientX - 12.5 - x;
+
     }
   },
   mounted: function() {

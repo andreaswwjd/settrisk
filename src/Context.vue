@@ -1,5 +1,5 @@
 <template>
-  <div id="context" >
+  <div id="context">
     <div id="curtain" v-bind:style="{height: curtain}" v-on:transitionend="curtainRollEnd()">
       <Login v-on:closeLoginPanel="curtainDown"></Login>
     </div>
@@ -44,7 +44,10 @@ export default {
     }
   },
   mounted: function(){
-   
+    document.body.touchmove = function(e){
+      e.preventDefault()
+      e.stopPropagation()
+    }
   }
 }
 
