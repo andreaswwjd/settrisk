@@ -3,7 +3,7 @@
     <h1> Buy & Build </h1>
     <div id="items_container">
       <div class="item" v-for="item in Object.keys(buildingitems)">
-        <button class="btn building_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?buy(item):'';" v-bind:disabled="available[item]==false">
+        <button class="btn building_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?confirmBuy(buildingitems[item]):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <polygon fill="#FAFAFA" points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
               </polygon>
@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="item" v-for="item in Object.keys(armyitems)">
-        <button class="btn army_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?buy(item):'';" v-bind:disabled="available[item]==false">
+        <button class="btn army_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?confirmBuy(armyitems[item]):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <rect fill="#FAFAFA" style="x: -14;y: -14; height: 28px;width: 28px; transform: rotate(45deg);" ></rect>
             <use v-bind:xlink:href="'#'+item"></use>
@@ -232,6 +232,7 @@ export default {
       },
       buildingitems: {
         "By": {
+          name: 'By',
           price: {
             "säd": [1,2],
             "trä": [1,2]
@@ -241,6 +242,7 @@ export default {
           info: 'Ger utdelning för angränsande fält.'
         },
         "Stad": {
+          name: 'Stad',
           price: {
             "säd": [1],
             "trä": [1,2],
@@ -252,6 +254,7 @@ export default {
           info: 'Ger utdelning för angränsande fält.'
         },
         "Storstad": {
+          name: 'Storstad',
           price: {
             "säd": [1],
             "sten": [1,2,3],
@@ -262,6 +265,7 @@ export default {
           info: 'Ger utdelning för angränsande fält.'
         },
         "Fabrik": {
+          name: 'Fabrik',
           price: {
             "säd": [1,2],
             "sten": [1],
@@ -273,6 +277,7 @@ export default {
           info: 'Ger utdelning för angränsande fält.'
         },
         "Flygplats": {
+          name: 'Flygplan',
           price: {
             "säd": [1],
             "sten": [1,2],
@@ -282,6 +287,7 @@ export default {
           info: 'Möjliggör flygplans-produktion.'
         },
         "Hamn": {
+          name: 'Hamn',
           price: {
             "säd": [1],
             "trä": [1],
@@ -299,6 +305,7 @@ export default {
         //   "djur": []
         // },
         "Universitet": {
+          name: 'Universitet',
           price: {
             "säd": [1,2,3],
             "trä": [1],
@@ -308,6 +315,7 @@ export default {
           info: 'Lyckad forskning ger utvecklingskort.'
         },
         "Väg": {
+          name: 'Väg',
           price: {
             "sten": [1],
             "olja": [1]
@@ -315,6 +323,7 @@ export default {
           info: 'Möjliggör byggnadsplats.'
         },
         "Bro": {
+          name: 'Bro',
           price: {
             "säd": [1],
             "trä": [1,2],
@@ -342,16 +351,17 @@ export default {
     }
   },
   methods: {
-    buy: function(item){
+    confirmBuy: function(item){
+      console.log(item)
       this.modals.mainModalQ.push({
           isOpen: true,
           type: 'confirm',
           svgClass: 'center',
-          svg: '<svg height="53" width="53" viewBox="-20 -20 40 40" filter="url(#shadow)"><polygon fill="#FAFAFA" stroke="darkgray" points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" ></polygon><use xlink:href="#'+item+'" fill="black"></use></use></svg>',
+          svg: '<svg height="53" width="53" viewBox="-20 -20 40 40" filter="url(#shadow)"><polygon fill="#FAFAFA" stroke="darkgray" points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" ></polygon><use xlink:href="#'+item.name+'" fill="black"></use></use></svg>',
           content: [{
-            title: 'Vill du köpa en/ett '+item+'?',
+            title: 'Vill du köpa en/ett '+item.name+'?',
             msg: '<strong>OBS!</strong> Bekräftan går ej att ångra.',
-            button1: {text: 'Ja', action:'buy', response: true, then: 'close'},
+            button1: {text: 'Ja', action:'buy', response: {item: item}, then: 'close'},
             button2: {text: 'Avbryt', action:'buy', response: false, then: 'close'}
           }],
           // evt: e,

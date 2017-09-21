@@ -379,20 +379,42 @@ export default {
             console.log('Utdelning')
             self.dices.roll()            
             var buildings_yeild = self.$props.buildings.filter((building)=>{
-                  if(building.yieldStat){
+                  if(building.utdelning){
                         building.yield = []
                         return building.fields.filter((f)=>{
                               var bp = self.getBp(f)
                               var field = self.getField(f)
                               if(field && Object.keys(self.types).indexOf(field.type) != -1 && field.number.nr == self.dices.nr() && (field.occupiedBy=='none' || field.occupiedBy==self.$props.user.username) ){
-                                    self.resurser.yield.push({
-                                          type: field.type, 
-                                          x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
-                                          y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
-                                    })
-                                    building.yieldStat[field.type] ? building.yieldStat[field.type] += 1 : building.yieldStat[field.type] = 1;
-                                    self.yieldStat[field.type] ? self.yieldStat[field.type] +=1 : self.yieldStat[field.type] = 1;
-                                    self.yieldStat.tot += 1;
+                                    if(building.bonus){
+                                          for(let i=0; i>=building.bonus.antal;i++){
+                                                if(building.bonus.type=='valfri'){
+                                                      self.resurser.valfri.push({
+                                                            type: building.bonus.type, 
+                                                            x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
+                                                            y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
+                                                      })
+                                                }else{
+                                                      self.resurser.yield.push({
+                                                            type: building.bonus.type, 
+                                                            x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
+                                                            y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
+                                                      })
+                                                      building.yieldStat[field.type] ? building.yieldStat[field.type] += 1 : building.yieldStat[field.type] = 1;
+                                                      self.yieldStat[field.type] ? self.yieldStat[field.type] +=1 : self.yieldStat[field.type] = 1;
+                                                      self.yieldStat.tot += 1;
+                                                }
+                                          }
+                                    }
+                                    for(let i=0; i>=building.utdelning;i++){
+                                          self.resurser.yield.push({
+                                                type: field.type, 
+                                                x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
+                                                y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
+                                          })
+                                          building.yieldStat[field.type] ? building.yieldStat[field.type] += 1 : building.yieldStat[field.type] = 1;
+                                          self.yieldStat[field.type] ? self.yieldStat[field.type] +=1 : self.yieldStat[field.type] = 1;
+                                          self.yieldStat.tot += 1;
+                                    }
                                     return true
                               }
                         })[0];

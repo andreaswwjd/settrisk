@@ -19,6 +19,7 @@
     <overlay v-bind:panel="cards_panel" v-on:close="closeOverlay('cards_panel')"><cards></cards></overlay>
 
     <modalmenu v-bind:modal="modal"
+      v-on:buy="buy"
       v-on:nextModuleInQueue="nextModuleInQueue" ></modalmenu>
 
     <footer>
@@ -137,6 +138,7 @@ export default {
           ],
           trade: [],
           yield: [],
+          valfri: [],
           types: {
             "trä": {color: '#1abc9c'},
             "säd": {color: '#f1c40f'},
@@ -177,6 +179,8 @@ export default {
         type: 'By',
         pos: {x:0, y:0},
         fields: [],
+        utdelning: 1,
+        bonus: {"type": 'people', "antal": 1},
         isBuild: false,
         yieldStat: {}
       },{
@@ -184,6 +188,8 @@ export default {
         type: 'Stad',
         pos: {x:0, y: 0},
         fields: [],
+        utdelning: 2,
+        bonus: {"type": 'people', "antal": 2},
         isBuild: false,
         yieldStat: {}
       },{
@@ -191,6 +197,8 @@ export default {
         type: 'Storstad',
         pos: {x:0, y: 0},
         fields: [],
+        utdelning: 2,
+        bonus: {"type": 'people', "antal": 3},
         isBuild: false,
         yieldStat: {}
       },{
@@ -198,6 +206,8 @@ export default {
         type: 'Fabrik',
         pos: {x:0, y: 0},
         fields: [],
+        utdelning: 2,
+        bonus: {"type": 'valfri', "antal": 1},
         isBuild: false,
         yieldStat: {}
       },{
@@ -257,6 +267,26 @@ export default {
     nextModuleInQueue: function(){
       this.modals.lastModal = this.modals.mainModalQ.shift()
     },
+    c4: function(){
+      return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    },
+    buy: function(buy) {
+      if(buy){
+        // Price
+        let item = {
+          // name: buy.item.name,
+          id: this.c4()+'-'+this.c4(),
+          type: buy.item.name,
+          pos: {x:0, y:0},
+          fields: [],
+          isBuild: false
+        }
+        if(['By','Stad','Storstad','Fabrik'].indexOf(buy.item.name)){ item['yieldStat'] = {} }
+        if(buy.item.bonus){ buy.item.bonus = item.bonus}
+        if(buy.item.utdelning){ buy.item.utdelning = item.utdelning}
+        this.buildings.push(item)
+      }
+    }
   },
   mounted: function(){
     console.log('App mounted')
