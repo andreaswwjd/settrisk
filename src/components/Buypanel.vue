@@ -353,6 +353,7 @@ export default {
   methods: {
     confirmBuy: function(item){
       console.log(item)
+      let itemgroup = Object.keys(this.buildingitems).indexOf(item.name) != -1 ? 'buildingitems' : 'armyitems' ;
       this.modals.mainModalQ.push({
           isOpen: true,
           type: 'confirm',
@@ -361,7 +362,7 @@ export default {
           content: [{
             title: 'Vill du köpa en/ett '+item.name+'?',
             msg: '<strong>OBS!</strong> Bekräftan går ej att ångra.',
-            button1: {text: 'Ja', action:'buy', response: {item: item}, then: 'close'},
+            button1: {text: 'Ja', action:'buy', response: {item: item, itemgroup: itemgroup}, then: 'close'},
             button2: {text: 'Avbryt', action:'buy', response: false, then: 'close'}
           }],
           // evt: e,

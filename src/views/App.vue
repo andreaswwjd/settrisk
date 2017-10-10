@@ -20,6 +20,7 @@
 
     <modalmenu v-bind:modal="modal"
       v-on:buy="buy"
+      v-on:fromValfriToYield="fromValfriToYield"
       v-on:nextModuleInQueue="nextModuleInQueue" ></modalmenu>
 
     <footer>
@@ -99,7 +100,7 @@ export default {
           this.b = Math.ceil(Math.random()*6)
           this.rotation_dice1 = Math.random()*180
           this.rotation_dice2 = Math.random()*180
-          console.log(this.a)
+          console.log(this.a+this.b)
         },
         render: function(){
           return '<div class="dice" style="transform: rotate('+this.rotation_dice1+'deg);">'+
@@ -229,6 +230,7 @@ export default {
         fields: [],
         isBuild: false,
       }],
+      bought: {}
     }
   },
   computed: {
@@ -257,12 +259,12 @@ export default {
       this[type].isOpen ? this.closeOverlay(type) : this.openOverlay(type);
     },
     slideoutClose: function() {
-      this.slideout.close()
+      // this.slideout.close()
     },
     slideoutToggle: function() {
-      if(this.panelIsOpen){this.closeOverlay(this.panelIsOpen)}
-      this.slideout.toggle()
-      this.panelIsOpen = '';
+      // if(this.panelIsOpen){this.closeOverlay(this.panelIsOpen)}
+      // this.slideout.toggle()
+      // this.panelIsOpen = '';
     },
     nextModuleInQueue: function(){
       this.modals.lastModal = this.modals.mainModalQ.shift()
@@ -273,18 +275,36 @@ export default {
     buy: function(buy) {
       if(buy){
         // Price
-        let item = {
-          // name: buy.item.name,
-          id: this.c4()+'-'+this.c4(),
-          type: buy.item.name,
-          pos: {x:0, y:0},
-          fields: [],
-          isBuild: false
+        Object.keys(buy.item.price).map((res)=>{
+          buy.item.price[res].map(()=>{
+            this.resurser.pop(res)
+          })
+        })
+        if(buy.itemgroup == 'buildingitems'){
+          // Add building item
+          let item = {
+            id: this.c4()+'-'+this.c4(),
+            type: buy.item.name,
+            pos: {x:0, y:0},
+            fields: [],
+            utdelning: buy.item.utdelning || undefined,
+            bonus: buy.item.bonus || undefined,
+            isBuild: false,
+            yieldStat: ['By','Stad','Storstad','Fabrik'].indexOf(buy.item.name) != -1 ? {} : undefined 
+          }
+          this.buildings.push(item)
         }
-        if(['By','Stad','Storstad','Fabrik'].indexOf(buy.item.name)){ item['yieldStat'] = {} }
-        if(buy.item.bonus){ buy.item.bonus = item.bonus}
-        if(buy.item.utdelning){ buy.item.utdelning = item.utdelning}
-        this.buildings.push(item)
+        this.bought[but.item.name] ? this.bought[but.item.name] += 1 : this.bought[but.item.name] = 1 ;
+      }
+    },
+    fromValfriToYield: function(responce){
+      if(responce){
+        let r = this.resurser.valfri.find((resurs)=>{return responce.resurs.x == resurs.x && responce.resurs.y == resurs.y });
+        console.log(r)
+        r = this.resurser.valfri.splice(this.resurser.valfri.indexOf(r),1)[0];
+        console.log(r)
+        r.type = responce.type;
+        this.resurser.yield.push(r);
       }
     }
   },
@@ -313,7 +333,29 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
+
+  html, body {
+    position: fixed;
+    overflow: hidden;
+  } 
+
+@media all and (orientation:landscape) {
+  #context:before {
+    content: "";
+    background: url("/static/flip.png");
+    background-color: lightgray;
+    position: fixed;
+    z-index: 30;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    left: 0;
+    top: 0;
+  }
+}
+
 .app{
   position: relative;
   overflow: hidden;
@@ -340,8 +382,8 @@ export default {
 
 .slideoutpanel {
   position: absolute;
-  position:fixed;
-  width:100%;
+  position: fixed;
+  width: 100%;
   /*position:relative;*/
   /*z-index: 1;*/
 }
