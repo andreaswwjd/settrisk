@@ -1,5 +1,5 @@
 <template>
-  <div class="app" v-bind:style="{height: screenheight}" >
+  <div class="app slideout-open" v-bind:style="{height: screenheight}" >
     <turn v-bind:panel="turn_panel" v-bind:dices="dices" v-bind:resurser="resurser" v-bind:armyitems="armyitems" v-bind:buildingitems="buildingitems" v-bind:trade_panel="trade_panel" v-bind:turn="turn"></turn>
     <buypanel class="slideout-menu" v-bind:modals="modals" v-bind:resurser="resurser" v-bind:armyitems="armyitems" v-bind:buildingitems="buildingitems"></buypanel>
     <panel v-bind:resurser="resurser" v-bind:isOpen="buy_panel.isOpen" v-bind:dices="dices" v-on:close="buy_panel.isOpen=false" v-on:open="buy_panel.isOpen=true" v-on:touchmove.prevent.stop></panel>
@@ -651,7 +651,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
+<style scoped>
 
   html, body {
     position: fixed;
