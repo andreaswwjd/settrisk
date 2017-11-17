@@ -16,24 +16,25 @@
         </filter>
         <g id="svg-map">
           <g v-for="bp in boardgame.boardpieces" :key="bp.id">
-              <boardpiece v-bind:boardpiece="bp" >
+            <field v-for="field in bp.fields" :key="field.id" class="passive" v-bind:field="field" v-on:fieldclick="selectField(field)"></field>
+          </g>
+          <g v-for="bp in boardgame.boardpieces" :key="bp.id">
+            <boardpiece v-bind:boardpiece="bp" >
               <g>
-                <field v-for="field in bp.fields" :key="field.id" class="passive" v-bind:field="field"
-                v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?selectField(field):'';"></field>
-                <use v-for="field in bp.fields" class="occupy_flag" xlink:href="#svg-occupy" v-if="field.occupiedBy!='none'" v-bind:transform="'translate('+(field.pos[0]-8)+','+(field.pos[1]-26)+') scale(0.3)'" v-bind:fill="field.occupiedBy==user.username?'white':'black'"></use>
                 <road v-for="road in bp.roads" :key="road.id" v-bind:road="road" ></road>
                 <buildsite v-for="buildsite in bp.buildsites" :key="buildsite.id" v-bind:buildsite="buildsite" ></buildsite>
+                <use v-for="field in bp.fields" class="occupy_flag" xlink:href="#svg-occupy" v-if="field.occupiedBy!='none'" v-bind:transform="'translate('+(field.pos[0]-8)+','+(field.pos[1]-26)+') scale(0.3)'" v-bind:fill="field.occupiedBy==user.username?'white':'black'"></use>
               </g>
             </boardpiece>
-            </g>
+          </g>
           <!-- <g class="boardpiece" v-for="boardpiece in boardgame.bps" v-bind:id="boardpiece.id">
             <g v-bind:id="'fields_'+boardpiece.id">
               <g v-for="field in boardpiece.fields" class="field" v-bind:fill="field.color" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?selectField(field):'';">
                 <g v-html="field.svg"></g>
                 <g class="number" style="text-anchor: middle; font-family: 'Helvetica'; font-size: 13px; fill: #606060;">
-                  <use class="occupy_flag" xlink:href="#svg-occupy" v-if="field.occupiedBy!='none'" v-bind:transform="'translate('+(field.pos.x-8)+','+(field.pos.y-26)+') scale(0.3)'" v-bind:fill="field.occupiedColor"></use>
-                  <circle v-bind:cx="field.pos.x" v-bind:cy="field.pos.y" r="8.1"></circle>
-                  <text v-bind:transform="'matrix(1 0 0 1 '+field.pos.x+' '+(field.pos.y+4.5)+')'" fill="#FFF">{{field.number.nr}}</text>
+                  <use class="occupy_flag" xlink:href="#svg-occupy" v-if="field.occupiedBy!='none'" v-bind:transform="'translate('+(field.pos[0]-8)+','+(field.pos[1]-26)+') scale(0.3)'" v-bind:fill="field.occupiedColor"></use>
+                  <circle v-bind:cx="field.pos[0]" v-bind:cy="field.pos[1]" r="8.1"></circle>
+                  <text v-bind:transform="'matrix(1 0 0 1 '+field.pos[0]+' '+(field.pos[1]+4.5)+')'" fill="#FFF">{{field.number.nr}}</text>
                 </g>
               </g>
             </g>
@@ -41,7 +42,7 @@
               <g class="road" v-for="roadSVG in boardpiece.roadsSVG" v-html="roadSVG" style="fill: #606060; stroke: #606060; stroke-width: 4;"></g>
             </g>
             <g v-bind:id="'buildsites_'+boardpiece.id">
-              <g class="buildsite" v-for="buildsite in boardpiece.buildings" v-bind:transform="'translate('+buildsite.pos.x+', '+buildsite.pos.y+')'" style="fill: black; fill-opacity: 0.1; "><polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
+              <g class="buildsite" v-for="buildsite in boardpiece.buildings" v-bind:transform="'translate('+buildsite.pos[0]+', '+buildsite.pos[1]+')'" style="fill: black; fill-opacity: 0.1; "><polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
           </polygon></g>
             </g>
           </g> -->
@@ -56,7 +57,7 @@
         v-on:touchstart="c=true" 
         v-on:touchmove="c=false" 
         v-on:touchend="c?selectBuilding(building):'';" 
-        v-bind:style="{transform: 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)'}">
+        v-bind:style="{transform: 'translate('+ (building.pos[0]) +'px,'+ (building.pos[1]) +'px)'}">
           <title>{{building.type}}</title>
           <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
           </polygon>
@@ -71,12 +72,13 @@
         <g id="new_buildings_dragmenu" v-bind:style="{transform: 'translate('+ viewBox[0] +'px,'+ viewBox[1] +'px)'}">
           <rect width="100%" style="fill:#ad9d85; filter: url('#shadow')" v-bind:style="{height: new_buildings.length==0 ? '0' : '60'}" />
           <g class="new_building" 
-          v-for="building in new_buildings" 
-          v-bind:style="{transform: building.pos.x && building.pos.y ? 'translate('+ (building.pos.x) +'px,'+ (building.pos.y) +'px)' : 'translate('+ (new_buildings.indexOf(building)*41+30) +'px,'+ 30 +'px)', filter: 'url(#shadow)'}"
-          v-on:touchstart="buildingMoveStart($event, building)" 
-          v-on:touchmove.stop.prevent="buildingMove($event, building)" 
-          v-on:touchend="buildingMoveEnd($event, building)"
-          v-on:transitionend="transitionEnd($event)">
+            v-for="building in new_buildings" 
+            v-bind:style="{transform: building.pos[0] && building.pos[1] ? 'translate('+ (building.pos[0]) +'px,'+ (building.pos[1]) +'px)' : 'translate('+ (new_buildings.indexOf(building)*41+30) +'px,'+ 30 +'px)', filter: 'url(#shadow)'}"
+            v-on:touchstart="buildingMoveStart($event, building)" 
+            v-on:touchmove.stop.prevent="buildingMove($event, building)" 
+            v-on:touchend="buildingMoveEnd($event, building)"
+            v-on:transitionend="transitionEnd($event)"
+          >
             <title>empty djur empty empty</title>
             <polygon points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764"></polygon>
             <use v-bind:xlink:href="'#'+building.type" fill="black"></use>
@@ -106,10 +108,10 @@
 import Modalmenu from '../components/Modalmenu'
 import Resurs from '../components/Resurs'
 
-import Boardpiece from '@/maps/Boardpiece'
-import Field from '@/maps/Field'
-import Road from '@/maps/Road'
-import Buildsite from '@/maps/Buildsite'
+import Boardpiece from '@/components/Boardpiece'
+import Field from '@/components/Field'
+import Road from '@/components/Road'
+import Buildsite from '@/components/Buildsite'
 
 export default {
   name: 'maps',
@@ -148,9 +150,11 @@ export default {
     },
     building_pos: function(){
       var buildingsites = []
-      this.boardgame.bps.map((bp)=>{
-        buildingsites = buildingsites.concat(bp.buildings);
+      this.boardgame.boardpieces.map((bp)=>{
+      // console.log('bp', bp)
+        buildingsites = buildingsites.concat(bp.buildsites);
       })
+      // console.log('buildingsites', buildingsites)
       return buildingsites;
     },
     new_buildings: function(){
@@ -215,19 +219,19 @@ export default {
       // setTimeout(function(){ self.flag = true; }, 50);
       this.moved = true;
       
-      var pos = {
-        x: e.touches[0].clientX + this.viewBox[0],
-        y: e.touches[0].clientY + this.viewBox[1]
-      }
-      var posToView = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY
-      }
+      let pos = [
+        e.touches[0].clientX + this.viewBox[0],
+        e.touches[0].clientY + this.viewBox[1]
+      ]
+      let posToView = [
+        e.touches[0].clientX,
+        e.touches[0].clientY
+      ]
       
-      this.closestSite = this.building_pos.find((a)=>{return Math.pow(a.pos.x-pos.x,2)<625 && Math.pow(a.pos.y-pos.y, 2)<625});
+      this.closestSite = this.building_pos.find((a)=>{return Math.pow(a.pos[0]-pos[0],2)<625 && Math.pow(a.pos[1]-pos[1], 2)<625});
       
       if(this.closestSite){
-        building.pos = {x: this.closestSite.pos.x-this.viewBox[0], y:this.closestSite.pos.y-this.viewBox[1]}; 
+        building.pos = [this.closestSite.pos[0]-this.viewBox[0], this.closestSite.pos[1]-this.viewBox[1]];
       }else{
         building.pos = posToView;
       }
@@ -241,7 +245,7 @@ export default {
           isOpen: true,
           type: 'confirm',
           svgClass: 'selection',
-          svg: '<svg width="100%" height="140px" viewBox="'+(this.closestSite.pos.x-width*zoom/2)+' '+(this.closestSite.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+          svg: '<svg width="100%" height="140px" viewBox="'+(this.closestSite.pos[0]-width*zoom/2)+' '+(this.closestSite.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
           content: [{
             title: 'Vill du bygga här?',
             msg: '<strong>OBS!</strong> Bekräftan går ej att ångra.',
@@ -293,13 +297,13 @@ export default {
         type: 'building_menu',
         dismissable: true,
         svgClass: 'selection',
-        svg: '<svg width="100%" height="140px" viewBox="'+(building.pos.x-width*zoom/2)+' '+(building.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+        svg: '<svg width="100%" height="140px" viewBox="'+(building.pos[0]-width*zoom/2)+' '+(building.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
         content: [{
             title: 'Byggnad: '+building.type,
             htmlClass: 'left',
             html: 'Info: '+building.fields.map((f)=>{ 
                   var field = this.getField(f); 
-                  return field ? f.type+' '+field.number.nr : f.type;
+                  return field ? f.type+' '+field.number : f.type;
             }).join(', ') +'<br><span style="font-size:11px;font-weight:bold;">Utdelning: % / tot<br>'+ Object.keys(building.yieldStat).map((res)=>{return '<div style="background:'+this.resurser.types[res].color+';height:13px;width:'+(building.yieldStat[res]/(this.yieldStat.tot/this.yieldgiving_buildings)*50)+'%;margin:2px 0; white-space:nowrap; display:inline-block;"> '+building.yieldStat[res]+'st</div><span style="float: right;">≈'+Math.floor(building.yieldStat[res]/this.yieldStat[res]*100)+'%/all '+res+'</span><br>'}).join('')+'</span>',
             menu: [
                   {text: 'Överge...', then: 'slide'},
@@ -324,6 +328,7 @@ export default {
 
     /*** Fält ***/
     selectField: function(field){
+      console.log('field',field)
       var width = screen.availWidth-20;
       var height = 140;
       var zoom = 0.7;
@@ -331,7 +336,7 @@ export default {
         isOpen: true,
         dismissable: true,
         svgClass: 'selection',
-        svg: '<svg width="100%" height="140px" viewBox="'+(field.pos.x-width*zoom/2)+' '+(field.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+        svg: '<svg width="100%" height="140px" viewBox="'+(field.pos[0]-width*zoom/2)+' '+(field.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
         content: [{
             // title: ,
             menu: [{
@@ -368,7 +373,7 @@ export default {
     },
 
     getBp: function(f){
-      return this.boardgame.bps.find((bp)=>{return bp.id==f.bp_id})
+      return this.boardgame.boardpieces.find((bp)=>{return bp.id==f.bp_id})
     },
     getField: function(f){
       var bp = this.getBp(f);
@@ -391,6 +396,7 @@ export default {
 
       
 
+      // var rollDices = function(){
       setInterval(function(){
             console.log('Utdelning')
             // 1. Roll dices
@@ -425,37 +431,37 @@ export default {
                         return building.fields.filter((f)=>{
                               var bp = self.getBp(f)
                               var field = self.getField(f)
-                              if(field && Object.keys(self.resurser.types).indexOf(field.type) != -1 && field.number.nr == self.dices.nr() && (field.occupiedBy=='none' || field.occupiedBy==self.user.username) ){
+                              if(field && Object.keys(self.resurser.types).indexOf(field.type) != -1 && field.number == self.dices.nr() && (field.occupiedBy=='none' || field.occupiedBy==self.user.username) ){
             console.log('building condition met')
-                                    if(building.bonus){
-                                          for(var i=0; i<building.bonus.antal;i++){
-                                                if(building.bonus.type=='valfri'){
-            console.log('bonus valfri')
-                                                      self.resurser.valfri.push({
-                                                            type: building.bonus.type, 
-                                                            x: building.pos.x+Math.random()*15-7, 
-                                                            y: building.pos.y+Math.random()*15-7
-                                                      })
-                                                }else{
-            console.log('bonus people')
-                                                      self.resurser.yield.push({
-                                                            type: building.bonus.type, 
-                                                            x: building.pos.x+Math.random()*15-7, 
-                                                            y: building.pos.y+Math.random()*15-7
-                                                      })
-                                                      building.yieldStat[building.bonus.type] ? building.yieldStat[building.bonus.type] += 1 : building.yieldStat[building.bonus.type] = 1;
-                                                      self.yieldStat[building.bonus.type] ? self.yieldStat[building.bonus.type] +=1 : self.yieldStat[building.bonus.type] = 1;
-                                                      self.yieldStat.tot += 1;
-                                                }
-                                          }
-                                    }
+            //                         if(building.bonus){
+            //                               for(var i=0; i<building.bonus.antal;i++){
+            //                                     if(building.bonus.type=='valfri'){
+            // console.log('bonus valfri')
+            //                                           self.resurser.valfri.push({
+            //                                                 type: building.bonus.type, 
+            //                                                 x: building.pos[0]+Math.random()*15-7, 
+            //                                                 y: building.pos[1]+Math.random()*15-7
+            //                                           })
+            //                                     }else{
+            // console.log('bonus people')
+            //                                           self.resurser.yield.push({
+            //                                                 type: building.bonus.type, 
+            //                                                 x: building.pos[0]+Math.random()*15-7, 
+            //                                                 y: building.pos[1]+Math.random()*15-7
+            //                                           })
+            //                                           building.yieldStat[building.bonus.type] ? building.yieldStat[building.bonus.type] += 1 : building.yieldStat[building.bonus.type] = 1;
+            //                                           self.yieldStat[building.bonus.type] ? self.yieldStat[building.bonus.type] +=1 : self.yieldStat[building.bonus.type] = 1;
+            //                                           self.yieldStat.tot += 1;
+            //                                     }
+            //                               }
+            //                         }
                                     if(building.utdelning){
                                           for(var i=0; i<building.utdelning;i++){
             console.log('Utdelning '+field.type)
                                                 self.resurser.yield.push({
                                                       type: field.type, 
-                                                      x: (building.pos.x+field.pos.x)/2+Math.random()*15-7, 
-                                                      y: (building.pos.y+field.pos.y)/2+Math.random()*15-7
+                                                      x: (building.pos[0]+field.pos[0])/2+Math.random()*15-7, 
+                                                      y: (building.pos[1]+field.pos[1])/2+Math.random()*15-7
                                                 })
                                                 building.yieldStat[field.type] ? building.yieldStat[field.type] += 1 : building.yieldStat[field.type] = 1;
                                                 self.yieldStat[field.type] ? self.yieldStat[field.type] +=1 : self.yieldStat[field.type] = 1;
@@ -500,7 +506,7 @@ export default {
                         {
                               title: 'Utdelning',
                               htmlClass: 'selection',
-                              html: '<svg width="100%" height="140px" viewBox="'+(building.pos.x-width*zoom/2)+' '+(building.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>Plus en bonus!',
+                              html: '<svg width="100%" height="140px" viewBox="'+(building.pos[0]-width*zoom/2)+' '+(building.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>Plus en bonus!',
                               menu: [{
                                 text: 'Nästa', then: 'slide'
                               }]
@@ -509,7 +515,7 @@ export default {
                         {
                               title: 'Utdelning',
                               htmlClass: 'selection',
-                              html: '<svg width="100%" height="140px" viewBox="'+(building.pos.x-width*zoom/2)+' '+(building.pos.y-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
+                              html: '<svg width="100%" height="140px" viewBox="'+(building.pos[0]-width*zoom/2)+' '+(building.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
                               menu: [{
                                 text: 'Stäng', then: 'close'
                               }]
@@ -517,7 +523,7 @@ export default {
                     }).concat(välj_valfri)
                   })
             }
-      }, 1000);
+      },5000);
 
     this.boardgame = {"id":"567d","boardpieces":[{"id":"c375-cdc5","fields":[{"id":"8d1f-3db8","type":"trä","fill":"#1abc9c","array":[[[120,99.28],[130,116.6],[110,116.6]],[[110,116.6],[130,116.6],[120,133.92]],[[120,133.92],[130,151.24],[110,151.24]],[[120,133.92],[140,133.92],[130,151.24]],[[140,133.92],[150,151.24],[130,151.24]],[[140,133.92],[160,133.92],[150,151.24]],[[150,116.6],[160,133.92],[140,133.92]],[[130,116.6],[150,116.6],[140,133.92]],[[140,99.28],[150,116.6],[130,116.6]],[[120,99.28],[140,99.28],[130,116.6]],[[130,116.6],[140,133.92],[120,133.92]],[[150,116.6],[170,116.6],[160,133.92]],[[160,99.28],[170,116.6],[150,116.6]],[[140,99.28],[160,99.28],[150,116.6]],[[150,81.96],[160,99.28],[140,99.28]],[[170,116.6],[180,133.92],[160,133.92]],[[160,133.92],[180,133.92],[170,151.24]],[[160,133.92],[170,151.24],[150,151.24]]],"number":5,"pos":[150,128.14666666666665],"occupiedBy":"none"},{"id":"2f73-f803","type":"olja","fill":"#B697D8","array":[[[150,81.96],[170,81.96],[160,99.28]],[[170,81.96],[180,99.28],[160,99.28]],[[160,99.28],[180,99.28],[170,116.6]],[[180,99.28],[190,116.6],[170,116.6]],[[170,116.6],[190,116.6],[180,133.92]],[[190,116.6],[200,133.92],[180,133.92]],[[180,133.92],[200,133.92],[190,151.24]],[[180,133.92],[190,151.24],[170,151.24]],[[170,151.24],[190,151.24],[180,168.56]],[[170,151.24],[180,168.56],[160,168.56]],[[150,151.24],[170,151.24],[160,168.56]],[[150,151.24],[160,168.56],[140,168.56]],[[130,151.24],[150,151.24],[140,168.56]],[[130,151.24],[140,168.56],[120,168.56]],[[110,151.24],[130,151.24],[120,168.56]],[[190,151.24],[200,168.56],[180,168.56]],[[190,151.24],[210,151.24],[200,168.56]],[[200,133.92],[210,151.24],[190,151.24]],[[170,81.96],[190,81.96],[180,99.28]],[[190,81.96],[200,99.28],[180,99.28]],[[180,99.28],[200,99.28],[190,116.6]],[[200,99.28],[210,116.6],[190,116.6]],[[190,116.6],[210,116.6],[200,133.92]],[[210,116.6],[220,133.92],[200,133.92]],[[200,133.92],[220,133.92],[210,151.24]],[[210,151.24],[220,168.56],[200,168.56]]],"number":4,"pos":[190,105.05333333333333],"occupiedBy":"none"}],"roads":[{"id":"2a34-774c","pos1":[150,81.96152422706633],"pos2":[190,81.96152422706633]},{"id":"e693-2a03","pos1":[190,81.96152422706633],"pos2":[220,133.92304845413267]},{"id":"b2eb-af59","pos1":[220,133.92304845413267],"pos2":[210,151.24355652982143]},{"id":"fcb2-71ef","pos1":[210,151.24355652982143],"pos2":[110,151.24355652982143]}],"buildsites":[{"id":"0687-03b9","pos":[180,133.92304845413267],"fields":[{"bp_id":"c375-cdc5","refid":"8d1f-3db8","type":"trä","nr":5},{"bp_id":"c375-cdc5","refid":"2f73-f803","type":"olja","nr":4}]}],"transform":{"translate":[0,0],"rotation":{"angle":0,"origin":[0,0]}}},{"id":"d775-07a1","fields":[{"id":"807e-ef7e","type":"sten","fill":"lightgray","array":[[[220,99.27847577293372],[240,99.27847577293372],[230,116.59847577293371]],[[220,99.27847577293372],[230,116.59847577293371],[210,116.59847577293371]],[[210,116.59847577293371],[230,116.59847577293371],[220,133.9184757729337]],[[220,133.9184757729337],[230,151.24847577293372],[210,151.24847577293372]],[[210,151.24847577293372],[230,151.24847577293372],[220,168.5684757729337]],[[230,151.24847577293372],[240,168.5684757729337],[220,168.5684757729337]],[[230,151.24847577293372],[250,151.24847577293372],[240,168.5684757729337]],[[240,133.9184757729337],[250,151.24847577293372],[230,151.24847577293372]],[[230,116.59847577293371],[240,133.9184757729337],[220,133.9184757729337]],[[230,116.59847577293371],[250,116.59847577293371],[240,133.9184757729337]],[[240,99.27847577293372],[250,116.59847577293371],[230,116.59847577293371]],[[240,99.27847577293372],[260,99.27847577293372],[250,116.59847577293371]],[[250,116.59847577293371],[270,116.59847577293371],[260,133.9184757729337]],[[250,116.59847577293371],[260,133.9184757729337],[240,133.9184757729337]],[[220,133.9184757729337],[240,133.9184757729337],[230,151.24847577293372]],[[240,133.9184757729337],[260,133.9184757729337],[250,151.24847577293372]]],"number":5,"pos":[230,139.69514243960037],"occupiedBy":"none"}],"roads":[{"id":"2460-8af8","pos1":[220,99.28203230275514],"pos2":[250,151.24355652982143]}],"buildsites":[{"id":"1cb5-ec5c","pos":[250,116.6025403784439],"fields":[{"bp_id":"d775-07a1","refid":"807e-ef7e","type":"sten","nr":5},{"type":"hamn"}]}],"transform":{"translate":[0,0],"rotation":{"angle":0,"origin":[0,0]}}}]};
     }

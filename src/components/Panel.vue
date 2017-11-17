@@ -1,11 +1,11 @@
 <template>
-  <div id='panel' v-bind:class="{slideoutpanel: true, transition: transition}" v-bind:style="{transform: 'translate3d('+x+'px,0,0)'}" v-on:click="$emit('close')" v-on:touchstart.stop.prevent="tstart" v-on:touchmove.stop.prevent="tmove" v-on:touchend.stop.prevent="tend" v-on:touchcancel.stop.prevent="tend" v-on:transitionend="transend" v-on:scroll.stop.prevent>
+  <div id='panel' v-bind:class="{slideoutpanel: true, transition: transition}" v-bind:style="{transform: 'translate3d('+translationX+'px,0,0)'}" v-on:click="$props.isOpen=false" v-on:touchstart.stop.prevent="tstart" v-on:touchmove.stop.prevent="tmove" v-on:touchend.stop.prevent="tend" v-on:touchcancel.stop.prevent="tend" v-on:transitionend="transend" v-on:scroll.stop.prevent>
   <!-- <div id='panel' v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?$emit('close'):''"> -->
     <div class="margintop" style="width:100%; height: 30px;"></div>
     <!-- <h1> Main panel </h1> -->
     <div v-html="dicesHTML"></div>
     <resurs v-for="resurs in $props.resurser.array" :key="resurs.type" v-bind:resurs="resurs" v-bind:panelX="current" v-bind:options="{movable:true}" ></resurs>
-    <div id="itemsmenu_container" style="position: absolute;  z-index:1; overflow: hidden; transition: left 0.3s; padding: 0 5px;">
+    <div id="itemsmenu_container" style="position: absolute; z-index: 1; overflow: hidden; transition: left 0.3s; padding: 0 5px;">
       <div style="height: 30px"></div>
     </div>
   <br>
@@ -18,8 +18,9 @@ import Resurs from '@/components/Resurs'
 export default {
   name: 'panel',
   props: {
+    isOpen: Boolean,
     resurser: Object,
-    dices: Object
+    dices: Object,
   },
   data () {
     return {
@@ -29,16 +30,37 @@ export default {
       moving: false,
       current: 0,
       end: 0
-
-      // panel: document.getElementById('panel')
     }
   },
   computed:{
     dicesHTML: function(){
       return this.dices.render()
+    },
+    translationX: function(){
+      // if(this.isOpen){
+      //   this.current = this.isOpen ? 250 : 0 ;
+      // }
+      if(this.moving){
+        this.transition = false;
+        return this.x
+      }else{
+        this.transition = true;
+        this.current = this.isOpen ? 250 : this.current ;
+        if(this.current == 250 && !this.isOpen){this.current = 0}
+        return this.current;
+      }
     }
   },
   methods: {
+    // open: function(){
+    //   this.x = this.current = 250;
+    // },
+    // close: function(){
+    //   this.x = this.current = 0;
+    // },
+    // toggle: function(){
+    //   this.open_state ? this.close() : this.open();
+    // },
     tstart: function(e){
       this.moving = false;
       this.start = e.touches[0].clientX;
@@ -50,24 +72,20 @@ export default {
       this.dist = this.end - this.start;
       this.x = this.current + this.dist;
       this.x = (this.x < 0) ? 0 : this.x;
-      // this.panel.style.transform = 'translate3d('+this.x+',0,0)';
     },
     tend: function(e){
       if(this.moving){ 
         this.transition = true
-        // if(40 < this.x && this.x < 110){ this.x = 75 }
-        // else if(110 <= this.x ){ this.x = 250 }
-        // else{ this.x = 0 }
+
         if((this.end - this.start)<0) { // closing
           switch(this.current) {
             case 75:
             // transition to 0
-              this.transition = true;
               this.x = this.current = 0;
             break;
             case 250:
             // transition to 75
-              this.transition = true;
+              this.$emit('close');
               this.x = this.current = (this.x <= 5)? 0 : 75;
             break;
           }
@@ -75,28 +93,20 @@ export default {
           switch(this.current) {
             case 0:
               // transition to 75  
-              this.transition = true;
               this.x = this.current = 75;
             break;
             case 75:
             // transition to 250
-              this.transition = true;
               this.x = this.current = 250;
+              this.$emit('open');
             break;
             case 250:
-              this.transition = true;
               this.x = this.current = 250;
-            
             break;
           }
         }
 
-        // this.swipe_dist = this.end - this.start;
-        // if(40 < this.x && this.x < 200){ this.x = 75 }
-        // else if(200 <= this.x ){ this.x = 250 }
-        // else{ this.x = 0 }
-        // this.current = this.x;
-        // this.panel.style.transform = 'translate3d('+this.x+',0,0)';
+        this.moving = false;
       }
     },
     transend: function(e) {

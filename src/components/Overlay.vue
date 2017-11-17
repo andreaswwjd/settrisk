@@ -1,6 +1,6 @@
 <template>
   <div class="overlay">
-    <div class="menuitem transition" v-bind:style="{height: height, background: $props.panel.color}" v-on:touchstart="tstart" v-on:touchmove="tmove" v-on:touchend="tend" v-on:transitionend="transend">
+    <div class="menuitem transition" v-bind:style="{height: height, background: panel.color, zIndex: panel.zIndex || 2 }" v-on:touchstart="tstart" v-on:touchmove="tmove" v-on:touchend="tend" v-on:transitionend="transend">
       <slot></slot>
     </div>
   </div>
@@ -63,6 +63,9 @@ export default {
             this.dismissOverlayPX = 0;
 			    },
     transend: function(e){
+            if(!this.panel.isOpen){
+              this.panel.zIndex = 2;
+            }
 			     //if(!this.$props.panel.isOpen){ this.hidden = true; } 
 			    },
     slide: function(distance) {
@@ -103,14 +106,13 @@ export default {
   top:0px; 
   height:0%; 
   width:100%; 
-  z-index: 2;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.45); 
   overflow-x: hidden; 
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
 }
 .transition {
-  transition: 0.5s;
+  transition: 0.5s height;
 }
 .inside {bottom:0; width:100%; position: relative; /*flex-direction: row;  flex-wrap: wrap;*/ justify-content: center;}
 </style>

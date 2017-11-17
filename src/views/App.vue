@@ -1,7 +1,8 @@
 <template>
   <div class="app" v-bind:style="{height: screenheight}" >
-    <buypanel class="slideout-menu" v-bind:modals="modals" v-bind:resurser="resurser"></buypanel>
-    <panel  v-bind:resurser="resurser" v-bind:dices="dices" v-on:close="slideoutClose" v-on:touchmove.prevent.stop></panel>
+    <turn v-bind:panel="turn_panel" v-bind:dices="dices" v-bind:resurser="resurser" v-bind:armyitems="armyitems" v-bind:buildingitems="buildingitems" v-bind:trade_panel="trade_panel" v-bind:turn="turn"></turn>
+    <buypanel class="slideout-menu" v-bind:modals="modals" v-bind:resurser="resurser" v-bind:armyitems="armyitems" v-bind:buildingitems="buildingitems"></buypanel>
+    <panel v-bind:resurser="resurser" v-bind:isOpen="buy_panel.isOpen" v-bind:dices="dices" v-on:close="buy_panel.isOpen=false" v-on:open="buy_panel.isOpen=true" v-on:touchmove.prevent.stop></panel>
     <overlay v-bind:panel="trade_panel" v-on:close="closeOverlay('trade_panel')"><trade v-bind:resurser="resurser" v-bind:players="players" v-bind:user="user"></trade></overlay>
     <overlay 
       v-bind:panel="map_panel"  
@@ -25,7 +26,7 @@
 
     <footer>
       <div class="spacer"></div>
-      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?slideoutToggle():'';" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+      <svg class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleOverlay('buy_panel'):'';" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
         <use xlink:href="#svg-dollar"></use>
       </svg>
       <svg id="trade_toggle" class="icon" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleOverlay('trade_panel'):'';" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
@@ -64,19 +65,25 @@ import Panel from '@/components/Panel'
 import Trade from '@/components/Trade'
 import Maps from '@/components/Maps'
 import Cards from '@/components/Cards'
+import Turn from '@/components/Turn'
 
 import Modalmenu from '../components/Modalmenu'
 
 
 export default {
   name: 'app',
-  components: { Overlay, Trade, Maps, Buypanel, Panel, Cards, Modalmenu },
+  components: { Overlay, Trade, Maps, Buypanel, Panel, Cards, Modalmenu, Turn },
   data () {
     return {
       panelIsOpen: '',
+      buy_panel: {
+        isOpen: false,
+        color: '#f1c40f'
+      },
       trade_panel: {
         isOpen: false,
-        color: '#54ADC7'
+        color: '#54ADC7',
+        zIndex: 2,
       },
       map_panel: {
         isOpen: false,
@@ -87,7 +94,31 @@ export default {
         isOpen: false,
         color: '#e74c3c'
       },
+      turn: {
+        "player": undefined,
+        "rolled": false,
+        "time": {
+          "rolled": undefined,
+          "finnished": undefined,
+          "duration": undefined
+        },
+        "state": 1,
+        "moves": [],
+        "movesDone": ()=>{ return this.moves.length==3 },
+        "outcome": {
+          "dices": {
+            "nr": undefined,
+            "a": undefined,
+            "b": undefined
+          },
+          "yield": {},
+          "eventcard": {},
+          "moves": [],
+        },
+        "done": false
+      },
       dices: {
+        player: '',
         a: Math.ceil(Math.random()*6), 
         b: Math.ceil(Math.random()*6),
         rotation_dice1: Math.random()*180,
@@ -103,7 +134,7 @@ export default {
           console.log(this.a+this.b)
         },
         render: function(){
-          return '<div class="dice" style="transform: rotate('+this.rotation_dice1+'deg);">'+
+          return '<div class="dice roll1" style="transform: rotate('+this.rotation_dice1+'deg);">'+
             '<div style="left: 8px; top: 8px;" class="'+'hide'.repeat(this.a<4)+'"></div>'+
             '<div style="left: 20px; top: 8px;" class="'+'hide'.repeat(this.a<6)+'"></div>'+
             '<div style="left: 32px; top: 8px;" class="'+'hide'.repeat(this.a<2)+'"></div>'+
@@ -111,7 +142,7 @@ export default {
             '<div style="left: 8px; top: 32px;" class="'+'hide'.repeat(this.a<2)+'"></div>'+
             '<div style="left: 20px; top: 32px;" class="'+'hide'.repeat(this.a<6)+'"></div>'+
             '<div style="left: 32px; top: 32px;" class="'+'hide'.repeat(this.a<4)+'"></div>'+
-          '</div><div class="dice" style="transform: rotate('+this.rotation_dice2+'deg);">'+
+          '</div><div class="dice roll2" style="transform: rotate('+this.rotation_dice2+'deg);">'+
             '<div style="left: 8px; top: 8px;" class="'+'hide'.repeat(this.b<4)+'"></div>'+
             '<div style="left: 20px; top: 8px;" class="'+'hide'.repeat(this.b<6)+'"></div>'+
             '<div style="left: 32px; top: 8px;" class="'+'hide'.repeat(this.b<2)+'"></div>'+
@@ -124,6 +155,15 @@ export default {
           '.dice{display:inline-block; margin: 10px 10px;width: 50px;height: 50px;background-color: #FAFAFA;border-radius: 5px;box-shadow:0 0 10px -3px gray}'+
           '.dice>div{width:10px; height:10px; background-color:white; border-radius:100%; box-shadow: 2px 2px 6px 2px rgb(139, 139, 139) inset;position:absolute; }'+
           '.hide{display:none}'+
+          '@keyframes roll {'+
+          '  100% {-webkit-transform: translate(0,0) rotate(0);-webkit-transform-origin: 17px 22px; }'+
+            '60% {-webkit-transform: translate(-50px,-30px) rotate(250deg);-webkit-transform-origin: 24px 22px; }'+
+            '40% {-webkit-transform: translate(60px,-50px) rotate(500deg);-webkit-transform-origin: 16px 22px; }'+
+            '15% {-webkit-transform: translate(-40px,-7px) rotate(990deg);-webkit-transform-origin: 23px 22px; }'+
+            'from {-webkit-transform: translate(0,0) rotate(1000deg);}'+
+          '}'+
+          '.roll1 { animation: roll 0.5s reverse;}'+
+          '.roll2 { animation: roll 0.5s; }'+
           '</style>';
         }
       },
@@ -230,10 +270,286 @@ export default {
         fields: [],
         isBuild: false,
       }],
-      bought: {}
+      bought: {},
+      armyitems: {
+        "Trupp": {
+          name: 'Trupp',
+          price: {
+            "people": [1],
+          },
+          vel: '1 fält/drag',
+          veg: 'alla fält',
+          range: 'Samma fält',
+          rpd: 1
+        },
+        "Mek_infanteri": {
+          name: 'Mek. infanteri',
+          price: {
+            "säd": [1],
+            "sten": [1],
+            "olja": [1],
+            "people": [1]
+          },
+          vel: '2 fält/drag',
+          veg: 'öppna fält',
+          range: 'Samma fält',
+          capacity: '5 trupper',
+          rpd: 1
+        },
+        "Lätt_tank": {
+          name: 'Lätt tank',
+          price: {
+            "säd": [1],
+            "sten": [1],
+            "olja": [1],
+            "people": [1]
+          },
+          vel: '2 fält/drag',
+          veg: 'öppna fält',
+          range: 'Samma fält',
+          rpd: 1
+        },
+        "Tung_tank": {
+          name: 'Tung tank',
+          price: {
+            "säd": [1],
+            "sten": [1,2],
+            "olja": [1,2],
+            "people": [1,2]
+          },
+          vel: '1 fält/drag',
+          veg: 'öppna fält',
+          range: '1 fält',
+          rpd: 2
+        },
+        "Artilleri": {
+          name: 'Artilleri',
+          price: {
+            "säd": [1],
+            "sten": [1,2],
+            "people": [1]
+          },
+          vel: '1 fält/drag',
+          veg: 'öppna fält',
+          range: '3 fält',
+          rpd: 3
+        },
+        "Jaktplan": {
+          name: 'Jaktplan',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "olja": [1],
+            "people": [1]
+          },
+          vel: '12cm',
+          veg: 'luft',
+          range: '3 fält',
+          rpd: 2
+        },
+        "Bombplan": {
+          name: 'Bombplan',
+          price: {
+            "säd": [1],
+            "trä": [1,2,3],
+            "olja": [1],
+            "people": [1,2]
+          },
+          vel: '8cm',
+          veg: 'luft',
+          range: 'Samma fält',
+          capacity: '5 bomber',
+          rpd: 3
+        },
+        "Herkules": {
+          name: 'Herkules',
+          price: {},
+          vel: '8cm',
+          veg: 'luft',
+          range: 'Samma fält',
+          capacity: '5 trupper',
+          rpd: 0
+        },
+        "Slagskepp": {
+          name: 'Slagskepp',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "sten": [1,2],
+            "olja": [1,2],
+            "people": [1,2,3,4,5,6]
+          },
+          vel: '6cm',
+          veg: 'vatten',
+          range: '5cm',
+          rpd: 3
+        },
+        "Ubåt": {
+          name: 'Ubåt',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "sten": [1],
+            "olja": [1],
+            "people": [1,2,3,4]
+          },
+          vel: '6cm',
+          veg: 'vatten',
+          range: '5cm',
+          rpd: 3
+        },
+        "Transportfartyg": {
+          name: 'Transportfartyg',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "sten": [1],
+            "olja": [1],
+            "people": [1,2]
+          },
+          vel: '4cm',
+          veg: 'vatten',
+          capacity: '10 trupper/3 tanks',
+          rpd: 0
+        },
+        "Hangarfartyg": {
+          name: 'Hangarfartyg',
+          price: {
+            "säd": [1],
+            "sten": [1,2,3],
+            "olja": [1,2,3],
+            "people": [1,2,3,4,5,6]
+          },
+          vel: '4cm',
+          veg: 'vatten',
+          capacity: '5 flygplan',
+          rpd: 2
+        },
+        "Missilramp": {
+          name: 'Missilramp',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "sten": [1,2,3],
+            "olja": [1]
+          },
+          vel: '0cm',
+          veg: 'alla fält',
+          range: '15cm',
+          rpd: 1
+        }
+      },
+      buildingitems: {
+        "By": {
+          name: 'By',
+          price: {
+            "säd": [1,2],
+            "trä": [1,2]
+          },
+          utdelning: 1,
+          bonus: {"type": 'people', "antal": 1},
+          info: 'Ger utdelning för angränsande fält.'
+        },
+        "Stad": {
+          name: 'Stad',
+          price: {
+            "säd": [1],
+            "trä": [1,2],
+            "sten": [1],
+            "olja": [1]
+          },
+          utdelning: 2,
+          bonus: {"type": 'people', "antal": 2},
+          info: 'Ger utdelning för angränsande fält.'
+        },
+        "Storstad": {
+          name: 'Storstad',
+          price: {
+            "säd": [1],
+            "sten": [1,2,3],
+            "olja": [1,2]
+          },
+          utdelning: 2,
+          bonus: {"type": 'people', "antal": 3},
+          info: 'Ger utdelning för angränsande fält.'
+        },
+        "Fabrik": {
+          name: 'Fabrik',
+          price: {
+            "säd": [1,2],
+            "sten": [1],
+            "olja": [1,2],
+            "people": [1,2,3,4]
+          },
+          utdelning: 2,
+          bonus: {"type": 'valfri', "antal": 1},
+          info: 'Ger utdelning för angränsande fält.'
+        },
+        "Flygplats": {
+          name: 'Flygplan',
+          price: {
+            "säd": [1],
+            "sten": [1,2],
+            "olja": [1,2],
+            "people": [1,2,3,4,5,6]
+          },
+          info: 'Möjliggör flygplans-produktion.'
+        },
+        "Hamn": {
+          name: 'Hamn',
+          price: {
+            "säd": [1],
+            "trä": [1],
+            "sten": [1,2],
+            "olja": [1],
+            "people": [1,2,3,4]
+          },
+          info: 'Möjliggör fartygs-produktion, samt byteshandel med andra spelare som har hamn.'
+        },
+        // "Oljerigg": {
+        //   "trä": [],
+        //   "säd": [],
+        //   "olja": [],
+        //   "sten": [],
+        //   "djur": []
+        // },
+        "Universitet": {
+          name: 'Universitet',
+          price: {
+            "säd": [1,2,3],
+            "trä": [1],
+            "sten": [1],
+            "people": [1,2,3,4]
+          },
+          info: 'Lyckad forskning ger utvecklingskort.'
+        },
+        "Väg": {
+          name: 'Väg',
+          price: {
+            "sten": [1],
+            "olja": [1]
+          },
+          info: 'Möjliggör byggnadsplats.'
+        },
+        "Bro": {
+          name: 'Bro',
+          price: {
+            "säd": [1],
+            "trä": [1,2],
+            "sten": [1],
+            "olja": [1]
+          },
+          info: 'Möjliggör rörlighet över sund.'
+        }
+      }
     }
   },
   computed: {
+    turn_panel: function(){
+      return {
+        isOpen: this.dices.player == this.user.username && !this.turn.done
+      }
+    },
     screenheight: function() {
       return document.documentElement.clientHeight+'px';
     },
@@ -313,6 +629,8 @@ export default {
     //this.trade_panel.open()
     
     this.$emit('openLoginPanel')
+    var self = this;
+    setInterval(()=> {self.dices.player='Andreas'}, 50000)
     // this.slideout = new Slideout({
     //   'panel': document.getElementById('panel'),
     //   'menu': document.getElementById('buypanel'),

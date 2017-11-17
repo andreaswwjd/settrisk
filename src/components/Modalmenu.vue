@@ -1,8 +1,8 @@
 <template>
-  <div id="modal" v-bind:class="{closing: closing}" v-bind:style="{height: height, opacity: opacity}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&modal.dismissable?close():'';" v-on:click.stop v-on:touchend.stop>
+  <div id="modal" v-bind:class="{closing: closing}" v-bind:style="{height: height, opacity: opacity}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&modal.dismissable?close():'';" v-on:click.prevent.stop v-on:touchend.stop>
     <div id="modal-content" v-bind:style="{top: top}" v-on:transitionend="closeTransitionEnd" v-on:touchend.stop>
       <span class="back" v-if="currentMenuIndex" v-on:click="back()"><</span>
-      <span class="close" v-if="modal.dismissable" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?close():'';">&times;</span>
+      <span class="close" v-if="modal.dismissable" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?close():'';" v-on:click.prevent>&times;</span>
       <div v-bind:class="modal.svgClass" v-if="modal.svg" v-html="modal.svg"></div>
       <div id="menues_container">
         <div id="menu_slider" v-bind:style="{transform: 'translateX('+(currentMenuIndex * (-100) / modal.content.length)+'%)', width: (100 * modal.content.length) +'%'}" v-on:transitionend.stop>
