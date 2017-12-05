@@ -1,1 +1,1 @@
-web: npm run build --report
+web: npm run dev --report

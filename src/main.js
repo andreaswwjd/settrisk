@@ -5,7 +5,7 @@ import Context from './Context'
 import router from './router'
 import VueSocketio from 'vue-socket.io';
 
-Vue.use(VueSocketio, 'http://localhost:3000');
+Vue.use(VueSocketio, 'https://socket.settrisk.se:53001');
 
 Vue.config.productionTip = false
 

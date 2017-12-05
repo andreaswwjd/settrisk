@@ -4,7 +4,7 @@
       <Login v-on:closeLoginPanel="curtainDown"></Login>
     </div>
     <router-view id="router" v-on:openLoginPanel="curtainUp" v-on:closeLoginPanel="curtainDown"></router-view>
-    
+
   </div>
 </template>
 
