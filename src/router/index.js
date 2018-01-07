@@ -4,7 +4,8 @@ import Router from 'vue-router'
 import Index from '@/views/Index'
 import Login from '@/views/Login'
 import Games from '@/views/Games'
-import New from '@/views/New'
+import Gamesettings from '@/views/Gamesettings'
+import Newuser from '@/views/Newuser'
 import App from '@/views/App'
 import Bank from '@/views/Bank'
 import Rules from '@/views/Rules'
@@ -22,27 +23,32 @@ export default new Router({
       component: Index
     },
     {
+      path: '/new/user',
+      name: 'New User',
+      component: Newuser
+    },
+    {
       path: '/games',
       name: 'Games',
       component: Games
     },
     {
-      path: '/games/new',
-      name: 'New',
-      component: New
+      path: '/game/settings/:id',
+      name: 'Game Settings',
+      component: Gamesettings
     },
     {
-      path: '/games/new/board',
+      path: '/new/board',
       name: 'Builder',
       component: Builder
     },
     {
-      path: '/game/app',
+      path: '/game/app/:id',
       name: 'App',
       component: App
     },
     {
-      path: '/game/bank',
+      path: '/bank',
       name: 'Bank',
       component: Bank
     },

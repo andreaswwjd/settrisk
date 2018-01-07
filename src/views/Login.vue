@@ -2,17 +2,23 @@
   <div id="login_page">
     <modal v-bind:modal="modal" v-on:register="register"></modal>
     <div id="loginmenu" class="overlay" style="z-index: 100; height: 1000px;">
-      <div id="login" >
+      <div id="login" style="height:100%">
         <div class="margintop" style="width:100%; height: 150px;"></div>
-        <h1>Logga in</h1>
+        <h1>{{game.name}}</h1>
         <form id="login_form">
           <label id="reg_label" name="reg_label" v-show="registration">Ny</label>
-          <input  v-model="username" v-on:keyup="checkUser()"  v-bind:class="{excists: username_excists}" class="focus" type="text" name="username" autocapitalize="words" placeholder="Namn" required>
+          <input  v-model="username" v-on:keyup="checkUser()"  v-bind:class="{exists: username_exists}" class="focus" type="text" name="username" autocapitalize="words" placeholder="Namn" required>
           <!-- <label>Password</label> -->
-          <input v-on:keyup="checkPass()" v-model="password" v-bind:class="{excists: user_excists, no: password_filled && !right_pass, yes: password_filled && right_pass}" placeholder="...." type="pin" name="password" value="" pattern="\d*" maxlength="4" size="4" style="-webkit-text-security: disc;" required>
+          <input v-on:keyup="checkPass()" v-model="pin" v-bind:class="{exists: user_exists, no: password_filled && !right_pass, yes: password_filled && right_pass}" placeholder="...." type="pin" name="password" value="" pattern="\d*" maxlength="4" size="4" style="-webkit-text-security: disc;" required>
           <button v-on:click="submitLoginForm" >{{ registration ? "Registrera" : "Logga in"}}</button>
           <button v-on:click="closeLoginPanel('/games')" style="position: absolute; top: 20px; left: 20px;"> Back </button>
         </form>
+        <p v-if="registration&&username">Det ser ut som att du <br>inte är registrerad på spelet. </p>
+        
+        <div style="bottom:20px; position: absolute; width: 100%">
+          <p><strong>Tips:</strong> lägg denna sida på hem-<br>skärmen så får du helskärm.</p>
+          <div><i class="fas fa-arrow-down"></i></div>
+        </div>
       </div>
     </div>
   </div>
@@ -24,13 +30,16 @@ import Modal from '../components/Modal'
 export default {
   name: 'login',
   components: { Modal },
+  props:{
+    game: Object
+  },
   data () {
     return {
       registration: true,
       username: '',
-      password: '',
-      user_excists: false,
-      username_excists: false,
+      pin: '',
+      user_exists: false,
+      username_exists: false,
       right_pass: false,
       modal: {
         type: ''
@@ -39,15 +48,15 @@ export default {
   },
   computed: {
     password_filled: function(){
-      return this.password.toString().length == 4;
+      return this.pin.toString().length == 4;
     }
   },
   sockets:{
-    user_excists: function(excists) {
-      if(excists){
-        console.log('Username excists!')
+    user_exists: function(exists) {
+      if(exists){
+        console.log('Username exists!')
         this.registration = false;
-        this.username_excists = true;
+        this.username_exists = true;
       }
     },
     authorized: function(authorized){
@@ -55,29 +64,39 @@ export default {
       if(authorized){
         console.log('authorized')
         this.right_pass = true;
-        this.user_excists = true;
+        this.user_exists = true;
       }
     },
-    login: function(authorized){
-      if(authorized){
-        console.log('Loging in')
+    login: function(user){
+      if(user){
+        console.log('Logging in')
         this.closeLoginPanel()
+        this.$emit('loggedIn', user)
+        this.$emit('notify', {html: '<p>Välkommen <strong>'+user.name+'</strong></p>', show: true})
+        this.$socket.emit('initApp',this.$props.game, user)
+
       }
     },
     registration_done: function(done){
       if(done){
         console.log('Loging in')
-        this.closeLoginPanel()
+        // this.closeLoginPanel()
       }
     },
+    // games: function(games){
+    //   console.log('games',games)
+    //   console.log('this',this.game)
+    //   const id = this.$route.params.id;
+    //   this.game = games.filter(g => g.id==id)[0]
+    // },
   },
   methods: {
     submitLoginForm: function(e){
       e.preventDefault()
       // Bypass
-      this.closeLoginPanel()
+      // this.closeLoginPanel()
       
-      if(!this.username || !this.password){
+      if(!this.username || !this.pin){
         this.modal = {
           type: 'alert',
           action: '',
@@ -91,12 +110,13 @@ export default {
           action: 'register',
           isOpen: true,
           title: "Ny spelare?",
-          msg: "Är du säker att du vill registrera en ny spelare i det här spelet?"
+          msg: "Be admin för spelet lägga till dig i inställningarna för spelomgången."
+          // msg: "Är du säker att du vill registrera en ny spelare i det här spelet?"
         }
       }else{
-        this.$socket.emit('login', {username: this.username, password: this.password })
+        this.$socket.emit('login', {id: this.game.id, username: this.username, pin: Number.parseInt(this.pin) })
       }
-      //this.$socket.emit('login', {username: this.username, password: this.password })
+      //this.$socket.emit('login', {username: this.username, pin: this.pin })
 //      window.location = "http://localhost:8080/#/component/"
     },
     closeLoginPanel: function(destination){
@@ -104,14 +124,15 @@ export default {
     },
     checkUser: function() {
       console.log('Check User...')
-      this.$socket.emit('checkUser', {username: this.username })
+      this.username_exists = false;
+      this.$socket.emit('checkUser', {id: this.game.id, username: this.username })
     },
     checkPass: function() {
       this.right_pass = false;
       if(!this.registration){
-        console.log('Check Password...')
+        console.log('Check pin...')
 
-        this.$socket.emit('checkPass', {username: this.username, password: this.password })
+        this.$socket.emit('checkPass', {id: this.game.id,username: this.username, pin: Number.parseInt(this.pin) })
       }
     },
     register: function(confirm){
@@ -130,7 +151,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-input.excists {
+input.exists {
   background: #2ECC71 !important;
 }
 

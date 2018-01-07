@@ -1,5 +1,5 @@
 <template>
-  <div class="overlay">
+  <div class="overlay" style="overflow:hidden"> 
     <div class="menuitem transition" v-bind:style="{height: height, transform: 'translateX(-'+(current+x)*100+'vw)'}" v-on:touchstart="tstart" v-on:touchmove.prevent="tmove" v-on:touchend="tend" v-on:transitionend="transend" style="">
       <section>
       </section>
@@ -22,17 +22,17 @@
       <section>
         <span>
           <h1 style="margin:-8px 0">{{turn.moves.length!=3? 'Vad vill du göra?':'Done!'}}</h1>
-          <svg v-for="i in [0,1,2]" height="53" width="53" viewBox="-20 -20 40 40" v-bind:class="{animat: turn.moves[i]!=undefined}" v-bind:style="{stroke: turn.moves[i]? '#f1f1f1': '#af3636' }" style="stroke: #af3636; stroke-width:1;stroke-linecap:round;stroke-miterlimit:10;fill:none;">
+          <svg v-for="i in [0,1,2]" v-bind:key="i" height="53" width="53" viewBox="-20 -20 40 40" v-bind:class="{animat: turn.moves[i]!=undefined}" v-bind:style="{stroke: turn.moves[i]? '#f1f1f1': '#af3636' }" style="stroke: #af3636; stroke-width:1;stroke-linecap:round;stroke-miterlimit:10;fill:none;">
             <g class="clock"><use v-bind:xlink:href="'#Stopwatch'"></use></g>
             <line class="swline" x1="-13.9" y1="15.6" x2="-9.8" y2="11.5"/>
             <line class="swline" x1="13.1" y1="15" x2="9.3" y2="11.2"/>
             <line class="swline" x1="13.4" y1="-11.7" x2="9.7" y2="-8"/>
             <line class="swline" x1="-14.1" y1="-12.2" x2="-10.1" y2="-8.2"/>
           </svg>
-          <span style="display: block; margin: -10px 0;"><span v-for="i in [0,1,2]" style="display: inline-block; color: white; margin: 0 2px;">{{turn.moves[i] }} </span> </span>
+          <span style="display: block; margin: -10px 0;"><span v-for="i in [0,1,2]" v-bind:key="i" style="display: inline-block; color: white; margin: 0 2px;">{{turn.moves[i] }} </span> </span>
         </span>
         <div style="height: 50vh; margin-top: -0vh">
-          <button class="button scale shadow" v-bind:class="{active: active_btn=='Armedrag'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleMoveBtn('Armedrag'):'';" v-bind:disabled="turn.moves.length == 3" v-on:click.prevent>Armedrag
+          <button class="button scale shadow" v-bind:class="{active: active_btn=='Armedrag'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&turn.moves.length<3?toggleMoveBtn('Armedrag'):'';" v-bind:disabled="turn.moves.length >= 3" v-on:click.prevent>Armedrag
             <div class="card" v-on:touchmove.stop v-on:touchend.stop>
               <div id="items_container">
                 <!-- <div class="item" v-for="item in Object.keys(buildingitems)">
@@ -50,7 +50,7 @@
                     <span class="xsmall" v-if="buildingitems[item].bonus"><strong>Bonus: </strong>{{buildingitems[item].bonus.antal+' '+buildingitems[item].bonus.type}}<br></span>
                   </div>
                 </div> -->
-                <div class="item" v-for="item in Object.keys(armyitems)">
+                <div class="item" v-for="item in Object.keys(armyitems)" v-bind:key="item">
                   <button class="btn armysymbol">
                   <svg height="53" width="53" viewBox="-20 -20 40 40">
                     <rect fill="#FAFAFA" style="x: -14;y: -14; height: 28px;width: 28px; transform: rotate(45deg);" ></rect>
@@ -59,8 +59,8 @@
                   </button>
                   <div class="small" style="margin: 10px 5px 5px 5px; width: 175px">
                     <span class="capitalize">{{item}}</span><br>Pris: 
-                    <span v-for="res in Object.keys(resurser.types)">
-                      <div v-for="nr in armyitems[item].price[res]" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
+                    <span v-for="res in Object.keys(resurser.types)" v-bind:key="res" >
+                      <div v-for="nr in armyitems[item].price[res]" v-bind:key="nr" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
                         <svg v-if="res=='people'" width="10px" height="10px" viewBox="14 10 72 80"><use v-bind:xlink:href="'#svg-'+res"></use></svg>
                       </div>
                     </span>
@@ -77,23 +77,23 @@
             <button class="button" style="background: antiquewhite; color: black; " v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?addmove('Armedrag'):'';" v-on:click.prevent>Förflytta/Attackera</button>
             <br>Tillbaka
           </button>
-          <button class="button scale shadow" v-bind:class="{active: active_btn=='Forskning'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleMoveBtn('Forskning'):'';" v-bind:disabled="turn.moves.length == 3" v-on:click.prevent>Forskning
+          <button class="button scale shadow" v-bind:class="{active: active_btn=='Forskning'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&turn.moves.length<3?toggleMoveBtn('Forskning'):'';" v-bind:disabled="turn.moves.length >= 3" v-on:click.prevent>Forskning
             <div class="card" v-on:touchmove.stop v-on:touchend.stop></div>
             <button class="button" style="background: antiquewhite; color: black;" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?addmove('Forskning'):'';" v-on:click.prevent>Forska</button>
             <br>Tillbaka
           </button>
-          <button class="button scale shadow" v-bind:class="{active: active_btn=='Utvecklingskort'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?toggleMoveBtn('Utvecklingskort'):'';" v-bind:disabled="turn.moves.length == 3" v-on:click.prevent>Utvecklingskort
+          <button class="button scale shadow" v-bind:class="{active: active_btn=='Utvecklingskort'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&turn.moves.length<3?toggleMoveBtn('Utvecklingskort'):'';" v-bind:disabled="turn.moves.length >= 3" v-on:click.prevent>Utvecklingskort
             <div class="card" v-on:touchmove.stop v-on:touchend.stop></div>
             <button class="button" style="background: antiquewhite; color: black;" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?addmove('Utvecklingskort'):'';" v-on:click.prevent>Använd ett kort</button>
             <br>Tillbaka
           </button>
-          <button class="button scale shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?openTradepanel():'';" v-bind:disabled="turn.moves.length == 3" v-on:click.prevent>Byteshandel
+          <button class="button scale shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?openTradepanel():'';" v-on:click.prevent>Byteshandel
             <div class="card" v-on:touchmove.stop></div>
             <button class="button" style="background: antiquewhite; color: black;" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?'':'';" v-on:click.prevent>Öppna bytesmenyn</button>
             <br>Tillbaka
           </button>
         </div>
-        <button class="button" v-bind:style="{opacity: turn.moves.length==3?1:0, visibility: turn.moves.length==3? 'visible' : 'hidden', transition: '2s', marginTop: '0vh'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?turn.done=true:'';" v-on:click.prevent>Överlämna</button>
+        <button class="button" v-bind:style="{opacity: turn.moves.length>=3?1:0, visibility: turn.moves.length>=3? 'visible' : 'hidden', transition: '2s', marginTop: '0vh'}" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?done():'';" v-on:click.prevent>Överlämna</button>
 
       </section>
     </div>
@@ -110,6 +110,7 @@ export default {
     trade_panel: Object,
     resurser: Object,
     armyitems: Object,
+    game: Object,
     // buildingitems: Object
   },
 
@@ -125,10 +126,10 @@ export default {
 
   computed:{
     dicesHTML: function(){
-      return this.dices.render()
+      return this.turn.rolled ? this.dices.render(this.turn.outcome.a,this.turn.outcome.b) : this.dices.render();
     },
   	height: function(){
-      return this.panel.isOpen ? '100vh' : '0vh';
+      return this.panel.isOpen && (!this.game.paused) ? '100vh' : '0vh';
   	},
     menuitem: function(){
       return this.$el.firstElementChild;
@@ -140,18 +141,33 @@ export default {
       if(this.turn.rolled){return}
       this.dices.roll()
       this.turn.rolled = true
+      this.turn.outcome.dices = {
+        a: this.dices.a,
+        b: this.dices.b,
+      }
+      this.$socket.emit('rollDices', this.turn)
       var self = this;
-      setTimeout(function(){self.next()},1500)
+      setTimeout(function(){self.next()}, 1500)
+    },
+    updateTurn: function(){
+      this.$socket.emit('updateTurn', this.turn)
     },
     addmove: function(move){
       var self = this;
-      setTimeout(function(){self.turn.moves.push(move)},500)
+      setTimeout(function(){
+        self.turn.moves.push(move);
+        self.$socket.emit('updateTurn', self.turn)
+      },500)
       // this.toggleMoveBtn(move);
       console.log(move)
+    },
+    done: function(){
+      this.$socket.emit('done', this.turn)
     },
     next: function(){
       this.current += 1
       this.turn.state = this.turn.state<this.current? this.current : this.turn.state;
+      this.$socket.emit('updateTurn', this.turn)
     },
     toggleMoveBtn: function(btn){
       console.log(btn)
@@ -184,6 +200,10 @@ export default {
 			    },
     transend: function(e){
             this.menuitem.classList.remove('transition');
+            if(this.turn.done){ 
+              this.current = 1;
+              this.menuitem.classList.add('transition');
+            }
 			     //if(!this.$props.panel.isOpen){ this.hidden = true; } 
 			    }
   },

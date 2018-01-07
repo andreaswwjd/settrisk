@@ -1,6 +1,6 @@
 <template>
   <div class="overlay">
-    <div class="menuitem transition" v-bind:style="{height: height, background: panel.color, zIndex: panel.zIndex || 2 }" v-on:touchstart="tstart" v-on:touchmove="tmove" v-on:touchend="tend" v-on:transitionend="transend">
+    <div class="menuitem transition" v-bind:style="{height: height, background: panel.color, overflow: panel.noscroll?'hidden':'hidden', zIndex: panel.zIndex || 2 }" v-on:touchstart="tstart" v-on:touchmove="tmove" v-on:touchend="tend" v-on:transitionend="transend">
       <slot></slot>
     </div>
   </div>
@@ -8,7 +8,7 @@
 
 <script>
 export default {
-  name: 'menuitem',
+  name: 'overlay',
   props: {
   	panel: Object
   },

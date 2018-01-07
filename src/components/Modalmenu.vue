@@ -11,7 +11,7 @@
             <p style=" color: darkgray;" v-if="content.msg" v-html="content.msg"></p>
             <div v-bind:class="content.htmlClass" v-if="content.html" v-html="content.html"></div>
             <div v-if="content.menu" style="height:10px; width:100%"></div>
-            <div class="menu_item" v-if="content.menu" v-for="item in content.menu" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(item.action, item.response, item.then):'';">{{ item.text }}</div>
+            <div v-bind:class="{menu_item: !item.type, menu_title: item.type}" v-if="content.menu" v-for="item in content.menu" v-bind:key="item.text" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&!item.type?action(item.action, item.response, item.then):'';">{{ item.text }}</div>
             <button class="round_btn" v-if="content.button1" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(content.button1.action, content.button1.response, content.button1.then):'';">{{ content.button1.text }}</button>
             <button class="round_btn" v-if="content.button2" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?action(content.button2.action, content.button2.response, content.button1.then):'';">{{ content.button2.text }}</button>
           </div>
@@ -53,6 +53,9 @@ export default {
     close: function(){
       this.$props.modal.isOpen = false;
       this.closing = true;
+      if(this.$props.modal.eraseAfterClose){
+        this.$socket.emit('dismissModal',this.$props.modal)
+      }
     },
     action: function(action, response, then){
       if(action){
@@ -65,6 +68,9 @@ export default {
     },
     back: function(){
       this.currentMenuIndex -= 1;
+    },
+    log: function(){
+      console.log('Selection made')
     },
     closeTransitionEnd: function() {
       if(this.closing){
@@ -81,8 +87,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
+.bank {
+  background: rgb(84, 173, 199);
+}
 
-.selection {
+.selection, .bank{
     position: relative;
     height: 140px;
     overflow: hidden;
@@ -188,6 +197,13 @@ export default {
     height: 30px;
     background: lightblue;
     padding: 10px;
+    border-radius: 5px;
+    margin: 0 auto 10px auto;
+    font-size: 20px;
+}
+.menu_title{
+    width: 80%;
+    height: 30px;
     border-radius: 5px;
     margin: 0 auto 10px auto;
     font-size: 20px;

@@ -1,10 +1,16 @@
 <template>
   <div id='panel' v-bind:class="{slideoutpanel: true, transition: transition}" v-bind:style="{transform: 'translate3d('+translationX+'px,0,0)'}" v-on:click="$props.isOpen=false" v-on:touchstart.stop.prevent="tstart" v-on:touchmove.stop.prevent="tmove" v-on:touchend.stop.prevent="tend" v-on:touchcancel.stop.prevent="tend" v-on:transitionend="transend" v-on:scroll.stop.prevent>
   <!-- <div id='panel' v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?$emit('close'):''"> -->
-    <div class="margintop" style="width:100%; height: 30px;"></div>
+    <div class="resurs_display" style="width:100%; height: 30px;">
+      <div class="" v-for="typ in resurser.resursTypes" :key="typ">
+        <resurs v-bind:resurs="{type: typ}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin-bottom:-5px;"></resurs>
+        <div style="display:inline-block;">{{resurser.array.filter(r=>r.type==typ).length}}</div>
+      </div>
+    </div> 
+    <div class="margintop" style="width:100%; height: 50px;"></div>
     <!-- <h1> Main panel </h1> -->
     <div v-html="dicesHTML"></div>
-    <resurs v-for="resurs in $props.resurser.array" :key="resurs.type" v-bind:resurs="resurs" v-bind:panelX="current" v-bind:options="{movable:true}" ></resurs>
+    <resurs v-for="resurs in _resurser" v-bind:key="resurs.id+'p'" v-bind:resurs="resurs" v-bind:panelX="current" v-bind:options="{movable:true}" ></resurs>
     <div id="itemsmenu_container" style="position: absolute; z-index: 1; overflow: hidden; transition: left 0.3s; padding: 0 5px;">
       <div style="height: 30px"></div>
     </div>
@@ -33,6 +39,9 @@ export default {
     }
   },
   computed:{
+    _resurser: function(){
+      return this.$props.resurser.array.filter(r=>r.location=='panel')
+    },
     dicesHTML: function(){
       return this.dices.render()
     },
@@ -121,14 +130,25 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
+<style>
+.resurs_display {
+  position:fixed; top: 0; left: 0; width:100%; 
+}
+.resurs_display > div {
+  display: inline-flex;
+  margin: 10px;
+  align-items: center;
+}
+.resurs_display .resurs > div {
+  background: none;
+  box-shadow: none !important
+}
 #panel{
   height: 100%;
   min-height: 675px;
   background: #f7e2c2;box-shadow: -3px 0 23px rgba(0, 0, 0, 0.25);
 }
-.transition {
+#panel.transition {
   transition: 0.3s transform cubic-bezier(0.21, 0.78, 0.58, 1);
 }
 </style>

@@ -2,8 +2,9 @@
   <div class="index">
     <div class="margintop" style="width:100%; height: 100px;"></div>
     <h1>Settrisk 3.0</h1>
+    <router-link to="/new/user"><button class="big_btn">New User</button></router-link>
     <router-link to="/games"><button class="big_btn">Games</button></router-link>
-    <router-link to="/games/new/board"><button class="big_btn">Maps Builder</button></router-link>
+    <router-link to="/new/board"><button class="big_btn">Maps Builder</button></router-link>
     <router-link to="/rules"><button class="big_btn">Rules</button></router-link>
     <router-link to="/guide"><button class="big_btn">Guide</button></router-link>
     <router-link to="/about"><button class="big_btn">About</button></router-link>
@@ -35,7 +36,8 @@ export default {
   name: 'index',
   data () {
     return {
-      swishTolken: ''
+      users: [],
+      games: []
     }
   },
   computed: {
@@ -81,6 +83,10 @@ export default {
 
 .games {
   overflow: hidden;
-  
 }
+.index {
+      max-width: 500px;
+    margin: 0 auto;
+}
+
 </style>

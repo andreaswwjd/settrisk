@@ -1,22 +1,24 @@
 <template>
   <div id='trade'>
     <h1> Trademarket </h1>
-    <svg mmmonclick="trademenu.toggle(); emptyTrade()" width="70px" height="100px" viewBox="0 0 100 100">
+    <svg width="70px" height="100px" viewBox="0 0 100 100">
       <use xlink:href="#svg-hands"></use>
     </svg>
     <div style="width: 100%; height: 40px; justify-content: center;">
       <div id="trade_container" >
         <p style="font-size: 10px; margin: 0; transition: 0.7s; opacity: 0" v-bind:class="{show: trade[0]}" >TAP TO REMOVE</p>
-        <div v-for="resurs in resurser.trade" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?del(resurs):'';"><resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs></div>
+        <div v-for="resurs in trade" v-bind:key="resurs.x+resurs.y" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?del(resurs):'';">
+          <resurs v-bind:resurs="resurs" v-bind:options="{movable:false, dyrt:''}"></resurs>
+        </div>
       </div>
     </div>
     <div style="width: 100%; height: 20px;"></div>
     <!-- Resurs buttons -->
-    <button v-for="resurs in resurser.typeNames" v-bind:class="'res ' + resurs" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?add(resurs):'';" v-bind:disabled="!$props.resurser.find(resurs)"> {{ resurs }} </button>
+    <button v-for="resurstype in resurser.tradeTypes" :key="resurstype" v-bind:class="'res ' + resurstype" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?add(resurstype):'';" v-bind:disabled="!$props.resurser.array.find(r=>r.type==resurstype&&r.location=='panel')"> {{ $props.resurser.types[resurstype].name }} </button>
     <div class="" style="width: 100%; height: 20px;"></div>
     <!-- To buttons -->
-    <button v-for="player in players" v-bind:disabled="'trade.korg.length' < 1" v-if="player.username != user.username" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?send(player):'';" class="player shadow_blue txtshadow"><p>{{player.username}}</p></button>
-    <button mmmng-disabled="trade.isTradable()" mmmng-click="trade.tradeWithBank()" class="player shadow_blue txtshadow"><p>Bank</p></button>
+    <button v-for="player in players" :key="player.id" v-bind:disabled="'trade.korg.length' < 1" v-if="hasHamn && player.username != user.username" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?send(player):'';" class="player shadow_blue txtshadow"><p>{{player.name}}</p></button>
+    <button v-bind:disabled="!isBankable" v-on:click="send({name: 'Bank', username: 'bank'})" class="player shadow_blue txtshadow"><p>Bank</p></button>
      
   </div>
 </template>
@@ -25,11 +27,12 @@
 import Resurs from '@/components/Resurs'
 
 export default {
-  name: 'menuitem',
+  name: 'trade',
   props: {
     resurser: Object,
     players: Array,
-    user: Object
+    user: Object,
+    hasHamn: Boolean
   },
   data () {
     return {
@@ -38,28 +41,34 @@ export default {
   },
   computed:{
   	trade: function(){
-      return this.$props.resurser.trade;
+      // return this.$props.resurser.trade;
+      return this.$props.resurser.array.filter(r=>r.location=='trade');
+    },
+    isBankable: function(){
+      return this.trade.filter(t=>t.type==this.trade[0].type).length==4;
     }
   },
   methods: {
     add: function(type){
-      var resurs = this.$props.resurser.pop(type);
-      if(resurs){this.trade.push(resurs)};
+      this.$props.resurser.array.find(r=>r.type==type&&r.location=='panel').location = 'trade';
+      // var resurs = this.$props.resurser.pop(type);
+      // if(resurs){this.trade.push(resurs)};
     },
     del: function(resurs){
-      var res = this.trade.splice(this.trade.indexOf(resurs),1)[0]
-      this.$props.resurser.push(res);
+      resurs.location = 'panel'
+      // var res = this.trade.splice(this.trade.indexOf(resurs),1)[0]
+      // this.$props.resurser.push(res);
     },
     send: function(player){
-      console.log(player)
+      if(player.name!='Bank'){
+        this.$socket.emit('trade',{resurser: this.trade, to: player})
+      }else if(this.isBankable){
+        this.$socket.emit('trade',{resurser: this.trade, to: player})
+      }
     }
   },
   mounted: function() {
-    var obj = {};
-    Object.keys(this.$props.resurser).map(function(res){
-      obj[res] = [];
-    })
-    this.trade_korg = obj;
+    
   },
   components: { Resurs }
 }
@@ -85,11 +94,11 @@ export default {
 .trä{background-color: #1abc9c;}
 .sten{background-color: #FFFFFF;}
 .olja{background-color: #B697D8;}
-.säd{background-color: #f1c40f;}
+.sad{background-color: #f1c40f;}
 .djur{background-color: #75B96B;}
 
 
-.res{ width: 25%; height: 35px; }
+.res{ width: 35%; height: 35px; }
 .player{ width: 40%; height: 50px; }
 .resurs {display: inline-block;}
 

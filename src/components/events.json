@@ -1,0 +1,166 @@
+[{    
+    "title":"Gerillakrig",
+    "mode": "positive",
+    "description":"Spelaren spelar ut gerillagruppen på valfritt landområde. Varje spelare som har byggnader i anslutning till landområdet tappar inkomst fram tills att den flyttas på nytt. Finns trupper på valda landområdet måste gerillagruppen övervinna dessa för att ockupera området. Storleken av gerillagruppen bestäms av summan på förra tärningskastet. Förlorar spelaren gerillagruppen får försvarande spelare välja landområde att flytta den till."
+},{
+    "title":"Torka",
+    "mode": "negative",
+    "description":"Torka drabbar spannmålsområden med samma nummer som föregående tärningskast. Inga spannmål inkasseras från dessa områden fram tills nästa händelsekort."
+},{
+    "title":"Torka",
+    "mode": "negative",
+    "description":"Torka drabbar alla spannmålsområden. Inga spannmål inkasseras fram tills nästa händelsekort."
+},{
+    "title":"Dimma",
+    "mode": "neutral",
+    "description":"På alla bergsområden vilar tjock dimma. Alla strider som utspelas på berg så förlorar defensiv spelare omständighets-fördel fram tills nästa händelsekort."
+},{
+    "title":"Dimma",
+    "mode": "neutral",
+    "description":"Tung dimma ligger över alla områden med nummer över 8. Anfall överraskar motspelare som inte hinner upptäcka anfallet förrän det är försent. Anfallande spelare spelar med + 1 vid anfall oavsett omständighetsutfall."
+},{
+    "title":"Logistik",
+    "mode": "positive",
+    "description":"Ökad tillgång på råvaror för framställning av dynamit möjliggör billigare byggnation av vägar. Alla spelare bygger två vägar för kostnaden av en fram tills nästa händelsekort."
+},{
+    "title":"Goda skördar",
+    "mode": "positive",
+    "description":"Gynnsamma väderförhållanden ger goda skördar över alla kontinenter. Alla spelare inkasserar dubbelt så mycket spannmål fram tills nästa händelsekort."
+},{
+    "title":"Goda skördar",
+    "mode": "positive",
+    "description":"Gynnsamma väderförhållanden ger goda skördar över alla kontinenter. Alla spelar bygger byar, städer och fabriker utan kostnaden av spannmål fram tills nästa händelsekort."
+},{
+    "title":"Epidemier",
+    "mode": "positive",
+    "description":"Epidemier har utbrutit och hälften av allt infanterier som står på landområden med nummer över föregående tärningskast omkommer."
+},{
+    "title":"Politisk omsvängning",
+    "mode": "negative",
+    "description":"Pacifistiska rörelser och opinion förändrar det politiska klimatet och omöjliggör fortsatt krigsföring. Ingen spelare kan föra krig fram tills nästa händelsekort."
+},{
+    "title":"Handelsblockad",
+    "mode": "negative",
+    "description":"Varje spelare som utför en attack under följande period utsätts för handelsblockad. Konsekvensen blir att spelaren betalar dubbelt så mycket för alla militära enheter fram tills nästa händelsekort."
+},{
+    "title":"Strejk",
+    "mode": "negative",
+    "description":"På grund av dåliga arbetsförhållanden utbryter strejker på fabriker som angränsar nummer 6 eller 8. För att produktionen ska fortsätta behöver spelare betala en spannmålsråvara och två boskapsråvaror per fabrik. De fabriker som spelare ej har råd att betala för när detta kort spelas, sätts ur spel fram tills nästa händelsekort. Detta leder till missade råvaruintäkter, territoriebonus, aktieutdelning och tillverkning av militära enheter."
+},{
+    "title":"Uppror",
+    "mode": "negative",
+    "description":"På grund av inrikespolitiska oroligheter för röd och grön spelare finns inget utrymme för utrikespolitiska angelägenheter (så som krig eller byteshandel). Dessa spelare kan inte kriga eller byteshandla fram tills att nästa händelsekort läggs."
+},{
+    "title":"Uppror",
+    "mode": "negative",
+    "description":"På grund av inrikespolitiska oroligheter för grå och vit spelare finns inget utrymme för utrikespolitiska angelägenheter (så som krig eller byteshandel). Dessa spelare kan inte kriga eller byteshandla fram tills att nästa händelsekort läggs."
+},{
+    "title":"Vulkanutbrott",
+    "mode": "negative",
+    "description":"En ökad seismisk aktivitet har orsakat flera vulkanutbrott. Alla bergsområden med nummer över förra tärningskastet är drabbade. En tredjedel av alla trupper som befunnit sig på dessa vulkaner vid utbrotten omkom."
+},{
+    "title":"Orkan",
+    "mode": "negative",
+    "description":"En kraftig orkan har drabbat alla kuster. Alla städer, byar och fabriker belägna på dessa kuster är i stort behov av återuppbyggnad. Alla spelare behöver betala tre valfria resurser för återuppbyggnaden av varje stad och fabrik, och två valfria resurser för byarna innan dessa åter kan tas i bruk."
+},{
+    "title":"Handel",
+    "mode": "positive",
+    "description":"Diplomatiska ansträngningar har lett till nya gynnsamma handelsavtal med tidigare stängda territorier. Alla spelare med hamn byter två sten till valfri resurs fram tills nästa händelsekort."
+},{
+    "title":"Handel",
+    "mode": "positive",
+    "description":"Diplomatiska ansträngningar har lett till nya gynnsamma handelsavtal med tidigare stängda territorier. Alla spelare med hamn byter två skogsråvaror till valfri resurs fram tills nästa händelsekort."
+},{
+    "title":"Krigsbyte",
+    "description":"För varje landområde som intas belönas spelare med fyra valfria resurser."
+},{
+    "title":"Dynamit",
+    "description":"Upptäckten av dynamit effektiviserar gruvdriften. Alla spelare inkasserar dubbelt så mycket sten fram tills nästa händelsekort."
+},{
+    "title":"Spionage",
+    "description":"Spelaren som just slagit kommer av en händelse över topphemlig information. Spelaren får dra ett utvecklingskort från valfri spelare."
+},{
+    "title":"Underhåll",
+    "description":"Underhåll behöver göras på fabriker och städer. Alla spelare betalar två valfria råvaror per fabrik och stad i underhåll för att inte förlora dem fram tills nästa händelsekort. Underhållet måste ske direkt när detta kort dras."
+},{
+    "title":"Aktieutdelning",
+    "description":"Alla spelare med aktier i ägo inkasserar två valfria resurser per marknadsandel man har aktier placerade i."
+},{
+    "title":"Jordbävning",
+    "description":"Jordbävning drabbar landområden med samma nummer som föregående tärningskast. Alla byar, städer och fabriker i anslutning till dessa landområden drabbas. Alla spelar behöver betala två valfria resurser per byggnad innan dessa åter kan komma i funktion."
+},{
+    "title":"Högkonjuktur",
+    "description":"Ekonomisk tillväxt ökar inkomsten för spelare som har minst två marknadsandelar inom någon industri. Dessa dubblerar sin territorieråvarubonus fram tills nästa händelsekort spelas ut."
+},{
+    "title":"Oljebrist",
+    "description":"På grund av oljebrist sätts hälften av alla spelares pansarbrigader ur spel fram tills nästa händelsekort. Varje spelare väljer själv vilka pansarbrigader som sätts ur spel."
+},{
+    "title":"Urbanisering",
+    "description":"På grund av urbanisering förlorar alla spelare territoriebonus från byar fram tills nästa händelsekort. Spelare räknar endast in städer och fabriker i sin territoriebonus."
+},{
+    "title":"Jordbävning",
+    "description":"Jordbävningar som drabbat alla kontinenter har förstört stora delar av vägnätet. Ingen spelare kan använda sitt vägnät utan behöver förflytta enheter från landområde till landområde fram till att vägarna är återuppbyggda igen. Även fabrikerna är satta ur spel fram tills nästa händelsekort."
+},{
+    "title":"Vargavinter",
+    "description":"Isande kall ihållande vinter blir påfrestande för försörjningslinjerna ut till stridande enheter som befinner sig bortom befintlig infrastruktur. Hälften av allt infanteri som befinner sig på landområden utan väglinjer i förbindelser till städer dör av svält och sjukdomar."
+},{
+    "title":"Höjd Ränta",
+    "description":"Höjd ränta gör det dyrt att bygga men gynnsamt att spara. Kostnaden för byar, städer och fabriker ökar med två valfria resurser per byggnad fram tills nästa händelsekort."
+},{
+    "title":"Sänkt Ränta",
+    "description":"Låg ränta gör det billigt att bygga. Kostnaden för byar, städer och fabriker minskar med en valfria resurs fram tills nästa händelsekort."
+},{
+    "title":"Höjd skatt?",
+    "description":"Varje spelare ges möjlighet att höja skatten fram tills nästa händelsekort. Konsekvensen av en skattehöjning blir ökade intäkter i form av territoriebonus från fabriker som fördubblas under perioden. Ökade skatter ökar också risken för strejk, som sker om någon spelare slår en 2:a eller 3:a innan nästa händelsekort. Konsekvensen av en strejk är stoppad produktion. Spelaren tappar territoriebonus, aktieintäkter och råvaruintäkter från alla fabriker."
+},{
+    "title":"Höjd Arbetstid?",
+    "description":"Varje spelare ges möjlighet att höja arbetstiden fram tills nästa händelsekort. Konsekvensen blir ökade intäkter i form av råvaruintäkter från fabriker, städer och byar som fördubblas under perioden. Höjd arbetstid ökar också risken för strejk, som sker om någon spelar slår en 2:a, 3:a, 4:a eller 12:a innan nästa händelsekort. Konsekvensen av en strejk är stoppad produktion. Spelaren tappar territoriebonus, aktieintäkter och råvaruintäkter från alla fabriker."
+},{
+    "title":"Hyperinflation",
+    "description":"Hyperinflation minskar värdet av alla tillgångar. Alla spelare förlorar hälften av alla sina råvaror och aktier."
+},{
+    "title":"Missväxt",
+    "description":"Missväxt och torka leder till svält över alla territorier. Ingen spelare kan ta ut någon territoriebonus fram tills nästa händelsekort."
+},{
+    "title":"Storm",
+    "description":"På grund av kraftiga oväder förliser många fartyg ute till sjöss. För att rädda fartygen behöver spelare med fartyg i ägo slå två tärningar där summan överstiger sju, för varje fartyg. Inga fartyg eller flygplan kan förflyttas fram tills nästa händelsekort."
+},{
+    "title":"Dåliga skördar",
+    "description":"Dåliga skördar över alla territorier leder till högre kostnad på infanterier för samtliga spelare. Priset dubbleras fram tills nästa händelsekort."
+},{
+    "title":"Jordbävning",
+    "description":"Jordbävningar drabbar alla territorier vilket leder till att gruvor rasar igen och omfattande återuppbyggnadsarbete behöver vidtas. Ingen spelare kan inkassera sten fram tills nästa händelsekort."
+},{
+    "title":"Lågkonjunktur",
+    "description":"En lågkonjunktur har under en längre period drabbat alla spelare vilket lett till nedskärningar inom produktionen. Hälften av alla fabriker måste läggas ner tills nästa händelsekort. Detta leder till minskad territoriebonus och råvaruinkomst under perioden. Spelarna väljer själva vilka fabriker som läggs ner under perioden. Alla spelare får tillbaka fabrikerna vid nästa händelsekort."
+},{
+    "title":"Befolkningstillväxt",
+    "description":"På grund av goda skördar och medicinsk utveckling ökar befolkningen i alla territorier. Alla spelare med territorier får ta ut ett infanteri extra per by och stad i territoriebonus!"
+},{
+    "title":"Skogsbränder",
+    "description":"På grund av långvarig torka har skogsbränder spridits över alla territorier. Alla skogsområden med nummer under sju drabbas och ingen spelare inkasserar tillgångar från dessa fram tills nästa händelsekort."
+},{
+    "title":"Ökad tillgång på olja",
+    "description":"Ökad tillgång på olja sänker priset för pansarbrigader, flygplan och fartyg. Alla enheter kostar en oljeråvara mindre i inköpskostnad."
+},{
+    "title":"Korruption",
+    "description":"Ökad korruption gör att alla spelare minskar sina skatteintäkter. Varje spelare förlorar hälften av sin territoriebonus (råvaruintäkter & trupper) varje omgång fram till nästa händelsekort."
+},{
+    "title":"En gång till..",
+    "description":"Föregående händelsekort gäller en händelseperiod till."
+},{
+    "title":"Krigsbyte",
+    "description":"Spelare som intagit en eller fler landområden under föregående händelsekortsperiod belönas med 3 valfria resurser per intaget område."
+},{
+    "title":"Forskningsupptäckt!",
+    "description":"En forskningsupptäckt leder till ekonomiska intäkter kommande händelseperiod. Varje spelare som haft två eller fler universitet i ägo under föregående händelseperiod inkasserar en dubbel aktieutdelning under kommande period, dock max 2 råvaror per aktie."
+},{
+    "title":"Byggboom!",
+    "description":"Spelare med någon marknadsandel inom byggnadsbranschen inkasserar intäkter för varje byggnad (by, stad & fabrik) som byggs av någon annan spelare under kommande händelseperiod. Spelaren inkasserar två valfria råvaror per byggnad."
+},{
+    "title":"Statsobligationer",
+    "description":"Följande händelseperiod kan spelare välja att sälja statsobligationer för att öka på statskassan. Spelare betalar 10% av lånet i ränta per spelrunda (eller utslaget på flera rundor om återbetalningen hamnar under 1 råvara per runda) fram tills att hela skulden är återbetald. Spelare kan maximalt låna 10 valfria resurser. Spelare som inte kunnat återbetala ränta under två eller flera spelrundor måste vid nästa händelsekort avveckla tre valfria byggnader för att bli skuldfri."
+},{
+    "title":"Aktieintäkt",
+    "description":"Följande händelseperiod läggs alla former av betalningar till banken i en pott där spelare som inkasserar aktieutdelningar vinner potten enligt följande; 4 Aktier = hela potten. 3 Aktier = 2/3 av potten 1-2 Aktier = 1/3 av potten."
+}]

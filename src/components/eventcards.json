@@ -1,0 +1,327 @@
+[{
+    "title": "Goda skördar!",
+    "mode": "positive",
+    "text": "Gynnsamma väderförhållanden ger goda skördar över alla kontinenter. Alla spelare inkasserar dubbelt så mycket spannmål fram tills nästa händelsekort.",
+    "eventByggnader": "r.db(socket.game.db).table('Byggnader').filter(%s).update(%s).run(connection);",
+    "init": "eventByggnader(filter:{mark: 'säd'}, change: {utdelning: 'x*2'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'sad'   )}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>x*2'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'säd'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Missväxt!",
+    "text": "Dåliga väderförhållanden ger missväxt och dåliga skördar på alla landområden med nummer under föregående tärningskast. Alla spelare inkasserar hälften så mycket spannmål från dessa områden fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'säd', nr:'t0>n'}, change: {utdelning: 'Math.floor(x/2)'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'sad'   ).and(f('nr').lt(   t0   ))}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>Math.floor(x/2)'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'säd'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Oljefyndighet!",
+    "text": "Nya oljefyndigheter! Alla spelare inkasserar dubbelt så mycket olja fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'olja'}, change: {utdelning: 'x*2'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'olja'   )}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>x*2'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'olja'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Oljefyndighet!",
+    "text": "Nya oljefyndigheter på oljelandområden med nummer över föregående tärningskast! Alla spelare inkasserar dubbelt så mycket olja från dessa områden fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'olja', nr:'t0<n'}, change: {utdelning: 'x*2'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'olja'   ).and(f('nr').gt(   t0   ))}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>x*2'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'olja'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Sjukdom!",
+    "text": "Sjukdomar sprider sig bland kreatur. Alla spelare inkasserar hälften så mycket boskap fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'boskap'}, change: {utdelning: 'Math.floor(x/2)'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'gras'   )}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>Math.floor(x/2)'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'boskap'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Skogsbränder!",
+    "text": "Varmt klimat har lett till att stora skogsbränder sprider sig över alla territorier. Alla spelare inkasserar hälften så mycket trä fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'trä'}, change: {utdelning: 'Math.floor(x/2)'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'tra'   )}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>Math.floor(x/2)'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'trä'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Jordbävning!",
+    "text": "Jordbävning! Alla malmområden med nummer över föregående tärningskast drabbas av jordbävningar vilket omöjliggör gruvdrift. Ingen spelaren inkasserar malm på något av dessa områden fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'malm'}, change: {utdelning: 'x*0'} )",
+//  r.db(socket.game.db).table('Byggnader')
+//   .filter(function(b){return b('fields').filter(
+//     function(f){return f('type').eq(   'sten'   )}
+//   ).nth(0)})
+//   .update({'utdelningFn':'x=>0'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'malm'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Skogsbränder!",
+    "text": "Varmt klimat har lett till att stora skogsbränder sprider sig på skogsområden med nummer under föregående tärningskast. Alla spelare inkasserar hälften så mycket trä på de aktuella områdena fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{mark: 'trä', nr:'t0>n'}, change: {utdelning: 'Math.floor(x/2)'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter(function(b){return b('fields').filter(
+    //     function(f){return f('type').eq(   'tra'   ).and(f('nr').lt(   t0   ))}
+    //   ).nth(0)})
+    //   .update({'utdelningFn':'x=>Math.floor(x/2)'})
+    "eval": "",
+    "end": "eventByggnader(filter:{mark: 'trä'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Jordbävning!",
+    "text": "En omfattande jordbävning förstör alla fabriker. Ingen fabrik ger utdelning fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{byggnad: 'fabrik'}, change: {utdelning: 'x*0'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter({type:'Fabrik'})
+    //   .update({'utdelningFn':'x=>0','bonusFn':'antal=>0'})
+    "eval": "",
+    "end": "eventByggnader(filter:{byggnad: 'fabrik'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Högkonjuktur!",
+    "text": "Högkonjunktur leder till ökad produktion och utdelning från alla spelares fabriker. Spelare inkasserar dubbelt så mycket från sina fabriker under perioden.",
+    "init": "eventByggnader(filter:{byggnad: 'fabrik'}, change: {utdelning: 'x*2'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter({type:'Fabrik'})
+    //   .update({'utdelningFn':'x=>x*2','bonusFn':'antal=>antal*2'})
+    "eval": "",
+    "end": "eventByggnader(filter:{byggnad: 'fabrik'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Jordbävning!",
+    "text": "En omfattande jordbävning förstör hälften av alla städer. Enbart hälften av alla städer ger utdelning fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{byggnad: 'stad'}, change: {utdelning: 'Math.floor(x/2)'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter({type:'Stad'})
+    //   .update({'utdelningFn':'x=>x*Math.round(Math.random())'})
+    "eval": "",
+    "end": "eventByggnader(filter:{byggnad: 'stad'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Befolkningstillväxt!",
+    "text": "Ökad befolkning ökar utdelningen från alla spelares städer. Spelare inkasserar dubbelt så mycket under perioden från sina städer.",
+    "init": "eventByggnader(filter:{byggnad: 'stad'}, change: {utdelning: 'x*2'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter({type:'Stad'})
+    //   .update({'utdelningFn':'x=>x*2'})
+    "eval": "",
+    "end": "eventByggnader(filter:{byggnad: 'stad'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Urbanisering!",
+    "text": "På grund av urbanisering förlorar alla spelare hälften av sin utdelning från byar fram tills nästa händelsekort.",
+    "init": "eventByggnader(filter:{byggnad: 'by'}, change: {utdelning: 'Math.floor(x/2)'} )",
+    //  r.db(socket.game.db).table('Byggnader')
+    //   .filter({type:'By'})
+    //   .update({'utdelningFn':'x=>Math.floor(x/2)'})
+    "eval": "",
+    "end": "eventByggnader(filter:{byggnad: 'by'}, change: {utdelning: 'x'} )"
+},{
+    "title": "Höjd ränta!",
+    "text": "Höjd ränta gör det dyrt att bygga men gynnsamt att spara. Kostnaden för fabriker ökar med två säd fram tills nästa händelsekort.",
+    "init": "eventPriser(filter:{byggnad: 'fabrik'}, change: {fabrik: { 'säd': 'x+1' } })",
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Fabrik:{price:{sad:r.row('types')('buildingitems')('Fabrik')('price')('sad').append('x')}}}}})
+    // 
+    "eval": "",
+    "end": "eventPriser(filter:{byggnad: 'fabrik'}, change: {fabrik: { 'säd': 'x-1' }} )"
+    //r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Fabrik:{price:{sad:r.row('types')('buildingitems')('Fabrik')('price')('sad').filter(function(v){return v.ne('x')})}}}}})
+},{
+    "title": "Höjd ränta!",
+    "text": "Höjd ränta gör det dyrt att bygga men gynnsamt att spara. Kostnaden för byar, städer och fabriker ökar med två malm fram tills nästa händelsekort.",
+    "init": "eventPriser(filter:{byggnad: 'fabrik'}, change: {fabrik: { 'malm': 'x+2' } }); eventPriser(filter:{byggnad: 'by'}, change: {by: { 'malm': 'x+2' } }); eventPriser(filter:{byggnad: 'stad'}, change: {stad: { 'malm': 'x+2' } });",
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{By:{price:{sten:r.row('types')('buildingitems')('By')('price')('sten').append('x').append('x')}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Stad:{price:{sten:r.row('types')('buildingitems')('Stad')('price')('sten').append('x').append('x')}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Fabrik:{price:{sten:r.row('types')('buildingitems')('Fabrik')('price')('sten').append('x').append('x')}}}}})
+    "eval": "",
+    "end": "eventPriser(filter:{byggnad: 'fabrik'}, change: {fabrik: { 'malm': 'x-2' }} ); eventPriser(filter:{byggnad: 'by'}, change: {by: { 'malm': 'x-2' }} ); eventPriser(filter:{byggnad: 'stad'}, change: {stad: { 'malm': 'x-2' }} ); "
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{By:{price:{sten:r.row('types')('buildingitems')('By')('price')('sten').filter(function(v){return v.ne('x')})}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Stad:{price:{sten:r.row('types')('buildingitems')('Stad')('price')('sten').filter(function(v){return v.ne('x')})}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{buildingitems:{Fabrik:{price:{sten:r.row('types')('buildingitems')('Fabrik')('price')('sten').filter(function(v){return v.ne('x')})}}}}})
+},{
+    "title": "Bättre arbetsvillkor",
+    "text": "Bättre arbetsvillkor för varvsarbetare! Bättre arbetsvillkor ökar kostnaderna för tillverkning av fartyg. Kostnaderna för hangarfartyg, slagskepp, transportfartyg och ubåtar ökar med tre spannmål under perioden",
+    "init": "eventPriser(filter:{infanteri: 'hangarfartyg'}, change: {hangarfartyg: { 'säd': 'x+3' } }); eventPriser(filter:{infanteri: 'slagskepp'}, change: {slagskepp: { 'säd': 'x+3' } }); eventPriser(filter:{infanteri: 'transportfartyg'}, change: {transportfartyg: { 'säd': 'x+3' } }); eventPriser(filter:{infanteri: 'ubåt'}, change: {ubåt: { 'säd': 'x+3' } });",
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Hangarfartyg:{price:{sad:r.row('types')('armyitems')('Hangarfartyg')('price')('sad').append('x').append('x').append('x')}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Slagskepp:{price:{sad:r.row('types')('armyitems')('Slagskepp')('price')('sad').append('x').append('x').append('x')}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Transportfartyg:{price:{sad:r.row('types')('armyitems')('Transportfartyg')('price')('sad').append('x').append('x').append('x')}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Ubåt:{price:{sad:r.row('types')('armyitems')('Ubåt')('price')('sad').append('x').append('x').append('x')}}}}})
+    "eval": "",
+    "end": "eventPriser(filter:{infanteri: 'hangarfartyg'}, change: {fabrik: { 'säd': 'x-3' }} ); eventPriser(filter:{infanteri: 'slagskepp'}, change: {slagskepp: { 'säd': 'x-3' }} ); eventPriser(filter:{infanteri: 'transportfartyg'}, change: {transportfartyg: { 'säd': 'x-3' }} ); eventPriser(filter:{infanteri: 'ubåt'}, change: {ubåt: { 'säd': 'x-3' }} );"
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Hangarfartyg:{price:{sad:r.row('types')('armyitems')('Hangarfartyg')('price')('sad').filter(function(v){return v.ne('x')})}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Slagskepp:{price:{sad:r.row('types')('armyitems')('Slagskepp')('price')('sad').filter(function(v){return v.ne('x')})}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Transportfartyg:{price:{sad:r.row('types')('armyitems')('Transportfartyg')('price')('sad').filter(function(v){return v.ne('x')})}}}}})
+    //  r.db('Main').table('Games').get(socket.game.id).update({types:{armyitems:{Ubåt:{price:{sad:r.row('types')('armyitems')('Ubåt')('price')('sad').filter(function(v){return v.ne('x')})}}}}})
+},{
+    "title": "Bättre arbetsvillkor",
+    "text": "Bättre arbetsvillkor för fabriksarbetare! Bättre arbetsvillkor ökar kostnaderna för tillverkning av pansarvagnar och flygplan. Kostnaderna ökar med två boskap per enhet under perioden",
+    "init": "eventPriser(filter:{infanteri: 'lättpansarbridag'}, change: {lättpansarbridag: { 'boskap': 'x+2' } }); eventPriser(filter:{infanteri: 'tungpansarbrigad'}, change: {tungpansarbrigad: { 'boskap': 'x+2' } }); eventPriser(filter:{infanteri: 'mekaniseratinfanteribrigad'}, change: {mekaniseratinfanteribrigad: { 'boskap': 'x+2' } }); eventPriser(filter:{infanteri: 'bombplansdivision'}, change: {bombplansdivision: { 'boskap': 'x+2' } });",
+    "eval": "",
+    "end": "eventPriser(filter:{infanteri: 'lättpansarvagn'}, change: {lättpansarvagn: { 'boskap': 'x-2' }} ); eventPriser(filter:{infanteri: 'tungpansarvagn'}, change: {tungpansarvagn: { 'boskap': 'x-2' }} ); eventPriser(filter:{infanteri: 'mekaniseratinfanteri'}, change: {mekaniseratinfanteri: { 'boskap': 'x-2' }} ); eventPriser(filter:{infanteri: 'bombflygplan'}, change: {bombflygplan: { 'boskap': 'x-2' }} );"
+},{
+    "title": "Missväxt!",
+    "text": "Dåliga skördar minskar tillgången på spannmål vilket ökar kostnaderna för infanteri. Kostnaden för inköp av infanteribrigaderna ökar med ett spannmål per enhet.",
+    "init": "eventPriser(filter:{infanteri: 'infanteribrigad'}, change: {infanteribrigad: { 'säd': 'x+1' } })",
+    "eval": "",
+    "end": "eventPriser(filter:{infanteri: 'infanteribrigad'}, change: {infanteribrigad: { 'säd': 'x-1' }} )"
+},{
+    "title": "Minskade spannmålspriser!",
+    "text": "Bra väderförhållanden har gett goda skördar och ökad tillgång till spannmål. Handelspriset för spannmål minskas vilket leder till att spelare behöver byta in en extra resurser mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'säd'}, change: {trade: 'x+1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'säd'}, change: {trade: 'x-1', mot: 'x' } )"
+},{
+    "title": "Ökade spannmålspriser!",
+    "text": "Dåliga väderförhållanden har gett dåliga skördar och minskad tillgång till spannmål. Detta har lett till att handelspriset för spannmål ökats till följd av minskad tillgång. Spelare byter in ett mindre spannmål mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'säd'}, change: {trade: 'x-1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'säd'}, change: {trade: 'x+1', mot: 'x' } )"
+},{
+    "title": "Minskade timmerpriser!",
+    "text": "Bra väderförhållanden har gett god tillväxt och ökad tillgång till trävaror. Handelspriset för trä minskas vilket leder till att spelare behöver byta in en extra av resursen mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'timmer'}, change: {trade: 'x+1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'timmer'}, change: {trade: 'x-1', mot: 'x' } )"
+},{
+    "title": "Ökade timmerpriser!",
+    "text": "På grund av skogsbränder har tillgång på trävaror minskats. Detta har lett till att handelspriset för timmer ökats till följd av minskad tillgång. Spelare byter in en mindre timmer mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'timmer'}, change: {trade: 'x-1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'timmer'}, change: {trade: 'x+1', mot: 'x' } )"
+},{
+    "title": "Minskade oljepriser!",
+    "text": "Nya oljetillgångar har lett till ökad tillgång på olja. Handelspriset för olja minskas vilket leder till att spelare behöver byta in en extra olje-resurs mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'olja'}, change: {trade: 'x+1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'olja'}, change: {trade: 'x-1', mot: 'x' } )"
+},{
+    "title": "Ökade oljepriser!",
+    "text": "Minskade oljetillgångar har lett till minskad tillgång på olja. Detta har lett till att handelspriset för olja ökats till följd av en minskad tillgång. Spelare byter in en mindre olje-resurs mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'olja'}, change: {trade: 'x-1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'olja'}, change: {trade: 'x+1', mot: 'x' } )"
+},{
+    "title": "Minskade malmspriser!",
+    "text": "Nya malmfyndigheter har lett till ökad tillgång på malm. Handelspriset för malm minskas vilket leder till att spelare behöver byta in en extra malm-resurs mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'malm'}, change: {trade: 'x+1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'malm'}, change: {trade: 'x-1', mot: 'x' } )"
+},{
+    "title": "Ökade malmpriser!",
+    "text": "Minskade malmtillgångar har lett till att handelspriset för malm ökats till följd av minskade tillgångar. Spelare byter in en mindre malm-resurs mot en valfri resurs.",
+    "init": "eventHandel(filter:{resurs: 'malm'}, change: {trade: 'x-1', mot: 'x'} )",
+    "eval": "",
+    "end": "eventHandel(filter:{resurs: 'malm'}, change: {trade: 'x+1', mot: 'x' } )"
+},{
+    "title": "Gerillakrig",
+    "text": "Spelaren får placera ut en gerillagrupp på valfritt landområde. Storleken på gerillagruppen bestäms av summan på föregående tärningskast. Är det aktuella landområdet ockuperat sker en strid mellan gerillagruppen och de enheter som finns på landområdet. Striden avslutas när antingen gerillagruppen ockuperat området eller blivit utplånade av försvarande enheter.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Dimma",
+    "text": " På alla bergsområden vilar tjock dimma. Alla strider som utspelas på berg under perioden så förlorar defensiv spelare omständighets-fördel fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Dimma",
+    "text": "Tung dimma ligger över alla landområden med nummer över 8. Anfall överraskar motspelare som inte hinner upptäcka anfallet förrän det är försent. Anfallande spelare spelar med + 1 vid anfall oavsett omständighetsutfall på dessa landområden.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Logistik",
+    "text": "Ökad tillgång på råvaror för framställning av dynamit möjliggör billigare byggnation av vägar. Alla spelare bygger två vägar till kostnaden av en fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Epidemier",
+    "text": "Epidemier har utbrutit och hälften av allt infanterier som står på landområden med nummer över föregående tärningskast omkommer.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Politisk omsvängning",
+    "text": "Pacifistiska rörelser och opinion förändrar det politiska klimatet och omöjliggör fortsatt krigsföring. Ingen spelare kan föra krig fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Handelsblockad",
+    "text": "Varje spelare som utför en attack under följande period utsätts för handelsblockad. Konsekvensen blir att spelaren betalar dubbelt så mycket för alla militära enheter fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Uppror",
+    "text": "På grund av inrikespolitiska oroligheter finns det för ingen spelare utrymme för utrikespolitiska angelägenheter (så som krig eller byteshandel). Ingen spelare kan kriga eller byteshandla fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": " Vulkanutbrott",
+    "text": "En ökad seismisk aktivitet har orsakat flera vulkanutbrott. Alla bergsområden med nummer över förra tärningskastet är drabbade. En tredjedel av alla trupper som befunnit sig på dessa vulkaner vid utbrotten omkom.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Krigsbyte",
+    "text": "För varje landområde som intas under kommande period belönas spelare med fem resurser som landområdet består av.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Spionage",
+    "text": "Spelaren kommer över topphemlig information. Spelaren får dra ett utvecklingskort från valfri spelare.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Oljebrist",
+    "text": "På grund av oljebrist sätts hälften av alla spelares pansarbrigader ur spel fram tills nästa händelsekort. Varje spelare väljer själv vilka pansarbrigader som sätts ur spel.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Jordbävning!",
+    "text": "Jordbävningar som drabbat alla kontinenter har förstört stora delar av vägnätet. Ingen spelare kan använda sitt vägnät utan behöver förflytta enheter från landområde till landområde fram till att vägarna är återuppbyggda igen.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Vargavinter",
+    "text": "Isande kall ihållande vinter blir påfrestande för försörjningslinjerna ut till stridande enheter som befinner sig bortom befintlig infrastruktur. Hälften av alla infanteribrigader som befinner sig på landområden utan väglinjer i förbindelser till det egna territoriets städer dör av svält och sjukdomar.",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Hyperinflation",
+    "text": "Hyperinflation minskar värdet av alla tillgångar. Alla spelare förlorar hälften av alla sina råvaror och aktier. ",
+    "init": "",
+    "eval": "",
+    "end": ""
+},{
+    "title": "Storm!",
+    "text": "På grund av kraftiga oväder förliser många fartyg ute till sjöss. För att rädda fartygen behöver spelare med fartyg i ägo slå två tärningar där summan överstiger fem, för varje fartyg. Inga fartyg eller flygplan kan förflyttas fram tills nästa händelsekort.",
+    "init": "",
+    "eval": "",
+    "end": ""
+}]

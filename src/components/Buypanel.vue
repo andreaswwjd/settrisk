@@ -2,7 +2,8 @@
   <div id='buypanel' >
     <h1> Buy & Build </h1>
     <div id="items_container">
-      <div class="item" v-for="item in Object.keys(buildingitems)">
+      <!-- Buildings -->
+      <div class="item" v-for="item in Object.keys(buildingitems)" v-bind:key="item">
         <button class="btn building_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?confirmBuy(buildingitems[item]):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <polygon fill="#FAFAFA" points="-20,0 -10,17.320508075688764 10,17.320508075688764 20,0 10,-17.320508075688764 -10,-17.320508075688764" >
@@ -13,8 +14,8 @@
         <div class="small" style="margin: 10px 5px 5px 5px; width: 170px">
           <span class="capitalize">{{item}}</span>
           <br>Pris: 
-          <span v-for="res in Object.keys(resurser.types)">
-            <div v-for="nr in buildingitems[item].price[res]" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
+          <span v-for="res in Object.keys(resurser.types)" v-bind:key="res">
+            <div v-for="nr in buildingitems[item].price[res]" v-bind:key="nr" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
               <svg v-if="res=='people'" width="10px" height="10px" viewBox="14 10 72 80"><use v-bind:xlink:href="'#svg-'+res"></use></svg>
             </div>
           </span>
@@ -24,7 +25,8 @@
           <span class="xsmall" v-if="buildingitems[item].bonus"><strong>Bonus: </strong>{{buildingitems[item].bonus.antal+' '+buildingitems[item].bonus.type}}<br></span>
         </div>
       </div>
-      <div class="item" v-for="item in Object.keys(armyitems)">
+      <!-- Armys -->
+      <div class="item" v-for="item in Object.keys(armyitems)" v-bind:key="item">
         <button class="btn army_btn shadow" v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c&&available[item]?confirmBuy(armyitems[item]):'';" v-bind:disabled="available[item]==false">
           <svg height="53" width="53" viewBox="-20 -20 40 40">
             <rect fill="#FAFAFA" style="x: -14;y: -14; height: 28px;width: 28px; transform: rotate(45deg);" ></rect>
@@ -33,8 +35,8 @@
         </button>
         <div class="small" style="margin: 10px 5px 5px 5px; width: 175px">
           <span class="capitalize">{{item}}</span><br>Pris: 
-          <span v-for="res in Object.keys(resurser.types)">
-            <div v-for="nr in armyitems[item].price[res]" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
+          <span v-for="res in Object.keys(resurser.types)" v-bind:key="res">
+            <div v-for="nr in armyitems[item].price[res]" v-bind:key="nr" v-bind:class="{pris: true, not_enough: !resurser.has(res,nr)}" v-bind:style="{background: resurser.types[res].color}">
               <svg v-if="res=='people'" width="10px" height="10px" viewBox="14 10 72 80"><use v-bind:xlink:href="'#svg-'+res"></use></svg>
             </div>
           </span>
@@ -154,11 +156,11 @@ button{
 button:disabled{
   border: 0;
   box-shadow: 2px 1px 0 0 rgba(169, 150, 120, 0.99333) inset;
-  opacity: 0.8;
+  opacity: 1;
   background: radial-gradient(at top 55% left 55%, #E8D5B5, #E8D5B5, #C1AA81)
 }
 button:disabled *{
-  opacity: 0.5;
+  opacity: 1;
 }
 
 .item{
