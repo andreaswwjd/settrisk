@@ -318,6 +318,7 @@ export default {
     dropGame: function(game){
       if(confirm('Är du säker på att du vill radera spelet ('+this.game.name+')? Det går ej att ångra.')){
         this.$socket.emit('dropGameDb', game)
+        this.$router.push('/games')
       }
     },
     activateGame: function(){

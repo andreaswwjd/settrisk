@@ -5,10 +5,6 @@ var http = require('http');
 var express = require('express')
 var app = express();
 
-var options = {
-	key: fs.readFileSync('../cert/file.pem'),
-	cert: fs.readFileSync('../cert/file.crt')
-};
 
 var port = process.env.PORT || 53001;
 // var serverPort = 443;
@@ -175,6 +171,7 @@ io.on('connection', function(socket){
 				try{
 					cursor.each(function(err,change){
 						// socket.emit('data', {type: 'game', change: change})
+
 						socket.emit('game',change.new_val)
 						socket.game = change.new_val;
 					});
@@ -203,7 +200,7 @@ io.on('connection', function(socket){
 			let data = await r.db(game.db).table('Byggnader').filter({username: user.username}).changes().run(connection, function(err, cursor) {
 				try{
 					cursor.each(function(err,change){
-						if(!change.old_val&&change.new_val){
+						if(change&&!change.old_val&&change.new_val){
 							socket.emit('notify', {title:'Byggnad:', msg: '1 '+change.new_val.type+' har lagts till dina byggnader.'})
 						}
 						socket.emit('data', {type: 'byggnader', change: change})
@@ -221,7 +218,7 @@ io.on('connection', function(socket){
 			let data = await r.db(game.db).table('Infanteri').filter({username: user.username}).changes().run(connection, function(err, cursor) {
 				try{
 					cursor.each(function(err,change){
-						if(!change.old_val&&change.new_val){
+						if(change&&!change.old_val&&change.new_val){
 							socket.emit('notify', {title:'Arme:', msg: '1 '+change.new_val.type+' har lagts till din arme.'})
 						}
 						socket.emit('data', {type: 'infanteri', change: change})
