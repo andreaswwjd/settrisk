@@ -3,7 +3,9 @@
     <div id="bg">
       <div style="max-width: 650px; margin: 40px auto;background: white; color: black;">
         <h1>Gameboard</h1>
-
+        <p v-if="mode=='boardpiece'">Ge brickan ett namn: <input v-model="boardpiece.name"></p>
+        <p v-if="mode=='boardgame'">Ge spelplanen ett namn: <input v-model="boardgame.name"></p>
+        
         <svg id="canvas" v-bind:height="canvasCalcHeight" v-bind:width="canvasCalcWidth" v-bind:class="selected.tool+'_btn'">
           <!-- v-on:mousedown="mousedown" v-on:mousemove="mousemove" v-on:mouseup="mouseup" -->
           <defs>
@@ -240,7 +242,7 @@
 
           <g id="menu">
             <g>
-              <text style="transform: translateY(20px); font-weight: bold; text-decoration: underline; ">{{mode=='boardpiece'? 'BRICKA':'SPELPLAN'}}</text>
+              <text style="transform: translateY(20px); font-weight: bold; text-decoration: underline; ">{{mode=='boardpiece'? boardpiece.name:'SPELPLAN'}}</text>
             </g>
             <g id="new_btn" v-on:click="newfieldIsOpen = !newfieldIsOpen" style="transform: translateX(80px);" v-bind:class="{toolbtn: true, active: selected.tool=='field'}">
               <title>Create New Field</title>
@@ -248,7 +250,7 @@
               <polygon class="st4" points="12.5,2.8 1.9,21.1 23.1,21.1 "/>
               <text transform="matrix(1 0 0 1 8.0625 18.5)" class="st5 st6 st7 st11">+</text>
               <g id="new_fields_group" v-if="newfieldIsOpen">
-                <g v-for="d in fieldTools" v-on:click="selectTool(0, d);" v-bind:style="{opacity: newfieldIsOpen, transform: newfieldIsOpen ? 'translateY('+ (24 * fieldTools.indexOf(d) + 25) +'px)' : ''}">
+                <g v-for="d in fieldTools" :key="d.type" v-on:click="selectTool(0, d);" v-bind:style="{opacity: newfieldIsOpen, transform: newfieldIsOpen ? 'translateY('+ (24 * fieldTools.indexOf(d) + 25) +'px)' : ''}">
                   <path v-bind:fill="d.color" d="M22,25H3c-1.7,0-3-1.3-3-3V3c0-1.7,1.3-3,3-3h19c1.7,0,3,1.3,3,3v19C25,23.7,23.7,25,22,25z"/>
                   <svg width="25px" height="25px" viewBox="0 0 100 100"><use v-bind:xlink:href="'#svg-' + d.type"></use></svg>
                 </g>
@@ -330,9 +332,15 @@
         <h1>Data:</h1>
         <p>Kopiera datan i fältet nedan och spara i ett textdokument.</p>
       
-        <div id="saved" style="display: inline-block;">
-          <div v-for="bp in boardpieces" :key="bp.id">
+        <div id="saved" style="display: inline-block; width: 100%;">
+          <div v-for="(bp,i) in boardpieces" :key="bp.id" class="piece">
             <h3>{{bp.name}}</h3>
+            <p><span v-bind:style="{background:(bp.fields.length<10&&'#27ae60')||(bp.fields.length>=15&&'#e74c3c')||(bp.fields.length>=10&&'#f39c12'),width:bp.fields.length*4+'px',height:'15px',display:'inline-block'}"></span> Antal fält {{bp.fields.length}} 
+              <br><span v-bind:style="{background:(bp.fields.filter(f=>f.type!='gras').length<10&&'#27ae60')||(bp.fields.filter(f=>f.type!='gras').length>=15&&'#e74c3c')||(bp.fields.filter(f=>f.type!='gras').length>=10&&'#f39c12'),width:bp.fields.filter(f=>f.type!='gras').length*4+'px',height:'15px',display:'inline-block'}"></span> Fält (ej gräs) {{bp.fields.filter(f=>f.type!='gras').length}} 
+              <br><span v-bind:style="{background:(bp.buildsites.length<10&&'#27ae60')||(bp.buildsites.length>=15&&'#e74c3c')||(bp.buildsites.length>=10&&'#f39c12'),width:bp.buildsites.length*4+'px',height:'15px',display:'inline-block'}"></span> Antal byggnader {{bp.buildsites.length}} 
+               
+              <br>{{(bp.fields.length<10&&'1')||(bp.fields.length>=15&&'3')||(bp.fields.length>=10&&'2')}}/fabrik
+            </p>
             <svg v-bind:height="canvasHeight/6" v-bind:width="canvasWidth/6" viewBox="0 0 600 498" preserveAspectRatio="xMinYMax meet" style="display: inline-block; pointer-events: none">
               <boardpiece v-bind:boardpiece="bp" >
                 <g>
@@ -342,11 +350,21 @@
                 </g>
               </boardpiece>
             </svg>
+            <br>
+            <div v-bind:style="{height: (c==i&&'140px'||'0'), overflow: 'hidden', transition: '0.4s height', position: 'absolute', bottom: '70px', background: 'white', boxShadow:(c!=i&&'none'||'0 0px 30px -10px rgba(0,0,0,0.2)'), borderTop: (c!=i&&'none'||'solid black 2px')}">
+              <button v-on:click="saveFromTextArea(bp)">Save from input</button>
+              <button class="delete" v-on:click="deleteBoardpiece(bp)">Delete</button>
+              <textarea v-bind:id="bp.id+'_input'" cols="40" rows="5" style="margin: 10px 0 " v-model="JSON.stringify(bp)"></textarea>
+            </div>
             <button v-on:click="boardgame.boardpieces.push(bp)">Add</button>
             <button v-on:click="init(bp)">Edit</button>
-            <button v-on:click="$socket.emit('deleteboardpiece', bp)">Delete</button>
-            <textarea v-bind:id="bp.id+'_input'" cols="40" rows="5">{{JSON.stringify(bp)}}</textarea>
-            <button v-on:click="saveFromTextArea(bp)">Save from input</button>
+            <button v-on:click="c=c==i?-1:i;"> ... </button>
+          </div>
+
+          <div>
+            <h1>Lägg till bricka från input</h1>
+            <textarea v-model="newFromInput" cols="40" rows="5" style="margin: 10px 0 "></textarea>
+            <button v-on:click="init(JSON.parse(newFromInput));saveBoard()">Lägg till</button>
           </div>
         </div>
         <h1>Spelplaner:</h1>
@@ -400,6 +418,7 @@ export default {
       boardpieces: [],
       boardgame: {},
       boardpiece: {},
+      newFromInput: "",
       field: {},
       road: {},
 
@@ -428,6 +447,7 @@ export default {
       ],
       newfieldIsOpen: false,
 
+      c: -1
        
     }
   },
@@ -688,6 +708,13 @@ export default {
     newBp: function(){
       this.saveBoard()
       this.init()
+    },
+
+    deleteBoardpiece: function(bp){
+      if(confirm('Vill du radera '+bp.name)){
+        this.$socket.emit('deleteboardpiece', bp)
+        this.c = -1
+      }
     },
 
 
@@ -1025,16 +1052,21 @@ var c4 = function(){ // Random id generator
     display: inline-block;
     margin-top: 10px;
     background: #1abc9c;
+    background: white;
     font-family: Helvetica;
     font-weight: 600;
     color: black;
     font-size: 14px;
-    border: none;
-    border-radius: 20px;
+    /* border: none; */
+    /* border-radius: 20px; */
+    border: 2px solid black;
     padding: 5px 20px;
-    box-shadow: 1px 2px 0px 0px hsla(168, 76%, 34%, 1);
+    /* box-shadow: 1px 2px 0px 0px hsla(168, 76%, 34%, 1); */
   }
-
+  #saved button:hover, #boardgames button:hover {
+    background: #606060;
+    color: #FFFFFF;
+  }
 
   .triangle {
     stroke: rgba(0, 0, 0, 0.05);
@@ -1113,5 +1145,16 @@ var c4 = function(){ // Random id generator
 
   tt{
     background: #f1f1f1;
+  }
+/* 
+  #saved > * {
+    transform: scale(0.67);
+    transform-origin: top left; 
+  } */
+  .piece {
+    display: inline-block; width: 50%; padding: 10px 0 30px; border-bottom: 2px solid lightgray; position: relative;
+  }
+  #saved button.delete:hover, #boardgames button.delete:hover {
+    background: #e74c3c; color: white; border-color: #e74c3c;
   }
 </style>

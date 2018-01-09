@@ -1591,7 +1591,7 @@ io.on('connection', function(socket){
 
 	socket.on('getDbBuilderData', async function(){
 		try{
-			let bps_cursor = await r.db('Boards').table('Pieces').run(connection);
+			let bps_cursor = await r.db('Boards').table('Pieces').orderBy('name').run(connection);
 			let bgs_cursor = await r.db('Boards').table('Boards').run(connection);
 			if(bps_cursor.errors || bgs_cursor.errors ){ throw 'Something went wrong. Data not loaded...'}
 			let result = {
