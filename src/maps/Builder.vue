@@ -321,11 +321,11 @@
         <div id="list">
           <p v-for="(bp,i) in boardgame.boardpieces" :key="bp.id" v-bind:renderBuildsiteFields="renderBuildsiteFields">
             <strong>Bricka {{i+1}}</strong><br>
-            <span v-for="(field,i) in bp.fields">
+            <span v-for="(field,i) in bp.fields" :key="field.id+i">
               &nbsp;&nbsp;&nbsp;&nbsp;Fält {{i+1}}: {{field.type+' '+(field.number||'')}}<br>
             </span>
-            <span v-for="(buildsite,i) in bp.buildsites">
-              &nbsp;&nbsp;&nbsp;&nbsp;Byggnad {{i+1}}: <span v-for="field in buildsite.fields">{{field.type+' '+(field.nr||'')}}, </span><br>
+            <span v-for="(buildsite,i) in bp.buildsites" :key="buildsite.id+i">
+              &nbsp;&nbsp;&nbsp;&nbsp;Byggnad {{i+1}}: <span v-for="field in buildsite.fields" :key="field.id+'br'">{{field.type+' '+(field.nr||'')}}, </span><br>
             </span>
           </p>
         </div>
@@ -339,7 +339,7 @@
               <br><span v-bind:style="{background:(bp.fields.filter(f=>f.type!='gras').length<10&&'#27ae60')||(bp.fields.filter(f=>f.type!='gras').length>=15&&'#e74c3c')||(bp.fields.filter(f=>f.type!='gras').length>=10&&'#f39c12'),width:bp.fields.filter(f=>f.type!='gras').length*4+'px',height:'15px',display:'inline-block'}"></span> Fält (ej gräs) {{bp.fields.filter(f=>f.type!='gras').length}} 
               <br><span v-bind:style="{background:(bp.buildsites.length<10&&'#27ae60')||(bp.buildsites.length>=15&&'#e74c3c')||(bp.buildsites.length>=10&&'#f39c12'),width:bp.buildsites.length*4+'px',height:'15px',display:'inline-block'}"></span> Antal byggnader {{bp.buildsites.length}} 
                
-              <br>{{(bp.fields.length<10&&'1')||(bp.fields.length>=15&&'3')||(bp.fields.length>=10&&'2')}}/fabrik
+              <br>{{(bp.fields.length < 10&&'1')||(bp.fields.length>=15&&'3')||(bp.fields.length>=10&&'2')}}/fabrik
             </p>
             <svg v-bind:height="canvasHeight/6" v-bind:width="canvasWidth/6" viewBox="0 0 600 498" preserveAspectRatio="xMinYMax meet" style="display: inline-block; pointer-events: none">
               <boardpiece v-bind:boardpiece="bp" >
@@ -383,7 +383,7 @@
             </svg>
             <button v-on:click="boardgame = bg">Edit</button>
             <button v-on:click="$socket.emit('deleteboardgame', bg)">Delete</button>
-            <textarea cols="40" rows="5">{{JSON.stringify(bg)}}</textarea>
+            <textarea cols="40" rows="5" v-model="JSON.stringify(bg)"></textarea>
           </div>
         </div>
       </div>

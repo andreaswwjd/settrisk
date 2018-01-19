@@ -911,6 +911,19 @@ io.on('connection', function(socket){
 							range: '15cm',
 							rpd: 1,
 							inactive: false
+						},
+						"Forskare": {
+							name: 'Forskare',
+							type: 'Forskare',
+							price: {
+							"people": [1,2,3,4,5],
+							"sad": [1,2,3]
+							},
+							// vel: '1 fält/drag',
+							// veg: 'alla fält',
+							// range: 'Samma fält',
+							// rpd: 1,
+							inactive: false
 						}
 					},
 					buildingitems: {
@@ -1008,7 +1021,19 @@ io.on('connection', function(socket){
 							"sten": [1],
 							"people": [1,2,3,4]
 							},
-							info: 'Lyckad forskning ger utvecklingskort.',
+							info: 'Varje universitet har 4st forskarplatser. Forskning kostar 1 drag och kan endast ske på inköpt forskningskort. Fler forskare ökar chanserna till lyckad forskning, dvs utvecklingskort som spelas ut för 1 drag.',
+							inactive: false
+						},
+						"Bank": {
+							name: 'Bank',
+							type: 'Bank',
+							price: {
+								"sad": [1],
+								"sten": [1,2,3],
+								"olja": [1,2],
+								"people": [1,2,3,4]
+							},
+							info: 'Möjliggör växelkurs 4:1 i valfri valuta.',
 							inactive: false
 						},
 						"Väg": {

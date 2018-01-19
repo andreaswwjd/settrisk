@@ -333,6 +333,8 @@ export default {
     /*** Fält ***/
     selectField: function(field){
       console.log('field',field)
+      let bp = this.boardgame.boardpieces.find(bp=>bp.fields.find(f=>f.id==field.id));
+      let bonus = this.buildings.filter(b=>b.fields.find(f=>f.bp_id==bp.id)!=undefined).map(b=>''+b.bonus.antal+' '+b.bonus.type).join(', ');
       var width = screen.availWidth-20;
       var height = 140;
       var zoom = 0.7;
@@ -343,6 +345,7 @@ export default {
         svg: '<svg width="100%" height="140px" viewBox="'+(field.pos[0]-width*zoom/2)+' '+(field.pos[1]-height*zoom/2)+' '+width*zoom+' '+height*zoom+'"><use xlink:href="#svg-board"></use></svg>',
         content: [{
             // title: ,
+            html: '<p style="color:#262626">Tillhör '+bp.name+'<br>Brick-bonus: '+(bp.occupiedBy==this.user.username?'<i class="fas fa-check-circle" style="color:#2ECC71"></i>':'<i class="fas fa-times-circle" style="color:Tomato"></i>')+(bp.occupiedBy==this.user.username?'<br>'+bonus:'')+'</p>',
             menu: [{
               text: 'Ockupera', action:'occupyField', response: field, then: 'close'
             }]

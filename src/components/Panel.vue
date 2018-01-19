@@ -1,11 +1,18 @@
 <template>
   <div id='panel' v-bind:class="{slideoutpanel: true, transition: transition}" v-bind:style="{transform: 'translate3d('+translationX+'px,0,0)'}" v-on:click="$props.isOpen=false" v-on:touchstart.stop.prevent="tstart" v-on:touchmove.stop.prevent="tmove" v-on:touchend.stop.prevent="tend" v-on:touchcancel.stop.prevent="tend" v-on:transitionend="transend" v-on:scroll.stop.prevent>
   <!-- <div id='panel' v-on:touchstart="c=true" v-on:touchmove="c=false" v-on:touchend="c?$emit('close'):''"> -->
-    <div class="resurs_display" style="width:100%; height: 30px;">
-      <div class="" v-for="typ in resurser.resursTypes" :key="typ">
-        <resurs v-bind:resurs="{type: typ}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin-bottom:-5px;"></resurs>
-        <div style="display:inline-block;">{{resurser.array.filter(r=>r.type==typ).length}}</div>
+    <div class="resurs_display" style="width:100%; height: 30px; margin-top: 10px">
+      <div></div>
+      <div class="display_item" v-for="typ in resurser.resursTypes" :key="typ">
+        <resurs v-bind:resurs="{type: typ}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin: 0 -2px -5px;"></resurs>
+        <span style="display:inline-block;">{{resurser.array.filter(r=>r.type==typ).length}}</span>
       </div>
+      <div></div>
+      <div style="grid-column: 2/span 5;">Bonus: 2/2 valfria, 4/4 people.</div>
+      <div><resurs v-bind:resurs="{type: 'valfri'}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin: 0 -2px -5px;"></resurs>2/4</div>
+      <!-- <div>Valfria</div>
+      
+      <div>People</div> -->
     </div> 
     <div class="margintop" style="width:100%; height: 50px;"></div>
     <!-- <h1> Main panel </h1> -->
@@ -133,11 +140,17 @@ export default {
 <style>
 .resurs_display {
   position:fixed; top: 0; left: 0; width:100%; 
+  display: grid;
+  grid-template-columns: 1fr repeat(5,60px) 1fr;  
 }
-.resurs_display > div {
+.resurs_display > .display_item {
   display: inline-flex;
-  margin: 10px;
+  font-weight: 500;
+  grid-column: span 1/auto;
+  text-align: center;
   align-items: center;
+  justify-content: center;
+  font-size: 20px;
 }
 .resurs_display .resurs > div {
   background: none;

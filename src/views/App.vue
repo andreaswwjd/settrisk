@@ -2,9 +2,13 @@
   <div class="app slideout-open" v-bind:style="{height: screenheight}" >
     <div class="resurs_display" v-if="turn_panel.isOpen" style="width:100%; z-index:20; background: rgba(255,255,255,0.3);">
       <div class="" v-for="typ in resurser.resursTypes" :key="typ">
-        <resurs v-bind:resurs="{type: typ}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin-bottom:-5px;"></resurs>
+        <resurs v-bind:resurs="{type: typ}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin: 0 -3px -5px;"></resurs>
         <div style="display:inline-block;">{{resurser.array.filter(r=>r.type==typ).length}}</div>
       </div>
+      <!-- <div></div>
+      <div>Bonus:</div>
+      <div><resurs v-bind:resurs="{type: 'valfri'}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin-bottom:-5px; "></resurs> 2st/2</div>
+      <div><resurs v-bind:resurs="{type: 'people'}" v-bind:options="{movable:false}" style="display:inline-block; position: initial; margin-bottom:-5px; "></resurs> 3st/6</div> -->
     </div> 
     <turn v-bind:panel="turn_panel" v-bind:game="game" v-bind:dices="dices" v-bind:resurser="resurser" v-bind:armyitems="armyitems" v-bind:buildingitems="buildingitems" v-bind:trade_panel="trade_panel" v-bind:turn="turn"></turn>
     <buypanel class="slideout-menu" v-bind:modals="modals" v-bind:resurser="resurser" v-bind:armyitems="game.types.armyitems" v-bind:buildingitems="game.types.buildingitems"></buypanel>

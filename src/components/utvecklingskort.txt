@@ -1,0 +1,22 @@
+[{
+    "type": "",
+    "title": "",
+    "text": "",
+    "reqs": ["Universitet","Universitet","Fabrik"],
+    "duration": "1 gång"
+},{
+    "type": "",
+    "title": "",
+    "text": "",
+    "reqs": ["Universitet","Universitet","Fabrik"],
+    "duration": "1 händelseperiod" 
+},{
+    "type": "",
+    "title": "",
+    "text": "",
+    "reqs": {
+        "byggnader":["Universitet","Universitet","Fabrik"],
+        "utvecklingskort": []
+    }
+    "duration": "hela spelet ut" 
+}]

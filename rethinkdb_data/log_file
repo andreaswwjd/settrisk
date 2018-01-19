@@ -1338,3 +1338,19 @@
 2018-01-07T17:14:16.492028000 296234.187998s info: Table 4b6212ff-efe1-42f3-84b2-06bf769e9b12: Deleted the table.
 2018-01-07T17:14:16.512247000 296234.208219s notice: Removing file /Users/andreas/Web/Settrisk/rethinkdb_data/c90da48c-fd56-4f5c-8fd7-7e82f8a00100
 2018-01-07T17:14:16.512259000 296234.208229s info: Table c90da48c-fd56-4f5c-8fd7-7e82f8a00100: Deleted the table.
+2018-01-09T23:38:50.509871000 341533.229998s info: Table f46e0fa3-a814-42a7-b0a1-9bdd4c53d5c3: Starting a new Raft election for term 1.
+2018-01-09T23:38:50.510361000 341533.230484s info: Table f46e0fa3-a814-42a7-b0a1-9bdd4c53d5c3: Added replica on this server.
+2018-01-09T23:38:50.527613000 341533.247737s info: Table f46e0fa3-a814-42a7-b0a1-9bdd4c53d5c3: This server is Raft leader for term 1. Latest log index is 0.
+2018-01-09T23:38:51.166444000 341533.886582s info: Table 99e87a83-158b-495e-8068-647441fb9562: Starting a new Raft election for term 1.
+2018-01-09T23:38:51.166833000 341533.886970s info: Table 99e87a83-158b-495e-8068-647441fb9562: Added replica on this server.
+2018-01-09T23:38:51.183134000 341533.903272s info: Table 99e87a83-158b-495e-8068-647441fb9562: This server is Raft leader for term 1. Latest log index is 0.
+2018-01-09T23:38:51.812406000 341534.532557s info: Table 633be131-955d-4dc4-9091-3bc967f25469: Starting a new Raft election for term 1.
+2018-01-09T23:38:51.812719000 341534.532870s info: Table 633be131-955d-4dc4-9091-3bc967f25469: Added replica on this server.
+2018-01-09T23:38:51.829324000 341534.549476s info: Table 633be131-955d-4dc4-9091-3bc967f25469: This server is Raft leader for term 1. Latest log index is 0.
+2018-01-09T23:38:52.457960000 341535.178125s info: Table 9d3764ae-e868-4ca8-8efb-124cdfcc8cbe: Starting a new Raft election for term 1.
+2018-01-09T23:38:52.458180000 341535.178345s info: Table 9d3764ae-e868-4ca8-8efb-124cdfcc8cbe: Added replica on this server.
+2018-01-09T23:38:52.481940000 341535.202105s info: Table 9d3764ae-e868-4ca8-8efb-124cdfcc8cbe: This server is Raft leader for term 1. Latest log index is 0.
+2018-01-09T23:38:53.115813000 341535.835991s info: Table f6938dc2-61ef-4e77-9a08-25dd93c42d62: Starting a new Raft election for term 1.
+2018-01-09T23:38:53.116212000 341535.836391s info: Table f6938dc2-61ef-4e77-9a08-25dd93c42d62: Added replica on this server.
+2018-01-09T23:38:53.133709000 341535.853888s info: Table f6938dc2-61ef-4e77-9a08-25dd93c42d62: This server is Raft leader for term 1. Latest log index is 0.
+2018-01-09T23:38:53.639476000 341536.359666s info: Table 9d3764ae-e868-4ca8-8efb-124cdfcc8cbe: Configuration is changing.
